@@ -7,5 +7,6 @@
 .. toctree::
 
     getting_started
+    styleguide
     happpy
     tests
