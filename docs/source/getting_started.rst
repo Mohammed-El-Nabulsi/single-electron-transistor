@@ -57,3 +57,24 @@ Now let's run HaPPPy. To run the program itself (not the tests), type
 You will see a welcome message and information about your setup.
 
 You have now successfully setup HaPPPy and are able to dive into the code.
+
+Step 4. Build the Documentation 
+-------------------------------
+Next you should build the documentation. You find a directory called *docs* int the project, which holds the documentation.
+To build the documentation move into the directory and type run `make html`
+
+.. code-block:: shell
+
+    cd docs
+    make html
+
+.. note:: You can also run other targets like `make latexpdf` or `make text`, but in most cases we will use the html output.
+
+This creates a directory called *build* in your *docs* directory. In that *build* directory you find a directory called *html*
+which holds a file called *index.html*. So the path to the file is something like 
+
+.. code-block:: shell
+
+    /Happpy/docs/build/html/index.html
+
+Double click it. A browser should open showing you the HaPPPy documentation. Have a look.
