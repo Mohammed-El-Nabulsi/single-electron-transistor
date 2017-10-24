@@ -34,7 +34,7 @@ To run the first tests, run :code:`python3 -m tests.test_main`. This runs all te
 
 .. code-block:: console
 
-    user@machine:~/Happpy$ python3 -m test.test_main
+    user@machine:~/Happpy$ python3 -m tests.test_main
     tests_HaPPPy_main_exists (__main__.HappyBasicTestSuite) ... ok
     tests_HaPPPy_main_runs (__main__.HappyBasicTestSuite) ... ok
 
