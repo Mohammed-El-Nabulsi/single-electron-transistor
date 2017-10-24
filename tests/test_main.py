@@ -86,7 +86,7 @@ class RatesTestSuite(unittest.TestCase):
     def test_Rates_doCalculation(self):
         """ Checks the dummy calculation
         """  
-        Calc = HaPPPy.Rates.RatesCalculator()
+        Calc = HaPPPy.Rates.RateCalculator()
         self.assertEqual(Calc.doCalculation(), 2.0)
 
 class MasterEquationTestSuite(unittest.TestCase):
@@ -102,7 +102,7 @@ class MasterEquationTestSuite(unittest.TestCase):
     def test_MasterEquation_doCalculation(self):
         """ Checks the dummy calculation
         """  
-        Calc = HaPPPy.MasterEquation.MasterEquationCalculator()
+        Calc = HaPPPy.MasterEquation.MasterEquationSolver()
         self.assertEqual(Calc.doCalculation(), 2.0)
 
 if __name__ == '__main__':
