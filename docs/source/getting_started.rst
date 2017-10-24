@@ -45,6 +45,7 @@ To run the first tests, run :code:`python3 -m tests.test_main`. This runs all te
 
 which means all tests ran successfully. Get in contact with Lars or write in the Mattermost channel if the tests fail on your machine.
 
+.. note :: If Python 3 is not installed on your machine, get it from https://www.python.org/
 Step 3. Run HaPPPy for the first time
 -------------------------------------
 
@@ -60,7 +61,17 @@ You have now successfully setup HaPPPy and are able to dive into the code.
 
 Step 4. Build the Documentation 
 -------------------------------
-Next you should build the documentation. You find a directory called *docs* int the project, which holds the documentation.
+Next you should build the documentation. You need *sphinx* and *spinx_rtd_theme* in order to do that. 
+If you installed a recent Python version you can just run 
+
+.. code-block:: shell
+
+    pip3 install sphinx
+    pip3 install sphinx_rtd_theme
+
+If installation was successful, you are ready to build the docs. 
+
+You find a directory called *docs* int the project, which holds the documentation.
 To build the documentation move into the directory and type run `make html`
 
 .. code-block:: shell
