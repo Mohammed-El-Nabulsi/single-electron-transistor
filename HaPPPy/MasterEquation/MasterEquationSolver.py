@@ -28,19 +28,9 @@ class MasterEquationSolver:
 
         return 1.0+1.0
 
-    def simulate_time_development_of_propabilities(P_0,
-                                                   Γ,
-                                                   t_max,
-                                                   t_delta,
-                                                   ε=1E-10,
-                                                   check_tolerance=True,
-                                                   verbose=False
-                                                  ):
-        """Simulates the time development of propabilities P(t) for an ``n`` state system with transition rates Γ.
-
-        .. todo::
-
-            Create extra return type for simulation.
+    def get_span_of_stable_solution(Γ, ε=1E-10, verbose=False):
+        """
+        Finds span of stable solutions of the master equation.
 
         This method returns a numerical approximation of the solution to the following problem.
 
@@ -48,13 +38,13 @@ class MasterEquationSolver:
 
         .. math::
 
-            n \in \mathbb{N}, t_{max} \in \mathbb{R}^+_0, t_{delta} \in \mathbb{R}^+ \\\\ \Gamma \in Mat(n, n, \mathbb{R}^+_0), \\vec{P} : [0, t_{max}] \\to { \left ( \mathbb{R}^+_0 \\right ) }^n, t \mapsto \\vec{P}(t)
+            n \in \mathbb{N}, \Gamma \in Mat(n, n, \mathbb{R}^+_0), \\vec{P} \in \mathbb{R} \\to { \left ( \mathbb{R}^+_0 \\right ) }^n, t \mapsto \\vec{P}(t)
 
-        The differential equation of first order with constant coefficients to be solved is stated as
+        The master eqation (a differential equation of first order with constant coefficients) is stated as
 
         .. math::
 
-            \\frac{d P_{\\alpha}}{d t} = \sum_{\\beta} \Gamma_{\\beta \\rightarrow \\alpha} P_{\\beta} - \sum_{\\beta} \Gamma_{\\alpha \\rightarrow \\beta} P_{\\alpha}
+            \\frac{d P_{\\alpha}}{d t} = \sum_{\\beta} \Gamma_{\\beta \\rightarrow \\alpha} P_{\\beta} - \sum_{\\beta} \Gamma_{\\alpha \\rightarrow \\beta} P_{\\alpha} \\\\ \\alpha, \\beta \in \{ 1,2, \dots , n \}
 
         where
 
@@ -62,118 +52,56 @@ class MasterEquationSolver:
 
             \Gamma_{\\alpha \\rightarrow \\beta} \equiv \Gamma_{\\alpha \\beta}
 
-        denotes the rate from state :math:`\\alpha` to :math:`\\beta`.
+        denotes the rate from state :math:`\\alpha` to :math:`\\beta`. Stable solutions satisfy :math:`\\frac{d P_{\\alpha}}{d t} = 0, \\alpha \in \{ 1,2, \dots , n \}` and hence can be abbreviated to a single vector :math:`\\vec{P} \in { \left ( \mathbb{R}^+_0 \\right ) }^n`.
 
-        The returned solution for :math:`\\vec{P}` is discrete and is therefore consists of pairs :math:`(t_i, \\vec{P}(t_i))` where :math:`t_i \in \{n \cdot t_{delta} | n \in \mathbb{Z} \land n \cdot t_{delta} \leq t_{max} \}`
+        The returned value is a list of vectors which span the space of possible stable solutions when normalized with respect to :math:`\sum_{i=1}^{n} P_i = 1`.
 
-        :param P_0: Start value of propabilities. Must be either a list or a ``nx1`` matrix.
-        :type P_0: numpy.array
         :param Γ: Matrix containing the transition rates where :code:`Γ[i][j]` ≣ :math:`\Gamma_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
         :type Γ: numpy.array
-        :param t_max: Last point in time to be simulated. Must be >= 0.
-        :type t_max: float
-        :param t_delta: Length of the time tintervall between two simulated events. Must be > 0.
-        :type t_delta: float
-        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :param ε: Tolerance value. Due to numerical approximations during calculations a tolerance value is needed.
         :type ε: float
-        :param check_tolerance: Enables initial and successive check as described for ε.
-        :type check_tolerance: bool
         :param verbose: Enables the verbose mode: Calculation will be printed in detail to support debugging.
         :type verbose: bool
 
-        :return: Returns a pair. The first value is called ``sim_successful`` and is ``True`` iff no issue occurred during the simulation. The second value is a list of pairs representing the result. The first values track te time and the second contains the probabilities as vector given as a list of numbers.
-        :rtype: (bool, list)
+        :return: Returns a list of vectors which span the space of possible stable solution to the master eqation when normalized with respect to :math:`\sum_{i=1}^{n} P_i = 1`. Each vector of the list satisfies the mentioned normalization.
 
         :example: .. code-block:: python
-                :emphasize-lines: 1,3,6-16
 
                 import numpy as np
-                import matplotlib.pyplot as plt
                 from HaPPPy.MasterEquation.MasterEquationSolver import MasterEquationSolver as MES
 
-                ## test program for simulate_time_development_of_propabilities
-                # set-up a reasonable Γ-matrix
-                Γ = np.array([[0, 0.5, 0.5], [0.5, 0, 0.5], [0.5, 0.5, 0]])
-                # choose a legitimate start value for P_0 (P_0 = P(t=0))
-                P_0 = np.array([0.9, 0.1, 0])
-                # simulate
-                sim_successful, sim = MES.simulate_time_development_of_propabilities(
-                                   P_0,
-                                   Γ,
-                                   t_max=20,
-                                   t_delta=0.5
-                                  )
+                ## test program for get_span_of_stable_solution
+                # set-up reasonable Γ-matrices
+                Γ_1 = np.array([[0, 0.5, 0.5], [0.5, 0, 0.5], [0.5, 0.5, 0]])
+                Γ_2 = np.array([[0, 0.0, 0.0], [0.0, 0, 0.0], [0.0, 0.0, 0]])
+                # calculate
+                print(MES.get_span_of_stable_solution(Γ_1))
+                print(MES.get_span_of_stable_solution(Γ_2))
 
-                ## plot result
-                # seperate x value (time) from y values (P) to be able to plot it
-                ts = [sim[i][0] for i in range(len(sim))]
-                Ps = [sim[i][1] for i in range(len(sim))]
-                n = len(sim[0][1]) # dimension of P
-                legend_names = ["$P_" + str(i) + "$" for i in range(n)]
-                plt.plot(ts, Ps)
-                plt.xlabel("t")
-                plt.ylabel("P")
-                plt.legend(legend_names)
-                plt.grid()
-                if not sim_successful:
-                     plt.text(0, 0, "Simulation failed!")
-                plt.show()
+                # Output:
+                # [array([ 0.33333333,  0.33333333,  0.33333333])]
+                # [array([ 1.,  0.,  0.]), array([ 0.,  1.,  0.]), array([ 0.,  0.,  1.])]
 
-            The relevant lines of code for the simulation to work are highlighted. To give a real live example and to demonstarte the usage of the result some code to plot the result is added.
+            .
+
+        TODO: Extend description of ε and add more details about the calculation.
+              Alternative: Narrow properties of Γ: Γ must have exactly one eigenvalue equals to 0. It follows that there would be only one stable solution!
 
         """
-        # Don't remove the last dot since it is a workaround to shpinx's
-        # code-block interpreter.
-
-        # if necessary: reformat P_0 as matrix (otherwise P_0 could not be multiplicated with matricies)
-        if P_0.ndim == 1:
-            P_0 = np.array([P_0]).transpose()
-
-        if verbose:
-            print("P(t=0) = \n", P_0)
-            print("Γ = \n", Γ)
-            if check_tolerance:
-                print("ε = ", ε)
 
         ## input checks
         # warn if tolerance value is unreasonable
-        if check_tolerance and ε <= 0:
+        if ε <= 0:
             raise RuntimeError("ε must be a positive number > 0. \nε = " + str(ε))
         # Γ must be a nxn matrix
         if Γ.ndim != 2 or Γ.shape[0] != Γ.shape[1] or not (Γ >= 0).all():
             raise RuntimeError("Γ must be a square matrix with coefficients >= 0. \nΓ = \n" + str(Γ))
-        # P_0 must be a nx1 matrix (with n matching Λ)
-        if P_0.ndim != 2 or P_0.shape[0] != Γ.shape[0] or P_0.shape[1] != 1:
-            raise RuntimeError("P_0 must be a "
-                               + str(Γ.shape[0])
-                               + "x1 matrix (aka. a 'dotable vector')! \nP_0 = \n"
-                               + str(P_0)
-                              )
-        # P_0 must have coefficients >= 0
-        if not (P_0 >= 0).all():
-            raise RuntimeError("P_0 must have coefficients >= 0. \nP_0 = \n" + str(P_0))
-        # coefficients of P_0 must add up to 1
-        P_sum = sum(P_0)
-        if check_tolerance and (P_sum < 1 - ε or P_sum > 1 + ε):
-            raise RuntimeError("Coefficients of P_0 must add up to 1 (within tolerance ε = "
-                               + str(ε)
-                               + "). \nP_0 = \n"
-                               + str(P_0)
-                               + "\n Σ = "
-                               + str(P_sum)
-                              )
-        # simulated time intervals must be positive or negative
-        if t_max < 0 or t_delta <= 0:
-            raise RuntimeError("Simulated time intervals must be finite and positive ("
-                               + "t_max >= 0 and t_delta > 0).\n"
-                               + "t_max = " + str(t_max)
-                               + ", t_delta = " + str(t_delta)
-                              )
 
+        if verbose:
+            print("Γ = \n", Γ)
+            print("ε = ", ε)
 
-        ## simulation
-        # track if simulation had any issues
-        sim_successful = True
+        ## calculation
 
         # set-up Λ-matrix
         Λ_in = Γ
@@ -189,10 +117,6 @@ class MasterEquationSolver:
         if verbose: print("Λ.eigenvalues = \n", Λ_evals)
         if verbose: print("Λ.eigenvectors = \n", Λ_evecs_T)
 
-        # get P_0 in eigenvector basis of Λ
-        P_evb = Λ_evecs_T.dot(P_0)
-        if verbose: print("P(t=0) in Λ.eingenvetorbase = \n", P_evb)
-
         # get Λ eigenvector basis of Λ
         Λ_evb = np.diag(Λ_evals)
         if verbose: print("Λ in Λ.eingenvetorbase = \n", Λ_evb)
@@ -201,44 +125,29 @@ class MasterEquationSolver:
         Λ_evecs_T_inv = np.linalg.inv(Λ_evecs_T)
         if verbose: print("Λ.eingenvectors^-1 = \n", Λ_evecs_T_inv)
 
-        # check if creation inversion was successful
+        # check if creation of inversion was successful
         if (np.dot(Λ_evecs_T_inv, Λ_evecs_T) != np.identity(Λ.shape[0])).all():
             raise RuntimeError("Can not invert Λ = \n" + str(Λ))
 
-        # time development
-        sim = []
-        P_0_evb = np.dot(Λ_evecs_T, P_0)
-        for t in np.arange(0, t_max + t_delta, t_delta):
-            if verbose: print("\nt = ", t)
-            #exp_tΛ_evb = np.diag(np.power(Λ_evals, t)) # Does not behave well due to numerical issues!
-            exp_tΛ_evb = np.diag(np.exp(t * Λ_evals))
-            if verbose: print("exp(" + str(t) + " * Λ) in Λ.eingenvetorbase = \n", exp_tΛ_evb)
-            P_evb_t = np.dot(exp_tΛ_evb, P_0_evb)
-            if verbose: print("P(t=" + str(t) + ") in Λ.eigenvectorbase = \n", P_evb_t)
-            P_t = np.dot(Λ_evecs_T_inv, P_evb_t)
-            if verbose: print("P(t=" + str(t) + ") = \n", P_t)
-            sim.append((t, [P_t[i][0] for i in range(P_t.shape[0])]))
-            # check if sum of coefficients of P_t is still 1
-            P_sum = sum(P_t)
-            if check_tolerance and (P_sum < 1 - ε or P_sum > 1 + ε):
-                print("Warning! Calculation aborted Coefficients of P_(t="
-                      + str(t)
-                      + ") must add up to 1 (within tolerance ε = "
-                      + str(ε)
-                      + "). \nP_(t="
-                      + str(t)
-                      + ") = \n"
-                      + str(P_t)
-                      + "\n Σ = "
-                      + str(P_sum[0])
-                     )
-                sim_successful = False
-                break
+        # find eigenvalues with eigenvector which do not diverge or become 0 when t --> ∞
+        Λ_evals_zero_indices = []
+        for i in range(len(Λ_evals)):
+            if abs(Λ_evals[i]) <= ε:
+                Λ_evals_zero_indices.append(i)
+        if verbose:
+            print("indices of eigenvetors with eigenvalue 0 (within tolerance) = ", Λ_evals_zero_indices)
 
-        # Use either:
-        #   return sim_successful ? sim : None
-        # or
-        #   return sim_successful, sim
-        # to return the simulated data. The last option allowes to analyse the
-        # simulation up to the point of failure but must be analysed more carefully.
-        return sim_successful, sim
+        # get the corresponding eigenvectors
+        Λ_lasting_evecs = []
+        for i in Λ_evals_zero_indices:
+            Λ_lasting_evecs.append(Λ_evecs[:,i])
+        if verbose:
+            print("eigenvectors with eigenvalue 0 (within tolerance) = \n", Λ_lasting_evecs)
+
+        # renoralize such that sum(P_i) = 1
+        for i in range(len(Λ_lasting_evecs)):
+            Λ_lasting_evecs[i] = (1 / sum(Λ_lasting_evecs[i])) * Λ_lasting_evecs[i]
+        if verbose:
+            print("normalized eigenvectors with eigenvalue 0 (within tolerance) = \n", Λ_lasting_evecs)
+
+        return Λ_lasting_evecs
