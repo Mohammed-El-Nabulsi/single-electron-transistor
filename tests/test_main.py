@@ -57,22 +57,6 @@ class TwoBodyTestSuite(unittest.TestCase):
         TBSolver = HaPPPy.TwoBody.TwoBodySolver()
         self.assertEqual(TBSolver.doCalculation(), 2.0)
 
-class TransmissionTestSuite(unittest.TestCase):
-    """A test class to the Transmission module.
-
-    """
-
-    def test_Transmission_exists(self):
-        """ Checks wether the Transmission module exists
-        """
-        self.assertTrue(hasattr(HaPPPy, 'Transmission'))
-
-    def test_Transmission_doCalculation(self):
-        """ Checks the dummy calculation
-        """  
-        Calc = HaPPPy.Transmission.TransmissionCalculator()
-        self.assertEqual(Calc.doCalculation(), 2.0)
-
 class RatesTestSuite(unittest.TestCase):
     """A test class to the Rates module.
 
