@@ -5,11 +5,7 @@ me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert
 hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to ps
 
 class GaussianWave():
-<<<<<<< HEAD
     def create_package_at_point(self, x, x0, energy, a):
-=======
-    def create_package(self, x, energy, a):
->>>>>>> 4a35f5a... Update GaussianWave.py
         k = cmath.sqrt(2*me*energy)/hbar
         norm = (2/(cmath.pi*(a**2)))**(1/4)
         
