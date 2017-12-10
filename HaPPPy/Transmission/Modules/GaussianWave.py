@@ -1,11 +1,8 @@
-import cmath #calculations with complex numbers
+import cmath # Calculations with complex numbers
 from scipy.constants import codata
 
-me = codata.value("electron mass energy equivalent in MeV");
-hbar = codata.value("Planck constant over 2 pi in eV s") * 1e15; # Convert to ps
-
-# Is this wrong? Electron mass in MeV is 1e-1 not 1e-9.
-me = 0.5109989461*(10**(9))            #mass of electron in meV
+me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert to milli eV
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to ps
 
 class GaussianWave():
     def create_package(self, x, energy, a):
