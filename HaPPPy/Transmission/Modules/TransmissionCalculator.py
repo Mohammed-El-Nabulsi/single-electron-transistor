@@ -1,23 +1,15 @@
 import numpy
-#Integration über die Funktion anhand von Stützstellen.
-def integrate(funktion,start): # funktion  = Funktionsarray, start ist der endpunkt des Potentials.
+#Integration by addition of sample points.
+def integrate(funktion,start): # funktion = array with the samplepoints from the funktion , start sets the startingpoint for the integration.
     n = start
     a = 0
-    # Komplexkonjugiert die werte und addiert sie auf.
+    # Squares the absolut value and adds the samplepoints.
     while n < numpy.size(funktion) : 
         a = a + funktion[n]*funktion.conjugate()[n]
         n = n+1
     return a
     
-    # berechnet die Wahrscheinlicheit anhand der addierten Stützstellen.
-def warhscheinlichkeit(funktion,start):#  benötigt die momentane Funktion und den Endpunkt des Potentials
+    # Calculates the propability for tunneling with a given final wavefunktion.
+def warhscheinlichkeit(funktion,start):#  Requires only the final wavefunktion in the form of an array and the startingpoint for the propability.
     x = integrate(funktion,start)/ integrate(funktion,0)
     return x
- 
-#def main():
-#    funktion = numpy.array([1,1,1,1,1,1,1,1,1])
-#    start = 4
-#    print (warhscheinlichkeit(funktion,start) )
-#    
-#main()
-#    
