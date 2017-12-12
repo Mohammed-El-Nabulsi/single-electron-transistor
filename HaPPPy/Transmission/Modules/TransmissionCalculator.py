@@ -10,6 +10,6 @@ def integrate(funktion,start): # funktion = array with the samplepoints from the
     return a
     
     # Calculates the propability for tunneling with a given final wavefunktion.
-def warhscheinlichkeit(funktion,start):#  Requires only the final wavefunktion in the form of an array and the startingpoint for the propability.
+def Propability(funktion,start):#  Requires only the final wavefunktion in the form of an array and the startingpoint for the propability.
     x = integrate(funktion,start)/ integrate(funktion,0)
     return x
