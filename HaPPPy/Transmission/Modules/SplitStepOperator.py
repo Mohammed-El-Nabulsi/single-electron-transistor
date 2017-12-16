@@ -26,12 +26,21 @@ def splitStep(wave):
     TkWave1 = numpy.multiply(kWave1,T, dtype=numpy.complex64)
     
     #transform into x space
-    xWave = IFT(TkWave1)
+    xWave1 = IFT(TkWave1)
     
     #applying potential operator
-    VxWave = numpy.multiply(xWave1,V, dtype=numpy.complex64)
+    VxWave1 = numpy.multiply(xWave1,V, dtype=numpy.complex64)
     
-    return VxWave
+    #transform into k space
+    kWave2 = FT(VxWave1)
+    
+    #applying modified kinetic operator
+    TkWave2 = numpy.multiply(kWave2,T, dtype=numpy.complex64)
+    
+    #transform into x space
+    xWave2 = IFT(TkWave2)
+    
+    return xWave2
 
 dt = 1 #timestep
 me = 1 #mass of electron
