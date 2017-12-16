@@ -5,8 +5,8 @@ from scipy.fftpack import fft, ifft
 import cmath as cm
 
 #define parameter
-h = 12
-m = 5
+h = 1.054571800 * 10^-34
+m =  9,109 383 56 * 10^-31
 dt = 12
 
 #Example
