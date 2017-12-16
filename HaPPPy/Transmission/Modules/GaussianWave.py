@@ -13,16 +13,16 @@ class GaussianWave():
         
         return psi_x
     
-    def create_package(positions, x0, energy, a):
+    def create_package(self, positions, x0, energy, a):
         '''
         Creates a gaussian package in position-space symmetrically around x0 at time zero.
 
         Parameters
         ----------
-        x0 : float
-           symmetry point of the package
         positions : array
            A sequence of positions for which to create the package
+        x0 : float
+           symmetry point of the package           
         energy : float
            Energy of the package
         a : float
