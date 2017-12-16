@@ -8,7 +8,7 @@ hbar = codata.value("Planck constant over 2 pi in eV s") * 1e15; # Convert to ps
 me = 0.5109989461*(10**(9))            #mass of electron in meV
 
 class GaussianWave():
-    def CreatePackage(self, x, energy, a):
+    def create_package(self, x, energy, a):
         k = cmath.sqrt(2*me*energy)/hbar
         norm = (2/(cmath.pi*(a**2)))**(1/4)
         
