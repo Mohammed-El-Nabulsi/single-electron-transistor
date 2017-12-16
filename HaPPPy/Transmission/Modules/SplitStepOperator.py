@@ -35,10 +35,10 @@ def splitStep(wave):
     k_wave_new = FT(vx_wave)
     
     #applying modified kinetic operator
-    tk_wave_new = numpy.multiply(k_wave_new,T, dtype=numpy.complex64)
+    tk_wave_new_2 = numpy.multiply(k_wave_new,T, dtype=numpy.complex64)
     
     #transform into x space
-    x_wave_new = IFT(tk_nave_new)
+    x_wave_new = IFT(tk_nave_new_2)
     
     return x_wave_new
 
