@@ -17,10 +17,12 @@ def VElement(Vi):
     return Velement
 
 #SplitStep-Operator
-def splitStep(wave):
-    
+
     #transform into k space
     kWave1 = FT(wave)
+    
+def split_step(wave):
+    
     
     #applying modified kinetic operator
     TkWave1 = numpy.multiply(kWave1,T, dtype=numpy.complex64)
@@ -30,6 +32,9 @@ def splitStep(wave):
     
     #applying potential operator
     VxWave = numpy.multiply(xWave1,V, dtype=numpy.complex64)
+    
+    #applying modified kinetic operator
+    TkWave1 = numpy.multiply(kWave1,T, dtype=numpy.complex64)
     
     return VxWave
 
