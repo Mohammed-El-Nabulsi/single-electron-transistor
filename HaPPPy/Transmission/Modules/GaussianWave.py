@@ -6,6 +6,29 @@ hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert
 
 class GaussianWave():
     def CreatePackagePoint(self, x, x0, energy, a):
+         '''
+         Creates a gaussian package in position-space symmetrically around x0 at time zero.
+
+         Parameters
+         ----------
+         x : float
+            Position on which the gaussian wave is evaluated
+         x0 : float
+            symmetry point of the package
+         positions : array
+            A sequence of positions for which to create the package
+         energy: float
+            Energy of the package
+         a : float
+            Width of the package
+
+         Returns
+         -------
+         wavePoint : complex
+            Value of the gaussian wave at time zero an position x
+         wave : array, shape(len(positions))
+            Array containing the value of the gaussian package for each desired position in positions,
+        '''
         k = cmath.sqrt(2*me*energy)/hbar
         norm = (2/(cmath.pi*(a**2)))**(1/4)
         
@@ -18,26 +41,4 @@ class GaussianWave():
 
         return phi
     
- '''
- Creates a gaussian package in position-space symmetrically around x0 at time zero.
- 
- Parameters
- ----------
- x : float
-    Position on which the gaussian wave is evaluated
- x0 : float
-    symmetry point of the package
- positions : array
-    A sequence of positions for which to create the package
- energy: float
-    Energy of the package
- a : float
-    Width of the package
- 
- Returns
- -------
- wavePoint : complex
-    Value of the gaussian wave at time zero an position x
- wave : array, shape(len(positions))
-    Array containing the value of the gaussian package for each desired position in positions,
-'''
+
