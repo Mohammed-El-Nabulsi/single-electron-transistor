@@ -38,3 +38,4 @@ class GaussianWave():
     Value of the gaussian wave at time zero an position x
  wave : array, shape(len(positions))
     Array containing the value of the gaussian package for each desired position in positions,
+'''
