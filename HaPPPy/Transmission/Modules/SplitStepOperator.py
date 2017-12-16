@@ -3,56 +3,56 @@ import numpy
 import cmath
 
 #diagonalelemts of kinetic operator in k-space
-def TElement(ki):
+def t_element(ki):
     
-    Telement = cmath.exp(-1j*hbar*dt*(ki**2)/(4*me))
+    t_element = cmath.exp(-1j*hbar*dt*(ki**2)/(4*me))
     
-    return Telement
+    return t_element
 
 #diagonalelements of potential in position-space
-def VElement(Vi):
+def v_element(Vi):
     
-    Velement = cmath.exp(-1j*dt*Vi/hbar)
+    v_element = cmath.exp(-1j*dt*vi/hbar)
     
-    return Velement
+    return v_element
 
 #SplitStep-Operator
 def splitStep(wave):
     
     #transform into k space
-    kWave1 = FT(wave)
+    k_wave = FT(wave)
     
     #applying modified kinetic operator
-    TkWave1 = numpy.multiply(kWave1,T, dtype=numpy.complex64)
+    tk_wave_new = numpy.multiply(k_wave,T, dtype=numpy.complex64)
     
     #transform into x space
-    xWave1 = IFT(TkWave1)
+    x_wave = IFT(tk_wave)
     
     #applying potential operator
-    VxWave1 = numpy.multiply(xWave1,V, dtype=numpy.complex64)
+    vx_wave = numpy.multiply(x_wave,V, dtype=numpy.complex64)
     
     #transform into k space
-    kWave2 = FT(VxWave1)
+    k_wave_new = FT(vx_wave)
     
     #applying modified kinetic operator
-    TkWave2 = numpy.multiply(kWave2,T, dtype=numpy.complex64)
+    tk_wave_new = numpy.multiply(k_wave_new,T, dtype=numpy.complex64)
     
     #transform into x space
-    xWave2 = IFT(TkWave2)
+    x_wave_new = IFT(tk_nave_new)
     
-    return xWave2
+    return x_wave_new
 
 dt = 1 #timestep
 me = 1 #mass of electron
 hbar = 1 #reduced plack constant
 
 positions = [1]
-waveNumbers = [1]
+wave_numbers = [1]
 
 potential = [1] #potential
 
 #diagonalelements of kinetic operator
-T = [TElement(waveNumber) for waveNumber in waveNumbers]
+T = [t_element(wave_number) for wave_number in wave_numbers]
 
 #diagonalelements of potential operator
-V = [VElement(vi) for vi in potential]
+V = [v_element(vi) for vi in potential]
