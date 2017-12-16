@@ -32,9 +32,9 @@ class GaussianWave():
         -------
         psi : array, shape(len(positions))
            Array containing the value of the gaussian package for each desired position in positions,
-       '''
-       psi = [create_package_at_point(x, x0, energy, a) for x in positions]
-
-       return psi
+        '''
+        psi = [create_package_at_point(x, x0, energy, a) for x in positions]
+ 
+        return psi
     
 
