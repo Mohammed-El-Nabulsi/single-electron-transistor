@@ -1,71 +1,52 @@
-#Split-Step-Algorithm repeated M times
 import numpy
 import cmath
 
 
-
-dt = 1 #timestep
-me = 1 #mass of electron
-hbar = 1 #reduced plack constant
-
-positions = [1]
-wave_numbers = [1]
-
-potential = [1] #potential
-
-#diagonalelements of kinetic operator
-T = [t_element(wave_number) for wave_number in wave_numbers]
-
-#diagonalelements of potential operator
-V = [v_element(vi) for vi in potential]
-
-
-
-
-
-
-
-
-#diagonalelemts of kinetic operator in k-space
-class SplitStepMethod():
+class SplitStepMethod:
+    dt = 1
+    me = 1
+    hbar = 1
     
-    #diagonalelemts of kinetic operator in k-space
-    def t_element.create(ki):
+    positions = [1]
+    wave_numbers = [1]
+    potential = [1]
     
-    t_element = cmath.exp(-1j*hbar*dt*(ki**2)/(4*me))
+    T = [t_element(wave_number) for wave_number in wave_numbers]
     
-    return t_element
-
-#diagonalelements of potential in position-space
-    def v_element.create(Vi):
+    V = [v_element(vi) for vi in potential]
     
-    v_element = cmath.exp(-1j*dt*vi/hbar)
     
-    return v_element
-
-#SplitStep-Operator
-    def split_step_method(wave):
+    def t_element.create(self, dt, me, hbar):
     
-    #transform into k space
-    k_wave = FT(wave)
+        t_element = cmath.exp(-1j*hbar*dt(ki**2)/(4*me))
+        
+        return t_element
     
-    #applying modified kinetic operator
-    tk_wave_new = numpy.multiply(k_wave,T, dtype=numpy.complex64)
     
-    #transform into x space
-    x_wave = IFT(tk_wave)
     
-    #applying potential operator
-    vx_wave = numpy.multiply(x_wave,V, dtype=numpy.complex64)
+    def v_element.create(self, dt, me, hbar):
+       
+        
+        v_element = cmath.exp(-1j*dt*vi/hbar)
+        
+        return v_element
     
-    #transform into k space
-    k_wave_new = FT(vx_wave)
     
-    #applying modified kinetic operator
-    tk_wave_new_2 = numpy.multiply(k_wave_new,T, dtype=numpy.complex64)
+    def split_step_method.use(self, psi):
+        
+        psi_k = FT(psi)
+        
+        psi_tk = numpy.multiply(psi_k, T,  dtype=numpy.complex64)
+        
+        psi_x = IFT(psi_tk)
+        
+        psi_vx = numpy.multiply(psi_x, V, dtype=numpy.complex64)
+        
+        psi_k_new = FT(psi_vx)
+        
+        psi_tk_new = numpy.multiply(psy_k_new, T, dtype=numpy.complex64)
+        
+        psi_x_new = IFT(psi_tk_new)
+        
+        return psi_x_new
     
-    #transform into x space
-    x_wave_new = IFT(tk_nave_new_2)
-    
-    return x_wave_new
-
