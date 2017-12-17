@@ -35,7 +35,7 @@ class TransmissionTestSuite(unittest.TestCase):
         gaussianWave = GaussianWave()
 
         # Act
-        psi0 = gaussianWave.CreatePackage(pos, symmetrypoint, energy, width)
+        psi0 = gaussianWave.create_package(pos, symmetrypoint, energy, width)
         psi = numpy.array(psi0)
 
         maxAbsReal = max(numpy.absolute(psi.real - expectedPsiRe))
@@ -43,8 +43,11 @@ class TransmissionTestSuite(unittest.TestCase):
 
         errorTolerance = 10**(-10)
 
+        print("Max errors: ")
+        print([maxAbsReal, maxAbsImag])
+
         # Assert
-        self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance)
+        self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The gaussian wave returns an error greater than %e" % errorTolerance)
         
 if __name__ == '__main__':
     transmission_suite = unittest.TestLoader().loadTestsFromTestCase(TransmissionTestSuite)
