@@ -32,7 +32,7 @@ class SplitStepMethod:
         return v_element
     
     
-    def split_step_method.use(self, psi):
+    def split_step_method.use(self, psi, T, V):
         
         psi_k = FT(psi)
         
