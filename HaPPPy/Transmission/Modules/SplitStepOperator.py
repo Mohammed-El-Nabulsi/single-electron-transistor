@@ -23,7 +23,7 @@ class SplitStepMethod:
         
         
 
-        def v_element_create(self, ki):
+        def v_element_create(self, vi):
        
         
             v_element = cmath.exp(-1j*dt*vi/hbar)
