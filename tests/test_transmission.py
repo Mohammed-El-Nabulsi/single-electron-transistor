@@ -54,12 +54,14 @@ class TransmissionTestSuite(unittest.TestCase):
         psi = [ 1, 2, 3, 4, 4, 2, 1 ]
         V = [ 0, 0, 10, 10, 0, 0, 0 ]
         x = [ 1, 2, 3, 4, 5, 6, 7 ]
-
+   
         splitStepOperator = SplitStepOperator(V, x)
 
         psi_new = splitStepOperator.use(psi)
 
         print(psi_new)
+
+        self.assertTrue(true)
 
 
 
