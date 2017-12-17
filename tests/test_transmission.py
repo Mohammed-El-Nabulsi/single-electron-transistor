@@ -1,4 +1,5 @@
 from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
+from HaPPPy.Transmission.Modules.SplitStepOperator import SplitStepOperator
 from scipy.constants import codata
 
 import unittest
@@ -49,6 +50,20 @@ class TransmissionTestSuite(unittest.TestCase):
         # Assert
         self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The gaussian wave returns an error greater than %e" % errorTolerance)
         
+    def test_SplitStepOperator_isMathematicallyCorrect(self):
+        psi = [ 1, 2, 3, 4, 4, 2, 1 ]
+        V = [ 0, 0, 10, 10, 0, 0, 0 ]
+        x = [ 1, 2, 3, 4, 5, 6, 7 ]
+
+        splitStepOperator = SplitStepOperator(V, x)
+
+        psi_new = splitStepOperator.use(psi)
+
+        print(psi_new)
+
+
+
+
 if __name__ == '__main__':
     transmission_suite = unittest.TestLoader().loadTestsFromTestCase(TransmissionTestSuite)
     unittest.TextTestRunner(verbosity=2, buffer=True).run(transmission_suite)
