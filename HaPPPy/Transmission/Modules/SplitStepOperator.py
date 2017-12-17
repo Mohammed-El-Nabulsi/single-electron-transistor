@@ -16,7 +16,7 @@ class SplitStepMethod:
     V = [v_element(vi) for vi in potential]
     
     
-    def t_element.create(self, dt, me, hbar):
+    def t_element_create(self, dt, me, hbar):
     
         t_element = cmath.exp(-1j*hbar*dt(ki**2)/(4*me))
         
@@ -24,7 +24,7 @@ class SplitStepMethod:
     
     
     
-    def v_element.create(self, dt, me, hbar):
+    def v_element_create(self, dt, me, hbar):
        
         
         v_element = cmath.exp(-1j*dt*vi/hbar)
@@ -32,7 +32,7 @@ class SplitStepMethod:
         return v_element
     
     
-    def split_step_method.use(self, psi, T, V):
+    def use(self, psi, T, V):
         
         psi_k = FT(psi)
         
