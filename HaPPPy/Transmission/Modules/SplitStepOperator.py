@@ -2,22 +2,28 @@ import numpy
 import cmath
 from scipy.constants import codata
 
+
+
+
+dt = 10**-15
+me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert to milli eV
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to p    
+x =[1, 2, 3, 4, 5, 6] # example, getting it from Mo
+k = FT(x)
+v = [1, 2, 3, 4, 5, 6] #example, gettoing from mo
+    
+    
+    
+    
 class SplitStepMethod:
-    dt = 10**-15
-    me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert to milli eV
-    hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to ps
-    
-    x =[1, 2, 3, 4, 5, 6] # example, getting it from Mo
-    k = FT(x)
-    v = [1, 2, 3, 4, 5, 6] #example, gettoing from mo
-    
+
     
     
     def use(self, psi):
         
         
 
-        def v_element_create(self, dt, me, hbar, vi, v):
+        def v_element_create(self):
        
         
             v_element = cmath.exp(-1j*dt*vi/hbar)
@@ -30,7 +36,7 @@ class SplitStepMethod:
         
         
         
-        def t_element_create(self, dt, me, hbar, ki, k):
+        def t_element_create(self):
             
             t_element = cmath.exp(-1j*hbar*dt(ki**2)/(4*me))
             
