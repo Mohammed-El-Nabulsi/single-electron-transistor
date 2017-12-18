@@ -5,7 +5,7 @@ class TransmissionCalculator():
         """ Documentation"""
         n = start
         a = 0
-        while n < numpy.size(funktion) : 
+        while n < numpy.size(wavefunktion) : 
             a = a + wavefunktion[n]*wavefunktion.conjugate()[n]
             n = n+1
         return a
