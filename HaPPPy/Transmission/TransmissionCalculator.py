@@ -9,6 +9,9 @@ class TransmissionCalculator:
         return 2
 
     def calculate_transmission(self, E, V, x):
+        """
+            TODO: Extensive documentation.
+        """
         if not (isinstance(V, list) and isinstance(x, list)):
             raise ValueError("V and x must be arrays")
 
