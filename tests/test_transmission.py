@@ -15,18 +15,18 @@ class TransmissionTestSuite(unittest.TestCase):
         # testPsi for a=1/2, energy=(hbar/3)**2/(2*me) x in [-1,0,1], x0=1/5 from wolfram alpha:
         #x = -1
         expectedPsiRe1  = 0.00366637770707954939318041612000244530051853481045139516
-        expectedPsiIm1 = 0.00155011963188600389828072397974977655743189489415947434
+        expectedPsiIm1 = -0.00155011963188600389828072397974977655743189489415947434
 
         #x = 0
         expectedPsiRe2 = 1.074068789330235009621373594853013756095220098586369327
-        expectedPsiIm2 = 0.07171085575151225040654591725275008467732293163741000634
+        expectedPsiIm2 = -0.07171085575151225040654591725275008467732293163741000634
 
         #x = 1
         expectedPsiRe3 = 0.09420262718699546582979705382375965292637280618901849569
         expectedPsiIm3 = 0.02573359354865373116603681901836827575687821882738438584
         
         expectedPsiRe = numpy.array([expectedPsiRe1,expectedPsiRe2,expectedPsiRe3])
-        expectedPsiIm = numpy.array([expectedPsiIm1,expectedPsiIm2,expectedPsiIm3])
+        expectedPsiIm = numpy.array([expectedPsiIm1,expectedPsiIm2,expectedPsiIm3])        
         
         width = 1/2
         energy = (hbar/3)**2/(2*me)
