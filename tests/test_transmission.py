@@ -76,3 +76,43 @@ class TransmissionTestSuite(unittest.TestCase):
 if __name__ == '__main__':
     transmission_suite = unittest.TestLoader().loadTestsFromTestCase(TransmissionTestSuite)
     unittest.TextTestRunner(verbosity=2, buffer=True).run(transmission_suite)
+    
+    def test_Fourier_isMathematicallyCorrect(self):
+    # Assemble
+    # test L=4, N=3, x0=-2 from wolfram alpha:
+    #x = -2
+    expectedFtRe1  = 0.204416439153542362192092626
+    expectedFtIm1 = 0
+
+    #x = -2+4/3
+    expectedFtRe2 = -0.462346999597677712693041638
+    expectedFtIm2 = -1.31146310351406168738421171640
+
+    #x = x = -2+2*4/3
+    expectedFtRe3 = -0.462346999597677712693041638
+    expectedFtIm3 = 1.31146310351406168738421171640
+    
+    expectedFtRe = numpy.array([expectedFtRe1,expectedFtRe2,expectedFtRe3])
+    expectedFtIm = numpy.array([expectedFtIm1,expectedFtIm2,expectedFtIm3])
+        
+    x0 = -2
+    L = 4
+    N = 3     
+        
+    Fourier = Fourier()
+    
+    # Act
+    Ft0 = IFT(x0, L, N)
+    Ft = numpy.array(Ft0)
+
+    maxAbsReal = max(numpy.absolute(Ft.real - expectedFtRe))
+    maxAbsImag = max(numpy.absolute(Ft.imag - expectedFtIm))
+
+    errorTolerance = 10**(-8)
+
+    print("Max errors: ")
+    print([maxAbsReal, maxAbsImag])
+
+    # Assert
+    self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The Fourier-Method returns an error greater than %e" % errorTolerance)
+        
