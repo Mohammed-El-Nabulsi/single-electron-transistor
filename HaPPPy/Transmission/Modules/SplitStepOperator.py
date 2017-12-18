@@ -37,4 +37,3 @@ class SplitStepOperator:
         psi_x_new = ifft(psi_tk_new, norm='ortho')
         
         return psi_x_new
-    
