@@ -1,5 +1,6 @@
 from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
 from HaPPPy.Transmission.Modules.SplitStepOperator import SplitStepOperator
+from HaPPPy.Transmission.Modules.TransmissionCalculator import TransmissionCalculator
 from scipy.constants import codata
 
 import unittest
@@ -62,6 +63,14 @@ class TransmissionTestSuite(unittest.TestCase):
         print(psi_new)
 
         self.assertTrue(true)
+        
+    def test_Transmissioncalculator_isMathematicallyCorrect(self):
+        psi = [ -2, 1, 2, 1j ]
+        start = 2
+        expectedx = 0,5
+        x = TaransmissionCalculator.calculate(psi,start)
+
+        self.assertTrue(x == expectedx)
 
 
 if __name__ == '__main__':
