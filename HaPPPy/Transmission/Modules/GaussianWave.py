@@ -9,7 +9,8 @@ class GaussianWave():
         k = cmath.sqrt(2*me*energy)/hbar
         norm = (2/(cmath.pi*(a**2)))**(1/4)
         
-        psi_x = complex(norm*cmath.exp(1j*k*(x-x0)-((x-x0)/a)**2))
+        psi_x = complex(norm*cmath.exp(1j*k*(x-x0))*cmath.exp(-((x-x0)/a)**2))
+        
         
         return psi_x
     
