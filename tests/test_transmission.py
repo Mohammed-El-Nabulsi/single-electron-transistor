@@ -1,7 +1,7 @@
 from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
 from HaPPPy.Transmission.Modules.SplitStepOperator import SplitStepOperator
-from HaPPPy.Transmission.Modules.TransmissionCalculator import TransmissionCalculator
-from HaPPPy.Transmission.Modules.GaussianWave import Fourier
+from HaPPPy.Transmission.Modules.Transmission import Transmission
+from HaPPPy.Transmission.Modules.Fourier import Fourier
 from scipy.constants import codata
 
 import unittest
@@ -56,8 +56,12 @@ class TransmissionTestSuite(unittest.TestCase):
         psi = [ 1, 2, 3, 4, 4, 2, 1 ]
         V = [ 0, 0, 10, 10, 0, 0, 0 ]
         x = [ 1, 2, 3, 4, 5, 6, 7 ]
+        x0 = 0.5
+        L = numpy.abs(x[-1] - x[0])
 
-        splitStepOperator = SplitStepOperator(V, x)
+        print(L)
+
+        splitStepOperator = SplitStepOperator(V, psi, x, x0, L)
 
         psi_new = splitStepOperator.use(psi)
 
@@ -69,50 +73,60 @@ class TransmissionTestSuite(unittest.TestCase):
         psi = [ -2, 1, 2, 1j ]
         start = 2
         expectedx = 0,5
-        x = TaransmissionCalculator.calculate(psi,start)
+
+        transmission = Transmission()
+
+        x = transmission.calculate(psi,start)
 
         self.assertTrue(x == expectedx)
 
+    
+    def test_Fourier_isMathematicallyCorrect(self):
+        # Assemble
+        # test kfunc[sin(-2) + cos(2×(-2)),cos(4/3) - sin(2/3),sin(2/3) + cos(4/3)], x0=-2, L=4 from wolfram alpha:
+
+        kwave = numpy.array([
+            numpy.sin(-2) + numpy.cos(2*(-2)),
+            numpy.cos(4/3) - numpy.sin(2/3),
+            numpy.sin(2/3) + numpy.cos(4/3)
+        ])
+
+        #x = -2
+        expectedFtRe1  = 0.204416439153542362192092626
+        expectedFtIm1 = 0
+
+        #x = -2+4/3
+        expectedFtRe2 = -0.462346999597677712693041638
+        expectedFtIm2 = -1.31146310351406168738421171640
+
+        #x = x = -2+2*4/3
+        expectedFtRe3 = -0.462346999597677712693041638
+        expectedFtIm3 = 1.31146310351406168738421171640
+        
+        expectedFtRe = numpy.array([expectedFtRe1,expectedFtRe2,expectedFtRe3])
+        expectedFtIm = numpy.array([expectedFtIm1,expectedFtIm2,expectedFtIm3])
+            
+        x0 = -2
+        L = 4    
+            
+        fourier = Fourier()
+        
+        # Act
+        Ft0 = fourier.IFT(kwave, x0, L)
+        Ft = numpy.array(Ft0)
+
+        maxAbsReal = max(numpy.absolute(Ft.real - expectedFtRe))
+        maxAbsImag = max(numpy.absolute(Ft.imag - expectedFtIm))
+
+        errorTolerance = 10**(-8)
+
+        print("Max errors: ")
+        print([maxAbsReal, maxAbsImag])
+
+        # Assert
+        self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The Fourier-Method returns an error greater than %e" % errorTolerance)
+        
 
 if __name__ == '__main__':
     transmission_suite = unittest.TestLoader().loadTestsFromTestCase(TransmissionTestSuite)
     unittest.TextTestRunner(verbosity=2, buffer=True).run(transmission_suite)
-    
-    def test_Fourier_isMathematicallyCorrect(self):
-    # Assemble
-    # test kfunc[sin(-2) + cos(2×(-2)),cos(4/3) - sin(2/3),sin(2/3) + cos(4/3)], x0=-2, L=4 from wolfram alpha:
-    #x = -2
-    expectedFtRe1  = 0.204416439153542362192092626
-    expectedFtIm1 = 0
-
-    #x = -2+4/3
-    expectedFtRe2 = -0.462346999597677712693041638
-    expectedFtIm2 = -1.31146310351406168738421171640
-
-    #x = x = -2+2*4/3
-    expectedFtRe3 = -0.462346999597677712693041638
-    expectedFtIm3 = 1.31146310351406168738421171640
-    
-    expectedFtRe = numpy.array([expectedFtRe1,expectedFtRe2,expectedFtRe3])
-    expectedFtIm = numpy.array([expectedFtIm1,expectedFtIm2,expectedFtIm3])
-        
-    x0 = -2
-    L = 4    
-        
-    Fourier = Fourier()
-    
-    # Act
-    Ft0 = IFT(kwave, x0, L)
-    Ft = numpy.array(Ft0)
-
-    maxAbsReal = max(numpy.absolute(Ft.real - expectedFtRe))
-    maxAbsImag = max(numpy.absolute(Ft.imag - expectedFtIm))
-
-    errorTolerance = 10**(-8)
-
-    print("Max errors: ")
-    print([maxAbsReal, maxAbsImag])
-
-    # Assert
-    self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The Fourier-Method returns an error greater than %e" % errorTolerance)
-        

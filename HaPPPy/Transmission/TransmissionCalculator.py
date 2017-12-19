@@ -1,6 +1,6 @@
 from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
 from HaPPPy.Transmission.Modules.SplitStepOperator import SplitStepOperator
-from HaPPPy.Transmission.Modules.TrasmssionCalculator import TransmissionCalculator
+from HaPPPy.Transmission.Modules.Transmission import Transmission
 
 import numpy
 
@@ -60,7 +60,7 @@ class TransmissionCalculator:
         try:
             end_point = self.get_index_for_end_of_potential(V)
 
-            return TransmissionCalculator().calculate(psi_n, end_point)
+            return Transmission().calculate(psi_n, end_point)
         except Exception as error:
             raise Exception("An error occured while calculating transmission rates. Error: " + repr(error))
 

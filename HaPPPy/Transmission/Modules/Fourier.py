@@ -27,9 +27,9 @@ class Fourier():
         -------
         kFunction : array, shape(len(xFunction))
             Array containing the value of the DFT for each desired sample point in wavenumber space
-        '''   
+        '''
         
-        N =  xFunction.size #Number of Arguments, needs to be odd for centering k's around 0
+        N =  len(xFunction) #Number of Arguments, needs to be odd for centering k's around 0
     
         dx = L/N
         dk = 2*cmath.pi/L
@@ -99,7 +99,7 @@ class Fourier():
         return xFunction
         
     def waveNumbers(self, xfunction, x0, L):
-         '''
+        '''
         Calculates wavenumbers centured around 0.
         
         Parameters
@@ -115,7 +115,7 @@ class Fourier():
         -------
         waveNumbers : Array, shape(len(xFunction))
         '''   
-        N =  xfunction.size
+        N = len(xfunction)
 
         dk = 2*np.pi/L
         k0 = -(N-1)/2*dk #lowest new arguments so that k's centred around k = 0
