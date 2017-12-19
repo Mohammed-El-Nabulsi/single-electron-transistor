@@ -1,17 +1,17 @@
 import numpy
 
 class TransmissionCalculator():
-    def integrate(wavefunktion,start): 
+    def integrate(wavefunction,start): 
         """ Documentation"""
         n = start
         a = 0
-        while n < numpy.size(wavefunktion) : 
-            a = a + wavefunktion[n]*wavefunktion.conjugate()[n]
+        while n < numpy.size(wavefunction) : 
+            a = a + wavefunction[n]*wavefunction.conjugate()[n]
             n = n+1
         return a
 
         
-    def calculate(wavefunktion,start):
+    def calculate(wavefunction,start):
         """Documentation"""
-        x = TransmissionCalculator.integrate(wavefunktion,start) / TransmissionCalculator.integrate(wavefunktion,0)
+        x = TransmissionCalculator.integrate(wavefunction,start) / TransmissionCalculator.integrate(wavefunction,0)
         return x.real
