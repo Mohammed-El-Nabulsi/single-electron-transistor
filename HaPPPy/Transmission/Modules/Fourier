@@ -12,7 +12,7 @@ class Fourier():
     #FT transform to new arguments
     def FT(self, xFunction, x0, L):
         '''
-        Returns DFT of an given complex array
+        Returns DFT of an given complex array in wavenumber-space, centured around the origin.
         
         Parameters
         ----------
@@ -58,12 +58,12 @@ class Fourier():
     #IFT:retransform to arguments
     def IFT(self, kFunction, x0, L):
         '''
-        Returns IDFT of an given complex array
+        Returns IDFT of an given complex array, with lowest samplepoint x0.
         
         Parameters
         ----------
         kFunction : Array
-            A sequence of wavefunction values in wavenumber space
+            A sequence of wavefunction values in in wavenumber-space
         x0 : float
             lowest sample point argument in position space         
         L : float
