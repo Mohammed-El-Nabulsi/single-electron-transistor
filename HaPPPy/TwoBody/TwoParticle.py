@@ -1,9 +1,9 @@
 import numpy as np 
-#import Matrixelement
+from MatrixElement import getMatrixElement, testFunction
 
 ## Set up  
 n=6 #number of one-particle eigenmodes 
-X=1000 # number of grid points 
+X=100 # number of grid points 
 
 ### Testfunctions for the eigenemodes 
 
@@ -11,16 +11,15 @@ def test(x, n):
     return np.sin(x*n)
 
 def getOneParticleStuff(n,V):
-	W=np.zeros((6, 1000))
+	W=np.zeros((n, X))
+	e=np.zeros(n)
 	for i in range(n):
-		for j in range(X):
-			W[i, j]=test(j, i)
-	e=[1, 2, 3, 4, 5, 6]
+		W[i,:] = testFunction(-1.0, 1.0, i+1, X)
+		e[i] = float(i+1)**2
+		#for j in range(X):
+		#	W[i, j]=test(j, i)
+	#e=[1, 2, 3, 4, 5, 6]
 	return [e,W]
-
-
-def getMatrixElement(a, b, c, d):
-    return 0
 
 
 #write the Eigenenergies and Eigenstates to a file
@@ -133,7 +132,7 @@ def createTwoParticleData(n,V):
 
 	save(Eigenenergies, Eigenvectors_Productbasis)
 	print(Eigenenergies)
-	print(Eigenvectors)#_Productbasis)
+	#print(Eigenvectors)#_Productbasis)
 	return None
 
-createTwoParticleData(6,None)
+createTwoParticleData(4,None)
