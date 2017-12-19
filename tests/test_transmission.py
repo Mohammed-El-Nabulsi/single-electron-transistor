@@ -79,7 +79,7 @@ if __name__ == '__main__':
     
     def test_Fourier_isMathematicallyCorrect(self):
     # Assemble
-    # test L=4, N=3, x0=-2 from wolfram alpha:
+    # test kfunc[sin(-2) + cos(2×(-2)),cos(4/3) - sin(2/3),sin(2/3) + cos(4/3)], x0=-2, L=4 from wolfram alpha:
     #x = -2
     expectedFtRe1  = 0.204416439153542362192092626
     expectedFtIm1 = 0
