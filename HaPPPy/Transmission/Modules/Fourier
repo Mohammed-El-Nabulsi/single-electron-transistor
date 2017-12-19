@@ -1,79 +1,99 @@
-#Def an command FT that calculates the discret fouriertransformation of an 
-#function 'function' that is given on discret sampling points called 
-#'arguments' (as well as the retransformation IFT). The result is a list of 
-#complex numbers called'kFunction' ('xfunction) with a list of new samplepoints
-#called 'new arguments'.
-#ATTENTION!: the so called transformationmatrices TM and ITM are  matrices that
-#perform a fourier transform (retransfomation) mod a normalizationfactor.
-#This factor is recognised by the FT and IFT command.
-
-import numpy
+import numpy as np
 import cmath
 
-def function(x):
+class Fourier():
+    #inverse transformationmatrixelement
+    def ITMElement(self, arg,newArg, N):
     
-    f = numpy.sin(x)+numpy.cos(2*x)
+        element = cmath.exp(1j*newArg*arg)/np.sqrt(N)
     
-    return f
-
-#inverse transformationmatrixelement
-def ITMElement(arg,newArg):
+        return element
     
-    element = cmath.exp(1j*newArg*arg)/numpy.sqrt(N)
+    #FT transform to new arguments
+    def FT(self, xFunction, x0, L):
+        '''
+        Returns DFT of an given complex array
+        
+        Parameters
+        ----------
+        xFunction : Array
+            A sequence of wavefunction values in position space 
+        x0 : float
+            lowest sample point argument in position space         
+        L : float
+            range of the sample points in position space
+            
+        Returns
+        -------
+        kFunction : array, shape(len(xFunction))
+            Array containing the value of the DFT for each desired sample point in wavenumber space
+        '''   
+        
+        N =  xFunction.size #Number of Arguments, needs to be odd for centering k's around 0
     
-    return element
-
-#FT transform to new arguments
-def FT(xFunction):
+        dx = L/N
+        dk = 2*cmath.pi/L
+        k0 = -(N-1)/2*dk #lowest new arguments so that k's centred around k = 0
+        
+        #create transformationMatrices
+        indices = np.arange(0, N, 1) # indices of transformation matrices
+        
+        arguments = np.array(np.arange(x0, x0 + L, dx)) #samplepoints of the function
+        
+        
+        newArguments = np.array(np.arange(k0,k0+N*dk, dk))
+        
+        ITM = np.zeros((N,N), dtype=np.complex64) #InverseTransformationMatrix
+        
+        for n in indices: #rowindeces
+            for m in indices: #columindices
+                ITM[n][m] = self.ITMElement(arguments[n],newArguments[m], N)
+        
+        TM = np.transpose(ITM.conjugate()) #transformationsmatrix    
+        
+        kFunction = L*np.dot(TM,xFunction)/np.sqrt(2*np.pi*N)
+        
+        return kFunction
     
-    kFunction = L*numpy.dot(TM,xFunction)/numpy.sqrt(2*numpy.pi*N)
+    #IFT:retransform to arguments
+    def IFT(self, kFunction, x0, L):
+        '''
+        Returns IDFT of an given complex array
+        
+        Parameters
+        ----------
+        kFunction : Array
+            A sequence of wavefunction values in wavenumber space
+        x0 : float
+            lowest sample point argument in position space         
+        L : float
+            range of the sample points in position space
+            
+        Returns
+        -------
+        xFunction : array, shape(len(xFunction))
+            Array containing the value of the IDFT for each desired sample point in position space
+        '''   
+        N =  kFunction.size #Number of Arguments, needs to be odd for centering k's around 0
     
-    return kFunction
-
-#IFT:retransform to arguments
-def IFT(kFunction):
-    
-    xFunction = numpy.sqrt(2*numpy.pi*N)*numpy.dot(ITM,kFunction)/L
-    
-    return xFunction
-
-########Constants and Parameters
-x0 = -2 #lowest argument
-L =  4#Range of arguments
-
-N =  3 #Number of Arguments, needs to be odd for centering k's around 0
-
-
-dx = L/N
-#print(dx)
-dk = 2*cmath.pi/L
-k0 =  -(N-1)/2*dk #lowest new arguments so that k's centred around k = 0
-##########
-
-#create transformationMatrices
-indices = numpy.arange(0, N, 1) # indices of transformation matrices
-
-#print(indices)
-
-arguments = numpy.array(numpy.arange(x0, x0 + L, dx)) #samplepoints of the function
-
-#print(arguments)
-
-newArguments = numpy.array(numpy.arange(k0,k0+N*dk, dk))
-#print(newArguments)
-
-ITM = numpy.zeros((N,N), dtype=numpy.complex64) #InverseTransformationMatrix
-#print(matrix)
-
-for n in indices: #rowindeces
-    for m in indices: #columindices
-        ITM[n][m] = ITMElement(arguments[n],newArguments[m])
-#print(IFTM)
-
-TM = numpy.transpose(ITM.conjugate()) #transformationsmatrix
-#print(FTM)
-
-
-##### Function that should be transformed
-xfunction = numpy.array([function(x) for x in arguments])
-####
+        dx = L/N
+        dk = 2*cmath.pi/L
+        k0 = -(N-1)/2*dk #lowest new arguments so that k's centred around k = 0
+        
+        #create transformationMatrices
+        indices = np.arange(0, N, 1) # indices of transformation matrices
+        
+        arguments = np.array(np.arange(x0, x0 + L, dx)) #samplepoints of the function
+        
+        
+        newArguments = np.array(np.arange(k0,k0+N*dk, dk))
+        
+        ITM = np.zeros((N,N), dtype=np.complex64) #InverseTransformationMatrix
+        
+        for n in indices: #rowindeces
+            for m in indices: #columindices
+                ITM[n][m] = self.ITMElement(arguments[n],newArguments[m], N)
+        
+        xFunction = np.sqrt(2*np.pi*N)*np.dot(ITM,kFunction)/L
+        
+        return xFunction
