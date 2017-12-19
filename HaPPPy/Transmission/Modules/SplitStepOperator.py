@@ -12,6 +12,7 @@ hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert
     
 class SplitStepOperator:
     def __init__(self, V, psi, x, x0, L):
+       
         def create_v_element(v_i):
             return cmath.exp(-1j*dt*v_i/hbar)
         
@@ -24,6 +25,23 @@ class SplitStepOperator:
         self.t_elements = [create_t_element(k_i) for k_i in k]
 
     def use(self, psi, x0, L):
+         '''
+        Applying Split Step Method
+        
+        Parameters
+        ----------
+        psi : Array
+            A sequence of wavefunction values in position space 
+        x0 : float
+            lowest sample point argument in position space         
+        L : float
+            range of the sample points in position space
+            
+        Returns
+        -------
+        psi_x_new : array, shape(len(psi))
+            Array containing the wavefunction values after one timestep
+        '''   
         psi_k = FT(psi, x0, L)
         
         psi_tk = numpy.multiply(psi_k, self.t_elements,  dtype=numpy.complex64)
