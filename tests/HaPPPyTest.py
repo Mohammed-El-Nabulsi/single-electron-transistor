@@ -7,7 +7,8 @@ import unittest
 class HappyBasicTestSuite(unittest.TestCase):
     """A test class to test HaPPPy in general.
 
-        This class is supposed to test the general behavior of HaPPPy. This includes test cases involving more than one 
+        This class is supposed to test the general behavior of HaPPPy.
+        This includes test cases involving more than one 
         package, as well as input and output handling. 
 
     """
@@ -24,6 +25,7 @@ class HappyBasicTestSuite(unittest.TestCase):
             HaPPPy.main()
         except Exception:
             self.fail("HaPPPy.main() raised Exception unexpectedly!")
+    
 
 if __name__ == '__main__':
     happy_suite = unittest.TestLoader().loadTestsFromTestCase(HappyBasicTestSuite)
