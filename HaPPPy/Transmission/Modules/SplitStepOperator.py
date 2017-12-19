@@ -25,7 +25,7 @@ class SplitStepOperator:
         self.t_elements = [create_t_element(k_i) for k_i in k]
 
     def use(self, psi, x0, L):
-         '''
+        '''
         Applying Split Step Method
         
         Parameters
