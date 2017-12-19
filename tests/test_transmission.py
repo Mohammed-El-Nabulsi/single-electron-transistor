@@ -96,13 +96,12 @@ if __name__ == '__main__':
     expectedFtIm = numpy.array([expectedFtIm1,expectedFtIm2,expectedFtIm3])
         
     x0 = -2
-    L = 4
-    N = 3     
+    L = 4    
         
     Fourier = Fourier()
     
     # Act
-    Ft0 = IFT(x0, L, N)
+    Ft0 = IFT(kwave, x0, L)
     Ft = numpy.array(Ft0)
 
     maxAbsReal = max(numpy.absolute(Ft.real - expectedFtRe))
