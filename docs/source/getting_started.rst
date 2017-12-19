@@ -30,7 +30,7 @@ Let's move with the terminal into that directory and run the very first test. Th
     user@machine:~/Happpy$ ls
     docs  HaPPPy  LICENSE  MANIFEST.in  README.md  setup.py  tests
 
-To run the first tests, run :code:`python3 -m tests.test_main`. This runs all tests preset tests. The output looks like
+To run the first tests, run :code:`python3 -m tests.AllTests`. This runs all tests preset tests. The output looks like
 
 .. code-block:: console
 
