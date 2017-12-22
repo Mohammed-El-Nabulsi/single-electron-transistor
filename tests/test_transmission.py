@@ -72,7 +72,7 @@ class TransmissionTestSuite(unittest.TestCase):
     def test_Transmissioncalculator_isMathematicallyCorrect(self):
         psi = [ -2, 1, 2, 1j ]
         start = 2
-        expectedx = 0,5
+        expectedx = 0,5  #Is this correct? Did you mean 0.5?
 
         transmission = Transmission()
 
