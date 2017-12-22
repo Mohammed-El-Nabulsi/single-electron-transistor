@@ -1,7 +1,7 @@
 from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
 from HaPPPy.Transmission.Modules.SplitStepOperator import SplitStepOperator
 from HaPPPy.Transmission.Modules.TransmissionCalculator import TransmissionCalculator
-from HaPPPy.Transmission.Modules.GaussianWave import Fourier
+from HaPPPy.Transmission.Modules.Fourier import Fourier
 from scipy.constants import codata
 
 import unittest
