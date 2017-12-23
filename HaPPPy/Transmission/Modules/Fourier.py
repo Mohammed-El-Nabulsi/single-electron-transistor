@@ -33,7 +33,7 @@ class Fourier():
     
         dx = L/N
         dk = 2*cmath.pi/L
-        k0 = -(int(N-1))/2*dk #lowest new arguments so that k's centred around k = 0
+        k0 = -int((N-1)/2)*dk #lowest new arguments so that k's centred around k = 0
         
         #create transformationMatrices
         indices = np.arange(0, N, 1) # indices of transformation matrices
@@ -78,7 +78,7 @@ class Fourier():
     
         dx = L/N
         dk = 2*cmath.pi/L
-        k0 = -(int(N-1))/2*dk #lowest new arguments so that k's centred around k = 0
+        k0 = -int((N-1)/2)*dk #lowest new arguments so that k's centred around k = 0
         
         #create transformationMatrices
         indices = np.arange(0, N, 1) # indices of transformation matrices
