@@ -1,124 +1,74 @@
+#Attention: This class uses dx = L/(N-1) with the total length of
+#the potential and the number samplepoints N.
+#It is different to the wikipedia formular dx=L/N.
+#Argumentation: the length of the grid is L=(N-1)*dx
+
 import numpy as np
-import cmath
 
 class Fourier():
-    #inverse transformationmatrixelement
-    def ITMElement(self, arg,newArg, N):
-    
-        element = cmath.exp(1j*newArg*arg)/np.sqrt(N)
-    
-        return element
-    
-    #FT transform to new arguments
-    def FT(self, xFunction, x0, L):
-        '''
-        Returns DFT of an given complex array in wavenumber-space, centured around the origin.
+    def __init__(self, x):
+        """
+        Creates a grid in wavenumber-space.
+        
+        Transformation between position- and wavenumber-space.
         
         Parameters
         ----------
-        xFunction : Array
-            A sequence of wavefunction values in position space 
-        x0 : float
-            lowest sample point argument in position space         
-        L : float
-            range of the sample points in position space
+        func: Array
+            function on discret grid
+        x : Array
+            grid in position space
             
-        Returns
-        -------
-        kFunction : array, shape(len(xFunction))
-            Array containing the value of the DFT for each desired sample point in wavenumber space
-        '''   
-        
-        N =  xFunction.size #Number of Arguments, needs to be odd for centering k's around 0
-    
-        dx = L/N
-        dk = 2*cmath.pi/L
-        k0 = -int((N-1)/2)*dk #lowest new arguments so that k's centred around k = 0
-        
-        #create transformationMatrices
-        indices = np.arange(0, N, 1) # indices of transformation matrices
-        
-        arguments = np.array(np.arange(x0, x0 + L, dx)) #samplepoints of the function
-        
-        
-        newArguments = np.array(np.arange(k0,k0+N*dk, dk))
-        
-        ITM = np.zeros((N,N), dtype=np.complex64) #InverseTransformationMatrix
-        
-        for n in indices: #rowindeces
-            for m in indices: #columindices
-                ITM[n][m] = self.ITMElement(arguments[n],newArguments[m], N)
-        
-        TM = np.transpose(ITM.conjugate()) #transformationsmatrix    
-        
-        kFunction = L*np.dot(TM,xFunction)/np.sqrt(2*np.pi*N)
-        
-        return kFunction
-    
-    #IFT:retransform to arguments
-    def IFT(self, kFunction, x0, L):
-        '''
-        Returns IDFT of an given complex array, with lowest samplepoint x0.
-        
-        Parameters
+        Attributes
         ----------
-        kFunction : Array
-            A sequence of wavefunction values in in wavenumber-space
-        x0 : float
-            lowest sample point argument in position space         
-        L : float
-            range of the sample points in position space
-            
-        Returns
-        -------
-        xFunction : array, shape(len(xFunction))
-            Array containing the value of the IDFT for each desired sample point in position space
-        '''   
-        N =  kFunction.size #Number of Arguments, needs to be odd for centering k's around 0
-    
-        dx = L/N
-        dk = 2*cmath.pi/L
-        k0 = -(N-1)//2*dk #lowest new arguments so that k's centred around k = 0
+        self.k : Array
+            grid of samplepoints in wavenumber-space
+        """
+        #set Parameters for 
+        self.x = x
+        self.dx = x[1]-x[0]
+        self.L = x[-1]-x[0]
+        self.N = x.size
         
-        #create transformationMatrices
-        indices = np.arange(0, N, 1) # indices of transformation matrices
-        
-        arguments = np.array(np.arange(x0, x0 + L, dx)) #samplepoints of the function
-        
-        
-        newArguments = np.array(np.arange(k0,k0+N*dk, dk))
-        
-        ITM = np.zeros((N,N), dtype=np.complex64) #InverseTransformationMatrix
-        
-        for n in indices: #rowindeces
-            for m in indices: #columindices
-                ITM[n][m] = self.ITMElement(arguments[n],newArguments[m], N)
-        
-        xFunction = np.sqrt(2*np.pi*N)*np.dot(ITM,kFunction)/L
-        
-        return xFunction
-        
-    def waveNumbers(self, xfunction, x0, L):
-         '''
-        Calculates wavenumbers centured around 0.
-        
-        Parameters
-        ----------
-        xfunction : Array
-            A sequence of wavefunction values in in position-space
-        x0 : float
-            lowest sample point argument in position space         
-        L : float
-            range of the sample points in position space
-            
-        Returns
-        -------
-        waveNumbers : Array, shape(len(xFunction))
-        '''   
-        N =  xfunction.size
+        self.k0 = -np.pi/self.dx #smallest useable wavenumber
+        self.dk = 2*np.pi/self.L
+        self.k = np.arange(self.k0, self.k0 + (self.N)*self.dk, self.dk)
 
-        dk = 2*np.pi/L
-        k0 = -(N-1)//2*dk #lowest new arguments so that k's centred around k = 0
+        self.norm = np.sqrt(2*np.pi*(self.N-1))/self.L
         
-        waveNumers = np.array(np.arange(k0,k0+N*dk, dk))
-        return waveNumers
+        #create trafo matrix
+        def trafo_matrix_element(self, x, k):
+            return np.exp(1j*k*x)/np.sqrt(self.N-1)
+        
+        def create_trafo_matrix(self):
+            #create matrix with correct shape filled with zeros
+            matrix = np.zeros(self.N**2).reshape((self.N,self.N))
+            trafo_matrix = matrix + 1j*matrix
+            
+            #fill trafo_matrix with correct elements
+            indices = np.arange(0, self.N, 1)
+            
+            for a in indices:
+                for b in indices:
+                    trafo_matrix[a][b] = trafo_matrix_element(self,
+                                                              self.x[b],
+                                                              self.k[a])
+            print("shape of trafo matrix")
+            print(trafo_matrix.shape)
+            return trafo_matrix
+        
+        def get_trafo_matrix(self):
+            return (np.asmatrix(create_trafo_matrix(self)))
+        
+        self.trafo_matrix = create_trafo_matrix(self)
+        self.dagger_trafo_matrix = self.trafo_matrix.conjugate().T
+        
+    #define functions that perform the transformations
+    def dft(self, x_func):
+        
+        var = np.dot(self.dagger_trafo_matrix, x_func)/self.norm
+
+        return var.reshape(-1)
+        
+    def idft(self, k_func):
+        return self.norm*np.dot(self.trafo_matrix, k_func).reshape(-1)
