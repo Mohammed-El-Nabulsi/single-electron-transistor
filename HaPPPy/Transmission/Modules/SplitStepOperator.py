@@ -6,7 +6,7 @@
 import numpy as np
 
 #from A_Potential import Potential encomment for testing interaction between Fourier, SlpitStep and Potential class
-from B_Fourier_shapeproblemFix import Fourier
+from HaPPPy.Transmission.Modules.Fourier import Fourier
 
 from scipy.constants import codata
 
