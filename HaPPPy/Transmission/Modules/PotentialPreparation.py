@@ -1,5 +1,5 @@
 #WillkÃ¼rliche Festlegung: Gausspaket soll Breite der Barriere/5 breit sein
-
+#barrier means given potential/ the part with non zero potentialvalues
 
 import numpy as np
 
