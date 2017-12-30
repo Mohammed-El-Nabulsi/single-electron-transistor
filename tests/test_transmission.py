@@ -78,41 +78,54 @@ if __name__ == '__main__':
     transmission_suite = unittest.TestLoader().loadTestsFromTestCase(TransmissionTestSuite)
     unittest.TextTestRunner(verbosity=2, buffer=True).run(transmission_suite)
     
-    def test_Fourier_isMathematicallyCorrect(self):
-    # Assemble
-    # test kfunc[sin(-2) + cos(2×(-2)),cos(4/3) - sin(2/3),sin(2/3) + cos(4/3)], x0=-2, L=4 from wolfram alpha:
-    #x = -2
-    expectedFtRe1  = 0.204416439153542362192092626
-    expectedFtIm1 = 0
+  def test_Fourier_isMathematicallyCorrect(self):
+# Assemble
+# test x = np.arange(-1,-1+5/2,1/2), function = np.array([np.sin(0.123*x)+np.sin(0.234*x) for x in positions])
+        
+    positions = numpy.arange(-1,-1+5/2,1/2)
 
-    #x = -2+4/3
-    expectedFtRe2 = -0.462346999597677712693041638
-    expectedFtIm2 = -1.31146310351406168738421171640
-
-    #x = x = -2+2*4/3
-    expectedFtRe3 = -0.462346999597677712693041638
-    expectedFtIm3 = 1.31146310351406168738421171640
+    function = numpy.array([numpy.sin(0.123*x)+numpy.sin(0.234*x) for x in positions])
+        
+    #x[0]
+    expected_idft_real1 = 0
+    expected_idft_imag1 = 0
+    #x[1]
+    expected_idft_real2 = 0
+    expected_idft_imag2 = -0.44666733802575149239
+    #x[2]
+    expected_idft_real3 = 0
+    expected_idft_imag3 = 0
+    #x[3]
+    expected_idft_real4 = 0
+    expected_idft_imag4 = 0.44666733802575149239
+    #x[4]
+    expected_idft_real5 = 0
+    expected_idft_imag5 = 0
     
-    expectedFtRe = numpy.array([expectedFtRe1,expectedFtRe2,expectedFtRe3])
-    expectedFtIm = numpy.array([expectedFtIm1,expectedFtIm2,expectedFtIm3])
-        
-    x0 = -2
-    L = 4    
-        
-    Fourier = Fourier()
+    #create expected array
+    expected_idft = numpy.array(
+            [expected_idft_real1+1*1j*expected_idft_imag1,
+             expected_idft_real2+1*1j*expected_idft_imag2,
+             expected_idft_real3+1*1j*expected_idft_imag3,
+             expected_idft_real4+1*1j*expected_idft_imag4,
+             expected_idft_real5+1*1j*expected_idft_imag5
+             ]
+            )
+    
+    expected_idft_real = expected_idft.real
+    expected_idft_imag = expected_idft.imag
+    
     
     # Act
-    Ft0 = IFT(kwave, x0, L)
-    Ft = numpy.array(Ft0)
-
-    maxAbsReal = max(numpy.absolute(Ft.real - expectedFtRe))
-    maxAbsImag = max(numpy.absolute(Ft.imag - expectedFtIm))
-
-    errorTolerance = 10**(-8)
-
+    fourier = Fourier(positions)
+    
+    maxAbsReal = max(numpy.absolute(fourier.idft(function).real - expected_idft_real))
+    maxAbsImag = max(numpy.absolute(fourier.idft(function).imag - expected_idft_imag))
+    
+    errorTolerance = 10**(-15)
+    
     print("Max errors: ")
     print([maxAbsReal, maxAbsImag])
-
+    
     # Assert
     self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The Fourier-Method returns an error greater than %e" % errorTolerance)
-        
