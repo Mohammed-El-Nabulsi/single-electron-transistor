@@ -34,7 +34,7 @@ class TransmissionCalculator:
         psi_0 = None
 
         try:
-            psi_0 = GaussianWave(width, symmetry_point, E, x).create_gauss_x_package()
+            psi_0 = GaussianWave(width, symmetry_point, E, x, []).create_gauss_x_package()
         except Exception as error:
             raise Exception("An error occured while creating the gaussian package. Error: " + repr(error))
 
