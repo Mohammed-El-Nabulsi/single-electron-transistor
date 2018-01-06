@@ -7,8 +7,7 @@ me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert
 hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to ps
 
 
-from A_Potential import Potential
-from B_Fourier_shapeproblemFix import Fourier
+from HaPPPy.Transmission.Modules.PotentialPreparation import Potential
 
 class GaussianWave():
     
