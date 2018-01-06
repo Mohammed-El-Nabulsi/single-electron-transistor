@@ -71,19 +71,7 @@ class Potential():
         self.pos_grid_width = create_posistion_grid_width(self)
         
         def create_gauss_symmetry_index(self):
-            return 3*self.gauss_index_width-1
+            return 3*self.gauss_index_width
         
         self.gauss_symmetry_index = create_gauss_symmetry_index(self)
-
-#something to play:
-
-#barriere = np.arange(1,21,1)
-#dy = 1/5
-#
-#test_barriere = Potential(barriere, dy)
-#
-#print(test_barriere.potential)
-#print()
-#print(test_barriere.gauss_index_width)
-#print()
-#print(test_barriere.gauss_symmetry_index)
+        self.gauss_symmerey_point = self.position_grid[self.gauss_symmetry_index-1]
