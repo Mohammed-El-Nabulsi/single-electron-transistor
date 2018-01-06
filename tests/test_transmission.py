@@ -13,6 +13,7 @@ hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert
 
 class TransmissionTestSuite(unittest.TestCase):
     def test_GaussianWave_isMathematicallyCorrect(self):
+
         # Assemble
         # testPsi for a=1/2, energy=(hbar/3)**2/(2*me) x in [-1,0,1], x0=1/5 from wolfram alpha:
         #x = -1
@@ -35,10 +36,10 @@ class TransmissionTestSuite(unittest.TestCase):
         symmetrypoint = 1/5
         pos = [-1, 0, 1]
 
-        gaussianWave = GaussianWave()
+        gaussianWave = GaussianWave(width, symmetrypoint,energy,pos,pos)
 
         # Act
-        psi0 = gaussianWave.create_package(pos, symmetrypoint, energy, width)
+        psi0 = gaussianWave.x_package
         psi = numpy.array(psi0)
 
         maxAbsReal = max(numpy.absolute(psi.real - expectedPsiRe))
@@ -51,6 +52,7 @@ class TransmissionTestSuite(unittest.TestCase):
 
         # Assert
         self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The gaussian wave returns an error greater than %e" % errorTolerance)
+        
         
     def test_SplitStepOperator_isMathematicallyCorrect(self):
         psi = [ 1, 2, 3, 4, 4, 2, 1 ]
