@@ -1,41 +1,66 @@
-import cmath
+import numpy as np
 from scipy.constants import codata
+
+import matplotlib.pyplot as plt
 
 me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert to milli eV
 hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to ps
 
+
+from A_Potential import Potential
+from B_Fourier_shapeproblemFix import Fourier
+
 class GaussianWave():
-    def create_package_at_point(self, x, x0, energy, a):
-        k = cmath.sqrt(2*me*energy)/hbar
-        norm = (2/(cmath.pi*(a**2)))**(1/4)
-        
-        psi_x = complex(norm*cmath.exp(1j*k*(x-x0))*cmath.exp(-((x-x0)/a)**2))
-        
-        
-        return psi_x
     
-    def create_package(self, positions, x0, energy, a):
-        '''
-        Creates a gaussian package in position-space symmetrically around x0 at time zero.
+    def __init__(self, width, symm, energy, x_grid, k_grid):
 
-        Parameters
-        ----------
-        positions : array
-           A sequence of positions for which to create the package
-        x0 : float
-           symmetry point of the package           
-        energy : float
-           Energy of the package
-        a : float
-           Width of the package
+        self.width = width
+        self.symm = symm
+        self.x_grid = x_grid
         
-        Returns
-        -------
-        psi : array, shape(len(positions))
-           Array containing the value of the gaussian package for each desired position in positions,
-        '''
-        psi = [self.create_package_at_point(x, x0, energy, a) for x in positions]
- 
-        return psi
+        self.k_grid = k_grid
+        self.k0 = np.sqrt(2*me*energy)/hbar
+        
+        self.x_package = self.create_gauss_x_package()
+        self.k_package = self.create_gauss_k_package()
     
-
+    def create_gauss_at_x(self,x):
+        norm_x = ( 2/(np.pi*self.width**2) )**(1/4)
+        return norm_x * np.exp(1j*self.k0*(x-self.symm)) * np.exp(- ( (x-self.symm)/self.width )**2 ) #verschiebung um symm in zweiter exp vergessen
+    
+    def create_gauss_x_package(self):
+        return np.array([self.create_gauss_at_x(pos) for pos in self.x_grid])
+    
+    def plot_x_package(self):
+        
+        psi_abs_squared_x = np.multiply(self.x_package, self.x_package.conj()).real
+        
+        x_package = plt.plot(self.x_grid, psi_abs_squared_x)
+        plt.title ("Propabilitydensity of gaussian package at time zero in position-space")
+        plt.xlabel("position grid")
+        plt.ylabel("probabilitydensity")
+        
+        plt.show()
+        
+    def create_gauss_at_k(self, k):
+        norm_k = np.sqrt(self.width)/(2*np.pi)**(1/4)
+        return norm_k*np.exp( -(self.width*(k-self.k0)/2 )**2 )*np.exp( -1j*(k-self.k0)*self.symm)
+    
+    def create_gauss_k_package(self):
+        return np.array([self.create_gauss_at_k(wnum) for wnum in self.k_grid])
+    
+    def plot_k_package(self):
+        
+        psi_abs_squared_k = np.multiply(self.k_package, self.k_package.conj()).real
+        
+#        print(psi_abs_squared_k[98])
+#        print(psi_abs_squared_k[99])
+#        print(psi_abs_squared_k[100])
+#        print(max(psi_abs_squared_k)-psi_abs_squared_k[99])
+        
+        k_package = plt.plot(self.k_grid, psi_abs_squared_k)
+        plt.title("Propabilitydensity of gaussian package at time zero in wavenumber-space")
+        plt.xlabel("wavenumber grid")
+        plt.ylabel("probabilitydensity")
+        
+        plt.show()
