@@ -8,4 +8,7 @@ Here comes the general documentation for the Transmission module.
 """
 
 from .GaussianWave import GaussianWave
+from .Fourier import Fourier
+from .SplitStepOperator import SplitStepOperator
+from .Transmission import Transmission
 

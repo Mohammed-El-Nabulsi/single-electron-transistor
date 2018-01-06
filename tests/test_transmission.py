@@ -1,7 +1,9 @@
 from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
 from HaPPPy.Transmission.Modules.SplitStepOperator import SplitStepOperator
-from HaPPPy.Transmission.Modules.TransmissionCalculator import TransmissionCalculator
+from HaPPPy.Transmission.Modules.Transmission import Transmission
 from HaPPPy.Transmission.Modules.Fourier import Fourier
+from HaPPPy.Transmission.Modules.PotentialUtils import PotentialUtils
+from HaPPPy.Transmission.TransmissionCalculator import TransmissionCalculator
 from scipy.constants import codata
 
 import unittest
@@ -54,80 +56,104 @@ class TransmissionTestSuite(unittest.TestCase):
         self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The gaussian wave returns an error greater than %e" % errorTolerance)
         
         
+    # BUG: This runs forever because the delta never changes...
     def test_SplitStepOperator_isMathematicallyCorrect(self):
-        psi = [ 1, 2, 3, 4, 4, 2, 1 ]
-        V = [ 0, 0, 10, 10, 0, 0, 0 ]
-        x = [ 1, 2, 3, 4, 5, 6, 7 ]
+        V = numpy.arange(1,11,1/2)
+        dx = 1/4
 
-        splitStepOperator = SplitStepOperator(V, x)
+        potential_instanz = PotentialUtils(V, dx)
 
-        psi_new = splitStepOperator.use(psi)
+        grid = potential_instanz.position_grid
 
-        print(psi_new)
+        psi = numpy.arange(grid.size)
 
-        self.assertTrue(true)
+        splitStep = SplitStepOperator(grid, potential_instanz.potential)
+
+        psi1 = splitStep.first_step(psi)
+        psi2 = splitStep.step(psi)
+        psi3 = splitStep.final_step(psi)
+   
+        print(psi3)
+
+        # We need to define criteria for asserting the split step operator!
+        self.assertTrue(True)
         
-    def test_Transmissioncalculator_isMathematicallyCorrect(self):
+    def test_Transmission_isMathematicallyCorrect(self):
         psi = [ -2, 1, 2, 1j ]
         start = 2
-        expectedx = 0,5
-        x = TaransmissionCalculator.calculate(psi,start)
+        expectedx = 0.5
+
+        transmission = Transmission()
+
+        x = transmission.calculate(psi,start)
 
         self.assertTrue(x == expectedx)
 
 
+    def test_TransmissionCalculator_runs(self):
+        V = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        E = 0.5
+
+        transmissionCalculator = TransmissionCalculator()
+
+        rate = transmissionCalculator.calculate_transmission(E, V)
+
+        print(rate)
+
+        self.assertTrue(True)
+    
+    def test_Fourier_isMathematicallyCorrect(self):
+        # Assemble
+        # test x = np.arange(-1,-1+5/2,1/2), function = np.array([np.sin(0.123*x)+np.sin(0.234*x) for x in positions])
+            
+        positions = numpy.arange(-1,-1+5/2,1/2)
+
+        function = numpy.array([numpy.sin(0.123*x)+numpy.sin(0.234*x) for x in positions])
+            
+        #x[0]
+        expected_idft_real1 = 0
+        expected_idft_imag1 = 0
+        #x[1]
+        expected_idft_real2 = 0
+        expected_idft_imag2 = -0.44666733802575149239
+        #x[2]
+        expected_idft_real3 = 0
+        expected_idft_imag3 = 0
+        #x[3]
+        expected_idft_real4 = 0
+        expected_idft_imag4 = 0.44666733802575149239
+        #x[4]
+        expected_idft_real5 = 0
+        expected_idft_imag5 = 0
+        
+        #create expected array
+        expected_idft = numpy.array(
+                [expected_idft_real1+1*1j*expected_idft_imag1,
+                 expected_idft_real2+1*1j*expected_idft_imag2,
+                 expected_idft_real3+1*1j*expected_idft_imag3,
+                 expected_idft_real4+1*1j*expected_idft_imag4,
+                 expected_idft_real5+1*1j*expected_idft_imag5
+                 ]
+                )
+        
+        expected_idft_real = expected_idft.real
+        expected_idft_imag = expected_idft.imag
+        
+        
+        # Act
+        fourier = Fourier(positions)
+        
+        maxAbsReal = max(numpy.absolute(fourier.idft(function).real - expected_idft_real))
+        maxAbsImag = max(numpy.absolute(fourier.idft(function).imag - expected_idft_imag))
+        
+        errorTolerance = 10**(-15)
+        
+        print("Max errors: ")
+        print([maxAbsReal, maxAbsImag])
+        
+        # Assert
+        self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The Fourier-Method returns an error greater than %e" % errorTolerance)
+        
 if __name__ == '__main__':
     transmission_suite = unittest.TestLoader().loadTestsFromTestCase(TransmissionTestSuite)
     unittest.TextTestRunner(verbosity=2, buffer=True).run(transmission_suite)
-    
-  def test_Fourier_isMathematicallyCorrect(self):
-# Assemble
-# test x = np.arange(-1,-1+5/2,1/2), function = np.array([np.sin(0.123*x)+np.sin(0.234*x) for x in positions])
-        
-    positions = numpy.arange(-1,-1+5/2,1/2)
-
-    function = numpy.array([numpy.sin(0.123*x)+numpy.sin(0.234*x) for x in positions])
-        
-    #x[0]
-    expected_idft_real1 = 0
-    expected_idft_imag1 = 0
-    #x[1]
-    expected_idft_real2 = 0
-    expected_idft_imag2 = -0.44666733802575149239
-    #x[2]
-    expected_idft_real3 = 0
-    expected_idft_imag3 = 0
-    #x[3]
-    expected_idft_real4 = 0
-    expected_idft_imag4 = 0.44666733802575149239
-    #x[4]
-    expected_idft_real5 = 0
-    expected_idft_imag5 = 0
-    
-    #create expected array
-    expected_idft = numpy.array(
-            [expected_idft_real1+1*1j*expected_idft_imag1,
-             expected_idft_real2+1*1j*expected_idft_imag2,
-             expected_idft_real3+1*1j*expected_idft_imag3,
-             expected_idft_real4+1*1j*expected_idft_imag4,
-             expected_idft_real5+1*1j*expected_idft_imag5
-             ]
-            )
-    
-    expected_idft_real = expected_idft.real
-    expected_idft_imag = expected_idft.imag
-    
-    
-    # Act
-    fourier = Fourier(positions)
-    
-    maxAbsReal = max(numpy.absolute(fourier.idft(function).real - expected_idft_real))
-    maxAbsImag = max(numpy.absolute(fourier.idft(function).imag - expected_idft_imag))
-    
-    errorTolerance = 10**(-15)
-    
-    print("Max errors: ")
-    print([maxAbsReal, maxAbsImag])
-    
-    # Assert
-    self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The Fourier-Method returns an error greater than %e" % errorTolerance)

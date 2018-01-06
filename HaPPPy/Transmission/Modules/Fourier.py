@@ -28,7 +28,7 @@ class Fourier():
         self.x = x
         self.dx = x[1]-x[0]
         self.L = x[-1]-x[0]
-        self.N = x.size
+        self.N = len(x)
         
         self.k0 = -np.pi/self.dx #smallest useable wavenumber
         self.dk = 2*np.pi/self.L
@@ -65,9 +65,7 @@ class Fourier():
         
     #define functions that perform the transformations
     def dft(self, x_func):
-        
         var = np.dot(self.dagger_trafo_matrix, x_func)/self.norm
-
         return var.reshape(-1)
         
     def idft(self, k_func):

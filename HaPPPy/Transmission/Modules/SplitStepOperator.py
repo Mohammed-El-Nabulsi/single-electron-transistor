@@ -9,10 +9,9 @@ from scipy.constants import codata
 
 dt = 10**(-15)
 me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert to milli eV
-hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to p
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to p    
 
-
-class Split_Step_Operator():
+class SplitStepOperator():
     """
     Parameters
     ----------
@@ -35,7 +34,7 @@ class Split_Step_Operator():
         
         self.const = hbar/(2*me)
         
-        self.k = np.fft.fft(position_grid)
+        self.k = np.fft.fft(position_grid, norm='ortho')
         
         self.pot = pot
         
@@ -95,47 +94,32 @@ class Split_Step_Operator():
 #        print("type of the potential operator")
 #        print(type(self.potential_operator))
     
-    def final_step(self, x_wave_is):
+    def first_step(self, x_wave_is):
         """
         ACHTUNG: Rechne mit Operatoren, dies ist im Algorithmus somit der ERSTE Befehl der anzuwenden ist!
         """
-        k_wave_f = np.fft.fft(x_wave_is)
+        k_wave_f = np.fft.fft(x_wave_is, norm='ortho')
         kin_k_wave = np.multiply(self.kinetic_operator_half, k_wave_f, dtype=np.complex64)
-        x_wave2 = np.fft.ifft(kin_k_wave)
+        x_wave2 = np.fft.ifft(kin_k_wave, norm='ortho')
         pot_x_wave = np.multiply(self.potential_operator, x_wave2, dtype=np.complex64)
         return np.fft.fft(pot_x_wave)
     
-    def steps(self, wave):
+    def step(self, wave):
         """
         Anwendung nach final step, bis Abbruchkriterium erfuellt. 
         """
         kin_k_wave_s = np.multiply(self.kinetic_operator, wave, dtype=np.complex64)
-        x_wave_s = np.fft.ifft(kin_k_wave_s)
+        x_wave_s = np.fft.ifft(kin_k_wave_s, norm='ortho')
         pot_x_wave_s = np.multiply(self.potential_operator, x_wave_s, dtype=np.complex64)
-        k_wave_s2 = np.fft.fft(pot_x_wave_s)
+        k_wave_s2 = np.fft.fft(pot_x_wave_s, norm='ortho')
         return np.multiply(self.kinetic_operator, k_wave_s2, dtype=np.complex64)
     
-    def first_step(self, k_wave_fs):
+    def final_step(self, k_wave_fs):
         """
         Anwendung nachdem das Abbruchkriterium erfuellt wurde.
         """
-        x_wave_fs = np.fft.ifft(k_wave_fs)
+        x_wave_fs = np.fft.ifft(k_wave_fs, norm='ortho')
         pot_x_wave_fs = np.multiply(self.potential_operator, x_wave_fs, dtype=np.complex64)
-        k_wave_fs2 = np.fft.fft(pot_x_wave_fs)
+        k_wave_fs2 = np.fft.fft(pot_x_wave_fs, norm='ortho')
         kin_k_wave_fs = np.multiply(self.kinetic_operator_half, k_wave_fs2, dtype=np.complex64)
         return np.fft.ifft(kin_k_wave_fs)
-        
-        
-#barriere = np.arange(1,11,1/2)
-#dy = 1/4
-#
-#potential_instanz = Potential(barriere, dy)
-#
-#grid = potential_instanz.position_grid
-#
-#welle = np.arange(grid.size)
-#
-#splitStep = Split_Step_Operator(grid, potential_instanz.potential)
-#
-#print(splitStep.final_step(welle))
-#print("shape of the split step result ueber mir")

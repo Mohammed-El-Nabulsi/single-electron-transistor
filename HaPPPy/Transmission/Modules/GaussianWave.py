@@ -7,21 +7,21 @@ me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert
 hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to ps
 
 
-from HaPPPy.Transmission.Modules.PotentialPreparation import Potential
+from HaPPPy.Transmission.Modules.PotentialUtils import PotentialUtils
 
 class GaussianWave():
     
-    def __init__(self, width, symm, energy, x_grid, k_grid):
+    def __init__(self, width, symm, energy, x_grid): # k_grid):
 
         self.width = width
         self.symm = symm
         self.x_grid = x_grid
         
-        self.k_grid = k_grid
+        # self.k_grid = k_grid
         self.k0 = np.sqrt(2*me*energy)/hbar
         
-        self.x_package = self.create_gauss_x_package()
-        self.k_package = self.create_gauss_k_package()
+        # self.x_package = self.create_gauss_x_package()
+        # self.k_package = self.create_gauss_k_package()
     
     def create_gauss_at_x(self,x):
         norm_x = ( 2/(np.pi*self.width**2) )**(1/4)
