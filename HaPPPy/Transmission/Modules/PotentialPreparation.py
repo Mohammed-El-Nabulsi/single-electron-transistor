@@ -1,5 +1,5 @@
 #WillkÃ¼rliche Festlegung: Gausspaket soll Breite der Barriere/5 breit sein
-#barrier means given potential/ the part with non zero potentialvalues
+
 
 import numpy as np
 
@@ -51,7 +51,7 @@ class Potential():
         self.gauss_width = self.gauss_index_width*self.dx
         
         def create_potential(self):
-            praefix = np.zeros(6*self.gauss_index_width)
+            praefix = np.zeros(int(6*self.gauss_index_width+1))
             suffix = np.zeros(50*self.gauss_index_width)
             
             pot = np.append(praefix,self.barrier)
@@ -74,4 +74,4 @@ class Potential():
             return 3*self.gauss_index_width
         
         self.gauss_symmetry_index = create_gauss_symmetry_index(self)
-        self.gauss_symmerey_point = self.position_grid[self.gauss_symmetry_index-1]
+        self.gauss_symmerey_point = self.position_grid[self.gauss_symmetry_index]
