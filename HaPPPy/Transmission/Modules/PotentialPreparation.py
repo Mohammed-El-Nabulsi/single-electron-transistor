@@ -52,7 +52,7 @@ class Potential():
         
         def create_potential(self):
             praefix = np.zeros(int(6*self.gauss_index_width+1))
-            suffix = np.zeros(50*self.gauss_index_width)
+            suffix = np.zeros(500*self.gauss_index_width)
             
             pot = np.append(praefix,self.barrier)
             return np.append(pot, suffix)
@@ -61,7 +61,7 @@ class Potential():
         
         def create_position_grid(self):
             potential_index_width = self.potential.size
-            return np.arange(0,(potential_index_width)*self.dx, self.dx)
+            return np.linspace(0,(potential_index_width)*self.dx, potential_index_width)
         
         self.position_grid = create_position_grid(self)
         
