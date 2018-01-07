@@ -3,9 +3,9 @@ import numpy as np
 
 from scipy.constants import codata
 
-from A_Potential01 import Potential
-from B_Gauss00 import GaussianWave
-from C_Fourier03 import Fourier
+from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
+from HaPPPy.Transmission.Modules.Fourier import Fourier
+from HaPPPy.Transmission.Modules.PotentialPreparation import Potential
 
 me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to milli eV/c^2
 hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10femtoseconds*millielectronvolts
