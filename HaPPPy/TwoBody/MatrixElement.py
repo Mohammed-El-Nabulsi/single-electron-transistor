@@ -4,8 +4,8 @@ import math
 
 from numpy import sin, exp
 
-_epsilon = 1e-3
-_coulomb_consts = 1 #1.440343e3 #[nm*meV]
+_epsilon = 1e-1
+_coulomb_consts = 1.440343e3 #[nm*meV]
 
 def getMatrixElement(Phi1, Phi2, Phi3, Phi4):
 
@@ -15,7 +15,11 @@ def getMatrixElement(Phi1, Phi2, Phi3, Phi4):
 	sum = 0.0
 	for i1 in range(0, n):
 		for i2 in range(0, n):
-			sum += Phi1[i1] * Phi2[i2] / (max(abs(i1 - i2), _epsilon) * dX) * Phi3[i1] * Phi4[i2]
+			if i1 == i2:
+				r = _epsilon * dX
+			else:
+				r = abs(i1 - i2) * dX
+			sum += Phi1[i1] * Phi2[i2] / r * Phi3[i1] * Phi4[i2]
 	return sum * dX * dX * _coulomb_consts
 
 #### testing ####

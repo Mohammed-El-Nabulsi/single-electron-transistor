@@ -4,8 +4,10 @@ from MatrixElement import getMatrixElement, testFunction
 ## Set up  
 n=6 #number of one-particle eigenmodes 
 X=100 # number of grid points 
+V = [0 for n in range(0,X)]
 
 ### Testfunctions for the eigenemodes 
+#	createTwoParticleData(n,);
 
 def test(x, n):
     return np.sin(x*n)
@@ -71,7 +73,7 @@ def createTwoParticleData(n,V):
 			a=int(I[j, 0])
 		   
 			b=int(I[j, 1])
-			B[j, i]=1/np.sqrt(2)*(getMatrixElement(SP_EV[a, :], SP_EV[b,:],SP_EV[i, :], SP_EV[i, :] )+getMatrixElement(SP_EV[b, :], SP_EV[a,:],SP_EV[i,:], SP_EV[i, :] ))
+			B[j, i]=np.sqrt(2)*getMatrixElement(SP_EV[a, :], SP_EV[b,:],SP_EV[i, :], SP_EV[i, :] )
 
 	# Matrix C und D: 
 	C=np.zeros((L, L))
@@ -79,8 +81,8 @@ def createTwoParticleData(n,V):
 
 	for i in range(L): 
 		for j in range(i+1):
-			a=int(I[j, 0])
-			b=int(I[j, 1])
+			a=int(I[i, 0])
+			b=int(I[i, 1])
 			c=int(I[j, 0])
 			d=int(I[j, 1])
 			PartA=getMatrixElement(SP_EV[a, :], SP_EV[b, :],SP_EV[c, :], SP_EV[d, :])+getMatrixElement(SP_EV[b,:], SP_EV[a,:],SP_EV[d,:], SP_EV[c,:])
@@ -119,20 +121,24 @@ def createTwoParticleData(n,V):
 
 	#Transform the eigenvectors back to the product state basis
 
-	Eigenvectors_Productbasis = np.zeros((n,n,n**2))
+	Eigenvectors_Productbasis = np.zeros((n**2,n**2))
 	
-	for i in range(n):
-		for j in range(n):
-			if i==j:
-				Eigenvectors_Productbasis[i,j,:]=Eigenvectors[i,:]
-			elif i<j:
-				Eigenvectors_Productbasis[i,j,:]=(1/np.sqrt(2))*(Eigenvectors[int((2*n-i-1)*i/2)+j-1,:] + Eigenvectors[int((2*n-i-1)*i/2)+j-1+L,:])
-			else:
-				Eigenvectors_Productbasis[i,j,:]=(Eigenvectors[int((2*n-i-1)*i/2)+j-1,:] - Eigenvectors[int((2*n-i-1)*i/2)+j-1+L,:])/np.sqrt(2)
+	Z = np.zeros((n**2,n**2))
+	for i in range(n**2):
+		if(i<n):
+			Z[i,i]=1
+		elif(i<n+L):
+			Z[i,i]=1/np.sqrt(2)
+			Z[i,i+L]=1/np.sqrt(2)
+		else:
+			Z[i,i]=(-1)/np.sqrt(2)
+			Z[i,i-L]=1/np.sqrt(2)
 
+	Eigenvectors_Productbasis = np.dot(Eigenvectors, Z)
+	
 	save(Eigenenergies, Eigenvectors_Productbasis)
 	print(Eigenenergies)
 	#print(Eigenvectors)#_Productbasis)
 	return None
 
-createTwoParticleData(4,None)
+createTwoParticleData(3,None)
