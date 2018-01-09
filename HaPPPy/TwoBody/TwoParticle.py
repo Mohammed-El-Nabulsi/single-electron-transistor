@@ -1,5 +1,5 @@
 import numpy as np 
-from MatrixElement import getMatrixElement, testFunction
+from .MatrixElement import getMatrixElement, testFunction
 
 ## Set up  
 n=6 #number of one-particle eigenmodes 

@@ -1,4 +1,4 @@
-from TwoParticle import createTwoParticleData
+from .TwoParticle import createTwoParticleData
 
 class TwoBodySolver:
     """ Solves the two body problem
