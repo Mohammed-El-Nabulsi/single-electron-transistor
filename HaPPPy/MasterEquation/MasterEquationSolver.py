@@ -8,178 +8,176 @@ import math
 __docformat__ = 'reStructuredText'
 
 class MasterEquationSolver:
-    """ Solves the master equation
-
-    TODO: Add more documentation
-
-    """
-
-
-    def __init__(self):
-        """ The constructor.
-        """
-
-        print("Hello from the MasterEquationSolver, what can I do for you?")
 
     def doCalculation(self,
                       P_0,
                       Γ_L,
                       Γ_R,
                       t_max,
-                      t_delta,
+                      Δt,
                       ε=1E-10,
                       check_tolerance=True
                      ):
-        """Simpulates the time development of probabilities and calculates the current
-
-        :param P_0: Start value of propabilities. Must be either a list or a ``nx1`` matrix.
-        :type P_0: numpy.array
-        :param Γ_L: Matrix containing the transition rates regarding electrons going to the left where :code:`Γ[i][j]` ≣ :math:`\Γ_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
-        :type Γ_L: numpy.array
-        :param Γ_R: Matrix containing the transition rates regarding electrons going to the right where :code:`Γ[i][j]` ≣ :math:`\Γ_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
-        :type Γ_R: numpy.array
-        :param t_max: Last point in time to be simulated. Must be >= 0.
-        :type t_max: float
-        :param t_delta: Length of the time tintervall between two simulated events. Must be > 0.
-        :type t_delta: float
-        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
-        :type ε: float
-        :param check_tolerance: Enables initial and successive check as described for ε.
-        :type check_tolerance: bool
-
-        :return: Returns a pair of values. The first is a list of pairs of time and the corresponding current, the second one is a pair with the time and a list of the corresponding occupation probabilities for each state
-        :rtype: (list, list)
-        """
-        
-        Γ = Γ_L + Γ_R
-        sim_successful, sim = self.simulate_time_development_of_propabilities(P_0, Γ, t_max, t_delta, ε, check_tolerance)
-        if sim_successful:
-            I_t = self.calculate_current(Γ_L, Γ_R, sim, ε)
-
-        return I_t, sim
-
-    def simulate_time_development_of_propabilities(self,
-                                                   P_0,
-                                                   Γ,
-                                                   t_max,
-                                                   t_delta,
-                                                   ε=1E-10,
-                                                   check_tolerance=True,
-                                                   verbose=False
-                                                  ):
-        """Simulates the time development of propabilities P(t) for an ``n`` state system with transition rates Γ.
+        """Simulates the time development of propabilities P(t) for an ``n`` state system with transition rates Γ including the netto current.
 
         .. todo::
 
-            Create extra return type for simulation.
+            - Missing e in current simulation?
+            - Extra return type for each simulation recommended.
 
-        This method returns a numerical approximation of the solution to the following problem.
+        This method returns numerical approximations of the solution to the following problems.
+
+        **1st Problem: Time Development of Propabilities**
 
         Let
 
         .. math::
 
-            n \in \mathbb{N}, t_{max} \in \mathbb{R}^+_0, t_{delta} \in \mathbb{R}^+ \\\\ \Γ \in Mat(n, n, \mathbb{R}^+_0), \\vec{P} : [0, t_{max}] \\to { \left ( \mathbb{R}^+_0 \\right ) }^n, t \mapsto \\vec{P}(t)
+            n \in \mathbb{N}, t_{max} \in \mathbb{R}^+_0, \Delta t \in \mathbb{R}^+ \\\\ \Gamma = \Gamma^L + \Gamma^R \in Mat(n, n, \mathbb{R}^+_0), \\vec{P} : [0, t_{max}] \\to { \left ( \mathbb{R}^+_0 \\right ) }^n, t \mapsto \\vec{P}(t)
 
         The differential equation of first order with constant coefficients to be solved is stated as
 
         .. math::
 
-            \\frac{d P_{\\alpha}}{d t} = \sum_{\\beta} \Γ_{\\beta \\rightarrow \\alpha} P_{\\beta} - \sum_{\\beta} \Γ_{\\alpha \\rightarrow \\beta} P_{\\alpha}
+            \\frac{d P_{\\alpha}}{d t} = \sum_{\\beta} \Gamma_{\\beta \\rightarrow \\alpha} P_{\\beta} - \sum_{\\beta} \Gamma_{\\alpha \\rightarrow \\beta} P_{\\alpha}
 
         where
 
         .. math::
 
-            \Γ_{\\alpha \\rightarrow \\beta} \equiv \Γ_{\\alpha \\beta}
+            \Gamma_{\\alpha \\rightarrow \\beta} \equiv \Gamma_{\\alpha \\beta}
+
+        and
+
+        .. math::
+
+            \\vec{P_0} = \\vec{P}(t=0)
+
+        is the boundary condition.
 
         denotes the rate from state :math:`\\alpha` to :math:`\\beta`.
 
-        The returned solution for :math:`\\vec{P}` is discrete and is therefore consists of pairs :math:`(t_i, \\vec{P}(t_i))` where :math:`t_i \in \{n \cdot t_{delta} | n \in \mathbb{Z} \land n \cdot t_{delta} \leq t_{max} \}`
+        The solution of this problem is returned as a discrete version of :math:`\\vec{P}`. Therefore it consists of pairs :math:`(t_i, \\vec{P}(t_i))` where :math:`t_i \in \{n \cdot \Delta t | n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \}`.
 
-        :param P_0: Start value of propabilities. Must be either a list or a ``nx1`` matrix.
+        **2nd Problem: Netto Current**
+
+        From the time develpment of probabilities the netto current is derived.
+
+        In addition to the 1st problem let
+
+        .. math::
+
+            I : [0, t_{max}] \\to \mathbb{R}, t \mapsto I(t) \\\\
+            I^k : [0, t_{max}] \\to \mathbb{R}, t \mapsto I^k(t), k \in \\{ L, R \\} \\\\
+            I^k = e \sum_{\\alpha, \\beta} \Gamma^k_{\\alpha \\rightarrow \\beta} P_{\\alpha} \\\\
+            I = I^L - I^R = e \sum_{\\alpha, \\beta} \\left ( \Gamma^L_{\\alpha \\rightarrow \\beta} - \Gamma^R_{\\alpha \\rightarrow \\beta} \\right ) P_{\\alpha}
+
+        With :math:`e \\approx 1.602 \cdot 10^{-19} Coulomb`.
+
+        :math:`I^L,I^R` descibe the current the the *left* resp. *right* barrier, hence :math:`I` describes the netto flow.
+
+        The solution of this problem is returned as a discrete version as well. It consists of pairs :math:`(t_i, I(t_i))` where :math:`t_i \in \{n \cdot \Delta t | n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \}`. (Just like in the first problem.)
+
+        :param P_0: Start value of propabilities where :code:`P_0` ≣ :math:`\\vec{P_0}`. Must be either a list or a ``nx1`` matrix.
         :type P_0: numpy.array
-        :param Γ: Matrix containing the transition rates where :code:`Γ[i][j]` ≣ :math:`\Γ_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
-        :type Γ: numpy.array
+        :param Γ_L: Matrix containing the transition rates regarding electrons going to the *left* where :code:`Γ_L[i][j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
+        :type Γ_L: numpy.array
+        :param Γ_R: Matrix containing the transition rates regarding electrons going to the *right* where :code:`Γ_R[i][j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
+        :type Γ_R: numpy.array
         :param t_max: Last point in time to be simulated. Must be >= 0.
         :type t_max: float
-        :param t_delta: Length of the time tintervall between two simulated events. Must be > 0.
-        :type t_delta: float
+        :param Δt: Length of the time tintervall between two simulated events. Must be > 0.
+        :type Δt: float
         :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
         :type ε: float
         :param check_tolerance: Enables initial and successive check as described for ε.
         :type check_tolerance: bool
-        :param verbose: Enables the verbose mode: Calculation will be printed in detail to support debugging.
-        :type verbose: bool
 
-        :return: Returns a pair. The first value is called ``sim_successful`` and is ``True`` iff no issue occurred during the simulation. The second value is a list of pairs representing the result. The first values track te time and the second contains the probabilities as vector given as a list of numbers.
-        :rtype: (bool, list)
+        :return: Returns :code:`sim_time_dev_prop, sim_current` where :code:`sim_time_dev_prop[i][0]` ≣ :math:`i \cdot \Delta t`, :code:`sim_time_dev_prop[i][1][j]` ≣ :math:`P_j(i \cdot \Delta t)`, :code:`sim_current[i][0]` ≣ :math:`i \cdot \Delta t` and :code:`sim_current[i][1]` ≣ :math:`I(i \cdot \Delta t)`.
+        :rtype: (list, list)
 
         :example: .. code-block:: python
-                :emphasize-lines: 1,3,6-16
+                :emphasize-lines: 1,3,7-8,10-18
 
                 import numpy as np
                 import matplotlib.pyplot as plt
                 from HaPPPy.MasterEquation.MasterEquationSolver import MasterEquationSolver as MES
 
-                ## test program for simulate_time_development_of_propabilities
+                ## simple simulation with the MasterEquationSolver class
                 # set-up a reasonable Γ-matrix
-                Γ = np.array([[0, 0.5, 0.5], [0.5, 0, 0.5], [0.5, 0.5, 0]])
+                Γ_L = np.array([[0, 0.5, 0.5], [0.5, 0, 0.5], [0.5, 0.5, 0]])
+                Γ_R = np.array([[0, 0.0, 0.5], [0.0, 0, 0.5], [0.0, 0.5, 0]])
                 # choose a legitimate start value for P_0 (P_0 = P(t=0))
-                P_0 = np.array([0.9, 0.1, 0])
+                P_0 = np.array([0.9, 0.0, 0.1])
                 # simulate
-                sim_successful, sim = MES.simulate_time_development_of_propabilities(
-                                   P_0,
-                                   Γ,
-                                   t_max=20,
-                                   t_delta=0.5
-                                  )
+                mes = MES()
+                sim_time_dev_prop, sim_current = mes.doCalculation(P_0,
+                                                                   Γ_L,
+                                                                   Γ_R,
+                                                                   t_max=10,
+                                                                   Δt=0.1
+                                                                  )
 
-                ## plot result
+                ## plot results
+                # 1st plot: time development of propabilities
                 # seperate x value (time) from y values (P) to be able to plot it
-                ts = [sim[i][0] for i in range(len(sim))]
-                Ps = [sim[i][1] for i in range(len(sim))]
-                n = len(sim[0][1]) # dimension of P
-                legend_names = ["$P_" + str(i) + "$" for i in range(n)]
+                ts = [sim_time_dev_prop[i][0] for i in range(len(sim_time_dev_prop))]
+                Ps = [sim_time_dev_prop[i][1] for i in range(len(sim_time_dev_prop))]
+                # plot
                 plt.plot(ts, Ps)
                 plt.xlabel("t")
-                plt.ylabel("P")
+                plt.ylabel("P")# create legend
+                n = len(sim_time_dev_prop[0][1]) # dimension of P
+                legend_names = ["$P_" + str(i) + "$" for i in range(n)]
                 plt.legend(legend_names)
                 plt.grid()
-                if not sim_successful:
-                     plt.text(0, 0, "Simulation failed!")
                 plt.show()
+
+                # 2nd plot: time development of netto current
+                # seperate x value (time) from y values (P) to be able to plot it
+                ts = [sim_current[i][0] for i in range(len(sim_current))]
+                Is = [sim_current[i][1] for i in range(len(sim_current))]
+                # plot
+                plt.plot(ts,Is)
+                plt.xlabel("t")
+                plt.ylabel("I")
+                # create legend
+                legend_names = ["$I$"]
+                plt.legend(legend_names)
+                plt.grid()
+                plt.show()
+                plt.show()
+
 
             The relevant lines of code for the simulation to work are highlighted. To give a real live example and to demonstarte the usage of the result some code to plot the result is added.
 
         """
-        # Don't remove the last dot since it is a workaround to shpinx's
+        # Don't remove the last dot/paragrph since it is a workaround to shpinx's
         # code-block interpreter.
 
+
+        ## type conversions
         # if necessary: reformat P_0 as matrix (otherwise P_0 could not be multiplicated with matricies)
         if P_0.ndim == 1:
             P_0 = np.array([P_0]).transpose()
-
-        if verbose:
-            print("P(t=0) = \n", P_0)
-            print("Γ = \n", Γ)
-            if check_tolerance:
-                print("ε = ", ε)
 
         ## input checks
         # warn if tolerance value is unreasonable
         if check_tolerance and ε <= 0:
             raise RuntimeError("ε must be a positive number > 0. \nε = " + str(ε))
-        # Γ must be a nxn matrix
-        if Γ.ndim != 2 or Γ.shape[0] != Γ.shape[1] or not (Γ >= 0).all():
-            raise RuntimeError("Γ must be a square matrix with coefficients >= 0. \nΓ = \n" + str(Γ))
         # P_0 must be a nx1 matrix (with n matching Λ)
-        if P_0.ndim != 2 or P_0.shape[0] != Γ.shape[0] or P_0.shape[1] != 1:
+        if P_0.ndim != 2 or P_0.shape[1] != 1:
             raise RuntimeError("P_0 must be a "
                                + str(Γ.shape[0])
                                + "x1 matrix (aka. a 'dotable vector')! \nP_0 = \n"
                                + str(P_0)
                               )
+        # Γ_L must be a nxn matrix
+        if Γ_L.ndim != 2 or Γ_L.shape[0] != P_0.shape[0] or Γ_L.shape[1] != P_0.shape[0] or not (Γ_L >= 0).all():
+            raise RuntimeError("Γ_L must be a nxn matrix with coefficients >= 0. \nΓ_L = \n" + str(Γ_L))
+        # Γ_R must be a nxn matrix
+        if Γ_R.ndim != 2 or Γ_R.shape[0] != P_0.shape[0] or Γ_R.shape[1] != P_0.shape[0] or not (Γ_R >= 0).all():
+            raise RuntimeError("Γ_R must be a nxn matrix with coefficients >= 0. \nΓ_R = \n" + str(Γ_R))
         # P_0 must have coefficients >= 0
         if not (P_0 >= 0).all():
             raise RuntimeError("P_0 must have coefficients >= 0. \nP_0 = \n" + str(P_0))
@@ -194,13 +192,51 @@ class MasterEquationSolver:
                                + str(P_sum)
                               )
         # simulated time intervals must be positive or negative
-        if t_max < 0 or t_delta <= 0:
+        if t_max < 0 or Δt <= 0:
             raise RuntimeError("Simulated time intervals must be finite and positive ("
-                               + "t_max >= 0 and t_delta > 0).\n"
+                               + "t_max >= 0 and Δt > 0).\n"
                                + "t_max = " + str(t_max)
-                               + ", t_delta = " + str(t_delta)
+                               + ", Δt = " + str(Δt)
                               )
 
+        ## calculation
+        Γ = Γ_L + Γ_R
+        sim_successful, sim = self.__simulate_time_development_of_propabilities(P_0, Γ, t_max, Δt, ε, check_tolerance)
+        if sim_successful:
+            I_t = self.__simulate_current(Γ_L, Γ_R, sim, ε)
+
+        return sim, I_t
+
+    def __simulate_time_development_of_propabilities(self,
+                                                   P_0,
+                                                   Γ,
+                                                   t_max,
+                                                   Δt,
+                                                   ε=1E-10,
+                                                   check_tolerance=True,
+                                                   verbose=False
+                                                  ):
+        """Simulates the time development of propabilities P(t) for an :math:`n`-state system with transition rates Γ.
+
+        .. todo::
+
+            Create extra return type for simulation.
+
+        This is a private function and should not be called from outside the MasterEquationSolver class! (Hence it does not perform further tests than MasterEquationSolver.)
+
+        :return: Returns :code:`sim_sucessfull, sim_time_dev_prop`. Iff :code:`sim_sucessfull==True` than :code:`sim_time_dev_prop` has values like describet in MasterEquationSolver.doCalculation (see return) otherwise sim_time_dev_prop is undefined.
+        :rtype: (bool, list)
+
+        See documentation of MasterEquationSolver.doCalculation (1st problem) for more details.
+
+        """
+
+        # print input values (if verbose)
+        if verbose:
+            print("P(t=0) = \n", P_0)
+            print("Γ = \n", Γ)
+            if check_tolerance:
+                print("ε = ", ε)
 
         ## simulation
         # track if simulation had any issues
@@ -237,10 +273,10 @@ class MasterEquationSolver:
             raise RuntimeError("Can not invert Λ = \n" + str(Λ))
 
         verbose = False
-        # time development
+        # simulate time development discretly
         sim = []
         P_0_evb = np.dot(Λ_evecs_T, P_0)
-        for t in np.arange(0, t_max + t_delta, t_delta):
+        for t in np.arange(0, t_max + Δt, Δt):
             if verbose: print("\nt = ", t)
             #exp_tΛ_evb = np.diag(np.power(Λ_evals, t)) # Does not behave well due to numerical issues!
             exp_tΛ_evb = np.diag(np.exp(t * Λ_evals))
@@ -275,57 +311,30 @@ class MasterEquationSolver:
         # simulation up to the point of failure but must be analysed more carefully.
         return sim_successful, sim
 
-    def calculate_current(self, Γ_L, Γ_R, sim, ε=1E-10, verbose=False):
-        #Γ_L has to be an nxn Matrix
-        
-        #Γ_R has to be an nxn Matrix
+    def __simulate_current(self, Γ_L, Γ_R, sim_time_dev_prop, ε=1E-10, verbose=False):
+        """Simulates the time current I(t) for an :math:`n`-state system with transition rates Γ.
 
-        I_t = []
-        Γ = Γ_L - Γ_R
+        .. todo::
+
+            Create extra return type for simulation.
+
+        This is a private function and should not be called from outside the MasterEquationSolver class! (Hence it does not perform further tests than MasterEquationSolver.)
+
+        :return: Returns :code:`sim_current`. :code:`sim_time_dev_prop` needs to be valid for :code:`sim_current` to be valid!
+        :rtype: (bool, list)
+
+        See documentation of MasterEquationSolver.doCalculation (2nd problem) for more details.
+
+        """
+
+        # calculate ΔΓ (direction sensivtive form)
+        ΔΓ = Γ_L - Γ_R
         if verbose: print("Γ: \n", Γ)
 
-        for i in range(len(sim)):
-            I_t.append((sim[i][0], sum(np.dot(Γ, sim[i][1]))))
-            if verbose: print("I_t[" + str(i) + "= \n", I_t[i])
+        # simulate the current discretly
+        sim = []
+        for i in range(len(sim_time_dev_prop)):
+            sim.append((sim_time_dev_prop[i][0], sum(np.dot(ΔΓ, sim_time_dev_prop[i][1]))))
+            if verbose: print("I_t[" + str(i) + "= \n", sim[i])
 
-        return I_t
-
-#### test program for simulate_time_development_of_propabilities
-### set-up a reasonable Γ-matrix
-##Γ_l = np.array([[0, 0.38, 0.68], [0.54, 0, 0.5], [0.28, 0.182, 0]])
-##Γ_r = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-### choose a legitimate start value for P_0 (P_0 = P(t=0))
-##P_0 = np.array([0.9, 0.1, 0])
-### simulate
-##MES = MasterEquationSolver()
-##I_t, sim = MES.doCalculation(
-##                   P_0,
-##                   Γ_r,
-##                   Γ_l,
-##                   check_tolerance = False,
-##                   t_max=100,
-##                   t_delta=1
-##                  )
-##
-#### plot result
-### seperate x value (time) from y values (P) to be able to plot it
-##ts = [sim[i][0] for i in range(len(sim))]
-##Ps = [sim[i][1] for i in range(len(sim))]
-##n = len(sim[0][1]) # dimension of P
-##legend_names = ["$P_" + str(i) + "$" for i in range(n)]
-##plt.plot(ts, Ps)
-##plt.xlabel("t")
-##plt.ylabel("P")
-##plt.legend(legend_names)
-##plt.grid()
-##plt.show()
-##
-##ts = [I_t[i][0] for i in range(len(sim))]
-##Ps = [I_t[i][1] for i in range(len(sim))]
-##plt.plot(ts, Ps)
-##plt.xlabel("t")
-##plt.ylabel("P")
-##plt.legend(legend_names)
-##plt.grid()
-##plt.show()
-
+        return sim
