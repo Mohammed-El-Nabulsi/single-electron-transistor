@@ -2,8 +2,16 @@
 
 import math
 import numpy as np
+from HaPPPy.OneBody import OneBodySolver
+from HaPPPy.TwoBody import TwoBodySolver
+from HaPPPy.Transmission import TransmissionCalculator
+from HaPPPy.MasterEquation import MasterEquationSolver
 
-
+E1=OBSolver.doCalculation()
+V=Vinput[:half]
+#E2,C=TBSolver.doCalculation()
+#muL, muR,T, Vinput aus main importieren 
+#Transimissionsmatrix wird in def Gamma importiert
 class RateCalculator:
 
     def __init__(self):
@@ -12,11 +20,12 @@ class RateCalculator:
 
         print("Hello from the RateCalculator, what can I do for you?")
     
+    
 
     #benötigte Konstanten 
 
     kB=1 #Boltzmannkonstante in eV
-
+    
 
     #definiere Fermifunktion
 
@@ -25,7 +34,7 @@ class RateCalculator:
         return(f)
 
     def Gamma(Ea,Eb,V):
-        return (np.absolute(t(np.absolute(Eb-Ea),V))**2*D(np.absolute(Ea-Eb)))
+        return (np.absolute(TMCal.calculate_transmission(np.absolute(Eb-Ea),V))**2*D(np.absolute(Ea-Eb)))
 
       
     #Um Tunnelraten zu berechnen, die durch die linke Tunnerlbariere gehen, muss als Parameter mu das chemische Potential der linken Tunnelbariere eingesetzt werden. Umgekehrt symmetrisch für die rechte Tunnelbariere
@@ -58,7 +67,7 @@ class RateCalculator:
 
 
 
-    def rate_calculator(muL,muR,T,E1,E2,C,V):
+    def doCalculation():
         Gamma_12L=[[0 for i in E2]for i in E1]
         Gamma_12R=[[0 for i in E2]for i in E1]
         Gamma_21L=[[0 for i in E2]for i in E1]
