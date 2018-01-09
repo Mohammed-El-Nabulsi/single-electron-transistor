@@ -7,12 +7,36 @@ import numpy
 import math
 
 class TransmissionCalculator:
+    """
+    Calculates the transmission for a particle with energy E
+    moving in within a potential V.
+    """
     def doCalculation(self):
         return 2
 
     def calculate_transmission(self, E, V):
         """
-            TODO: Extensive documentation.
+        Performs the calculation for a particle with energy E
+        moving in within a potential V to return the trasmission rate.
+
+        Internally it creates a gaussian wave package with energy E and uses
+        the split step method to iterate the gaussian package through the potential
+        using small time steps.
+
+        The transmission is calculated by letting enough time pass so that the wave package
+        completely traveles through the potential V and calculating the propabiliy behind the barrier. 
+        
+        Parameters
+        ----------
+        E : float
+            The energy of the particle in milli eV
+        V : Array
+            An array of potential values for every point in space x (x is extracted using the indices of V)
+            
+        Returns
+        -------
+        rate : float
+            The rate of transmission for the particle within the Potential V (number between 0 and 1)
         """
         if not (isinstance(V, list)):
             raise ValueError("V and x must be arrays")
