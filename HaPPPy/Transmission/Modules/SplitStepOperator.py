@@ -7,7 +7,7 @@ import numpy as np
 
 from scipy.constants import codata
 
-dt = 10**(-15)
+dt = 1
 me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert to milli eV
 hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to p    
 

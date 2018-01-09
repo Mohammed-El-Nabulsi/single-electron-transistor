@@ -41,12 +41,15 @@ class TransmissionCalculator:
         margin = 10e-3      # Sample value, needs verification
  
         splitStepOperator = SplitStepOperator(x, potential)
+        transmission = Transmission()
 
         psi_1 = splitStepOperator.first_step(psi_0)
 
         # This step is redundant but serves a technical purpose and was added
         # for clarity reasons.
         psi_n = psi_1
+ 
+        end_point = self.get_index_for_end_of_potential(V)
 
         # Appliy the split step operator to advance in time until
         # the differences in psi are small enough. It is not certain
@@ -55,7 +58,10 @@ class TransmissionCalculator:
             try:
                 psi_n1 = splitStepOperator.step(psi_n[:])
 
-                delta = self.calculate_max_diff_pointwise(psi_n, psi_n1)
+                rate_n1 = transmission.calculate(psi_n1, end_point)
+                rate_n = transmission.calculate(psi_n, end_point)
+
+                delta = numpy.absolute(rate_n1 - rate_n) # self.calculate_max_diff_pointwise(psi_n, psi_n1)
 
                 psi_n = psi_n1[:]
 
@@ -70,8 +76,6 @@ class TransmissionCalculator:
                 raise Exception("An error occured while applying the split step operator. Error: " + repr(error))
             
         try:
-            end_point = self.get_index_for_end_of_potential(V)
-
             return Transmission().calculate(psi_n, end_point)
         except Exception as error:
             raise Exception("An error occured while calculating transmission rates. Error: " + repr(error))
@@ -85,16 +89,20 @@ class TransmissionCalculator:
             We define this as the end of the potential barrier.
         """
 
+        if (max(V) == 0):
+            return 0
+
         # Filter V for all entries > 0 and return an array with
         # the indices. The last index is the one we are looking for
         # ([-1] is a sort hand notation for this)
         return [idx for idx, v_i in enumerate(V) if v_i > 0][-1]    
 
-# V = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-# E = 1.8
+V = [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+E = 1.8
 
-# transmissionCalculator = TransmissionCalculator()
+transmissionCalculator = TransmissionCalculator()
 
-# rate = transmissionCalculator.calculate_transmission(E, V)
+rate = transmissionCalculator.calculate_transmission(E, V)
 
-# print(rate)
+print("done! Rate:")
+print(rate)
