@@ -263,7 +263,7 @@ class MasterEquationSolver:
 
 #### test program for simulate_time_development_of_propabilities
 ### set-up a reasonable Γ-matrix
-##Γ_l = np.array([[0, 0.5, 0.5], [0.5, 0, 0.5], [0.5, 0.5, 0]])
+##Γ_l = np.array([[0, 0.38, 0.68], [0.54, 0, 0.5], [0.28, 0.182, 0]])
 ##Γ_r = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
 ### choose a legitimate start value for P_0 (P_0 = P(t=0))
 ##P_0 = np.array([0.9, 0.1, 0])
@@ -274,8 +274,8 @@ class MasterEquationSolver:
 ##                   Γ_r,
 ##                   P_0,
 ##                   check_tolerance = False,
-##                   t_max=20000000000,
-##                   t_delta=1000000
+##                   t_max=100,
+##                   t_delta=1
 ##                  )
 ##
 #### plot result
