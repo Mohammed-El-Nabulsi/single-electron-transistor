@@ -18,6 +18,11 @@ class OneBodyTestSuite(unittest.TestCase):
         OBSolver = HaPPPy.OneBody.OneBodySolver()
         self.assertEqual(OBSolver.doCalculation(), 2.0)
 
+    def test_OneBody_doCalculation(self):
+        """ Checks the dummy calculation
+        """
+        OBSolver = HaPPPy.OneBody.OneBodySolver()
+        self.assertEqual(OBSolver.doCalculation(), 42.0)
 
 if __name__ == '__main__':
     one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)

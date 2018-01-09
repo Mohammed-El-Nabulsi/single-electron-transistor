@@ -7,19 +7,53 @@ class OneBodySolver:
 
     """
 
-
-    def __init__(self):
+    def __init__(self, l, n):
         """ The constructor.
         """
 
         print("Hello from the OneBody Solver, what can I do for you?")
+    
+        kin_en = sdihjfasdgjh
+    
+    def setL(self, l):
+        self.l = l
 
     def doCalculation(self):
-        """ Some dummy calculation
+        """ Gives the energy levels and energy eigen states
+            If portenil is equal to 2 it uses A * x^2
         
         Returns:
             double.  The result
 
         """
+        
+        if(l <= 0):
+            print("l not set. Abort!")
+        
+        exit()
+    
+    
+    def calcualteHarmonocPotential(a,b,c):
+        djfhgdföogjhdfg
+        
+        pot = difughsdfigjhdsfg
+        
+        ham = kin + pot
+        
+        V = eigh(V)
+        
+        return V
+        
+        
+    def calcualteGaussPotential(absdfjksdf):
 
-        return 1.0+1.0
+
+        ham = kin + pot
+    
+        V = eigh(V)
+
+        return V
+        
+    
+
+        return 42.5
