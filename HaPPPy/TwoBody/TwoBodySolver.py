@@ -1,4 +1,4 @@
-
+from TwoParticle import createTwoParticleData
 
 class TwoBodySolver:
     """ Solves the two body problem
@@ -15,11 +15,4 @@ class TwoBodySolver:
         print("Hello from the TwoBodySolver, what can I do for you?")
 
     def doCalculation(self):
-        """ Some dummy calculation
-        
-        Returns:
-            double.  The result
-
-        """
-
-        return 1.0+1.0
+        return createTwoParticleData(4,None)
