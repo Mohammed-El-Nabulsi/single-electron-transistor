@@ -96,13 +96,3 @@ class TransmissionCalculator:
         # the indices. The last index is the one we are looking for
         # ([-1] is a sort hand notation for this)
         return [idx for idx, v_i in enumerate(V) if v_i > 0][-1]    
-
-V = [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-E = 1.8
-
-transmissionCalculator = TransmissionCalculator()
-
-rate = transmissionCalculator.calculate_transmission(E, V)
-
-print("done! Rate:")
-print(rate)
