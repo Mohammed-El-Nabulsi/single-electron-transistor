@@ -21,7 +21,36 @@ class MasterEquationSolver:
 
         print("Hello from the MasterEquationSolver, what can I do for you?")
 
-    def doCalculation(self, Γ_L, Γ_R, P_0, t_max, t_delta, ε=1E-10, check_tolerance=True):
+    def doCalculation(self,
+                      P_0,
+                      Γ_L,
+                      Γ_R,
+                      t_max,
+                      t_delta,
+                      ε=1E-10,
+                      check_tolerance=True
+                     ):
+        """Simpulates the time development of probabilities and calculates the current
+
+        :param P_0: Start value of propabilities. Must be either a list or a ``nx1`` matrix.
+        :type P_0: numpy.array
+        :param Γ_L: Matrix containing the transition rates regarding electrons going to the left where :code:`Γ[i][j]` ≣ :math:`\Γ_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
+        :type Γ_L: numpy.array
+        :param Γ_R: Matrix containing the transition rates regarding electrons going to the right where :code:`Γ[i][j]` ≣ :math:`\Γ_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
+        :type Γ_R: numpy.array
+        :param t_max: Last point in time to be simulated. Must be >= 0.
+        :type t_max: float
+        :param t_delta: Length of the time tintervall between two simulated events. Must be > 0.
+        :type t_delta: float
+        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :type ε: float
+        :param check_tolerance: Enables initial and successive check as described for ε.
+        :type check_tolerance: bool
+
+        :return: Returns a pair of values. The first is a list of pairs of time and the corresponding current, the second one is a pair with the time and a list of the corresponding occupation probabilities for each state
+        :rtype: (list, list)
+        """
+        
         Γ = Γ_L + Γ_R
         sim_successful, sim = self.simulate_time_development_of_propabilities(P_0, Γ, t_max, t_delta, ε, check_tolerance)
         if sim_successful:
@@ -270,9 +299,9 @@ class MasterEquationSolver:
 ### simulate
 ##MES = MasterEquationSolver()
 ##I_t, sim = MES.doCalculation(
-##                   Γ_l,
-##                   Γ_r,
 ##                   P_0,
+##                   Γ_r,
+##                   Γ_l,
 ##                   check_tolerance = False,
 ##                   t_max=100,
 ##                   t_delta=1

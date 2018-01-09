@@ -3,6 +3,9 @@
 
 import HaPPPy
 import unittest
+import numpy as np
+import matplotlib.pyplot as plt
+from HaPPPy.MasterEquation.MasterEquationSolver import MasterEquationSolver as MES
 
 class HappyBasicTestSuite(unittest.TestCase):
     """A test class to test HaPPPy in general.
@@ -101,7 +104,47 @@ class MasterEquationTestSuite(unittest.TestCase):
 
     def test_MasterEquation_doCalculation(self):
         """ Checks the dummy calculation
-        """  
+        """
+        ## test program for simulate_time_development_of_propabilities
+        # set-up a reasonable Γ-matrix
+        Γ_l = np.array([[0, 0.5, 0], [0, 0, 0], [0, 0, 0]])
+        Γ_r = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+        # choose a legitimate start value for P_0 (P_0 = P(t=0))
+        P_0 = np.array([0.9, 0.1, 0])
+        # simulate
+
+        mes = MES()
+        I_t, sim = mes.doCalculation(
+                           P_0,
+                           Γ_r,
+                           Γ_l,
+                           100,
+                           1
+                          )
+        #print(sim)
+        self.assertTrue(sim[99][1][0] < 1e-10)
+
+        ## plot result
+        # seperate x value (time) from y values (P) to be able to plot it
+        ts = [sim[i][0] for i in range(len(sim))]
+        Ps = [sim[i][1] for i in range(len(sim))]
+        n = len(sim[0][1]) # dimension of P
+        legend_names = ["$P_" + str(i) + "$" for i in range(n)]
+        plt.plot(ts, Ps)
+        plt.xlabel("t")
+        plt.ylabel("P")
+        plt.legend(legend_names)
+        plt.grid()
+        plt.show()
+
+        ts = [I_t[i][0] for i in range(len(sim))]
+        Ps = [I_t[i][1] for i in range(len(sim))]
+        plt.plot(ts, Ps)
+        plt.xlabel("t")
+        plt.ylabel("P")
+        plt.legend(legend_names)
+        plt.grid()
+        plt.show()
         Calc = HaPPPy.MasterEquation.MasterEquationSolver()
         self.assertEqual(Calc.doCalculation(), 2.0)
 
