@@ -1,47 +1,20 @@
 import numpy as np 
 from .MatrixElement import getMatrixElement, testFunction
 
-## Set up  
-n=6 #number of one-particle eigenmodes 
-X=100 # number of grid points 
-V = [0 for n in range(0,X)]
-
-### Testfunctions for the eigenemodes 
-#	createTwoParticleData(n,);
-
-def test(x, n):
-    return np.sin(x*n)
-
-def getOneParticleStuff(n,V):
-	W=np.zeros((n, X))
-	e=np.zeros(n)
-	for i in range(n):
-		W[i,:] = testFunction(-1.0, 1.0, i+1, X)
-		e[i] = float(i+1)**2
-		#for j in range(X):
-		#	W[i, j]=test(j, i)
-	#e=[1, 2, 3, 4, 5, 6]
-	return [e,W]
+def getOneParticleData():
+	SP_EE = None
+	SP_EV = None
+	return [SP_EE,SP_EV]
 
 
-#write the Eigenenergies and Eigenstates to a file
-def save(E,S):
-	return None
+def createTwoParticleData():
+	""" Calculate and return the two-electron eigenfunctions from the single-electron eigenfunctions. Returns an array Q of matrices of the shape [i,j,n], where Q[i,j,n] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function.
+	"""	
+	[SP_EE,SP_EV] = getOneParticleData()
+		
+	n = len(SP_EE)
+	X = len(SP_EV[0])
 
-#returns the i-th eigenenergy from the file created by createTwoParticleData. 
-#Gives an error if such a file does not exist (i.e. the creation function was not called)
-def getEigenenergy(i):
-	return 0
-
-#returns the i-th eigenvector from the file created by createTwoParticleData.
-#Gives an error if such a file does not exist.
-def getEigenvector(i):
-	return zeros(X)
-
-# Calculate and store the two-electron eigenfunctions in the potential V from the first n single-electron eigenfunctions. Returns None.
-def createTwoParticleData(n,V):
-	[SP_EE,SP_EV] = getOneParticleStuff(n,V)
-	
 	# Basis: 
 	#       Singuletts: n - terms: |1>|1>, ...|n>|n>
 	#                   1/2 n(n-1) terms: |1>|2>, ....|1>|n>, |2>|3>,..., |2>|n>, ..., |n-1>|n>  
@@ -147,9 +120,6 @@ def createTwoParticleData(n,V):
 				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1+L,:]				
 	
 
-	save(Eigenenergies, Eigenvectors_Productbasis)
-	print(Eigenenergies)
+	#print(Eigenenergies)
 	#print(Eigenvectors)#_Productbasis)
-	return Q	
-
-createTwoParticleData(3,None)
+	return Q

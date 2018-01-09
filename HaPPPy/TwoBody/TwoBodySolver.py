@@ -15,4 +15,4 @@ class TwoBodySolver:
         print("Hello from the TwoBodySolver, what can I do for you?")
 
     def doCalculation(self):
-        return createTwoParticleData(4,None)
+        return createTwoParticleData()
