@@ -135,10 +135,21 @@ def createTwoParticleData(n,V):
 			Z[i,i-L]=1/np.sqrt(2)
 
 	Eigenvectors_Productbasis = np.dot(Eigenvectors, Z)
+	#Transform  Eigenvectors_Productbasis into n**2 Matrices with the coeeficients 
+	Q=np.zeros((n,n, n**2))
+	for i in range(n):
+		for j in range(n):
+			if i==j:
+				Q[i,j,:]=Eigenvectors_Productbasis[i, :]
+			elif i<j:
+				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1,:]
+			else:
+				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1+L,:]				
 	
+
 	save(Eigenenergies, Eigenvectors_Productbasis)
 	print(Eigenenergies)
 	#print(Eigenvectors)#_Productbasis)
-	return None
+	return Q	
 
 createTwoParticleData(3,None)
