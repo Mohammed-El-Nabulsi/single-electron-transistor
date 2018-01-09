@@ -6,7 +6,7 @@ import unittest
 from tests.HaPPPyTest import HappyBasicTestSuite
 from tests.OneBodyTest import OneBodyTestSuite
 from tests.TwoBodyTest import TwoBodyTestSuite
-from tests.TransmissionTest import TransmissionTestSuite
+from tests.test_transmission import TransmissionTestSuite
 from tests.RatesTest import RatesTestSuite
 from tests.MasterEquationTest import MasterEquationTestSuite
 from tests.ParameterHandlerTest import ParameterHandlerTestSuite
