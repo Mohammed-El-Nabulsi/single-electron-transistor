@@ -8,14 +8,14 @@ class SpectrumData:
 
 	def open(self, filename):
 		self.file = h5py.File(filename + ".hdf5", "a")
-		self.energies = file[_EN_NAME]
-		self.waves = file[_EV_NAME]
-		par = file[_OPT_NAME]
+		self.energies = self.file[_EN_NAME]
+		self.waves = self.file[_EV_NAME]
+		par = self.file[_OPT_NAME]
 		self.x0 = par[0]
 		self.x1 = par[1]
-		self.n = len(waves[0,:])
-		self.m = len(energies)
-		self.dx = (x1 - x0) / (n - 1)
+		self.n = len(self.waves[0,:])
+		self.m = len(self.energies)
+		self.dx = (self.x1 - self.x0) / (self.n - 1)
 	
 	# m: number of wave functions
 	# n: number of raster indices used to represent wave functions
@@ -28,13 +28,13 @@ class SpectrumData:
 		self.x1 = x1
 		self.dx = (x1 - x0) / (n - 1)
 		self.file = h5py.File(filename + ".hdf5", "w")
-		self.energies = self.file.create_dataset("energy", shape=(m))
-		self.waves = self.file.create_dataset("waves", shape=(m, n))
-		par = self.file.create_dataset("settings", shape=(2))
+		self.energies = self.file.create_dataset(_EN_NAME, (m,))
+		self.waves = self.file.create_dataset(_EV_NAME, (m, n))
+		par = self.file.create_dataset(_OPT_NAME, (2,))
 		par[0] = x0
 		par[1] = x1
 		self.file.flush()
 
 	def close(self):
-		file.close()
+		self.file.close()
 
