@@ -1,12 +1,30 @@
 import h5py
 
+#private constants holding the dataset names
 _EN_NAME = "eigenvalues_group1"
 _EV_NAME = "eigenvectors_group1"
 _OPT_NAME = "settings"
 
 class SpectrumData:
-
+	"""Used to store and load data of one-particle wave energy spectrums in hdf5-files.
+	
+	Fields available after initializing with 'open()' or 'init()':
+	file -- reference to the hdf5 file handle
+	energies -- dataset containing the energy eigenvalues in [meV] as floating point numbers: energies[i] stores the i-th eigenvalue
+	waves -- dataset containing the wavefunctions as rasterized floating point arrays of probabilities in [1/nm]: waves[i,j] stores the j-th grid entry of the i-th eigenvector
+	m -- the number of eigenvalues/-functions
+	n -- the number of grid points used to represent the wavefunctions
+	dx -- the spacial distance between grid points in [nm]: (x1-x0) = dx * (n-1)
+	x0 -- the spacial location of the 0-th grid point in [nm]
+	x1 -- the spacial location of the (n-1)-th grid point in [nm]
+	"""
+	
 	def open(self, filename):
+		"""Initialize the data by loading a hdf5-file
+		
+		Arguments:
+		filename -- path to the file containing the data (without the '.hsf5' ending)
+		"""
 		self.file = h5py.File(filename + ".hdf5", "a")
 		self.energies = self.file[_EN_NAME]
 		self.waves = self.file[_EV_NAME]
@@ -17,11 +35,16 @@ class SpectrumData:
 		self.m = len(self.energies)
 		self.dx = (self.x1 - self.x0) / (self.n - 1)
 	
-	# m: number of wave functions
-	# n: number of raster indices used to represent wave functions
-	# x0: x pos at first raster index
-	# x1: x pos at last raster index
 	def init(self, filename, m, n, x0, x1):
+		"""Initialize with empty data and create the datasets for a new hdf5-file
+		
+		Arguments:
+		filename -- path to the file to store the data in (without the '.hsf5' ending)
+		m -- the number of eigenvalues/-functions
+		n -- the number of grid points used to represent the wavefunctions
+		x0 -- the spacial location of the 0-th grid point in [nm]
+		x1 -- the spacial location of the (n-1)-th grid point in [nm]
+		"""
 		self.m = m
 		self.n = n
 		self.x0 = x0
@@ -36,5 +59,9 @@ class SpectrumData:
 		self.file.flush()
 
 	def close(self):
+		"""Close the underlying hdf5-file and save all modified data
+		
+		After this the datasets won't be accessible anymore!
+		"""
 		self.file.close()
 
