@@ -9,9 +9,9 @@ __docformat__ = 'reStructuredText'
 
 class MasterEquationSolver:
     """
-    Simulates the time development of propabilities P(t) for an ``n`` state system with transition rates Γ including the netto current.
+    Simulates the time development of propabilities :math:`\\vec{P}(t)` for an :math:`n`-state system with transition rates :math:`\\Gamma` including the netto current :math:`I(t)`.
 
-    This method returns numerical approximations of the solution to the following problems.
+    This method returns numerical approximations of the solutions to the following problems.
 
     **1st Problem: Time Development of Propabilities**
 
@@ -33,15 +33,13 @@ class MasterEquationSolver:
 
         \Gamma_{\\alpha \\rightarrow \\beta} \equiv \Gamma_{\\alpha \\beta}
 
-    and
+    denotes the rate from state :math:`\\alpha` to :math:`\\beta` and
 
     .. math::
 
         \\vec{P_0} = \\vec{P}(t=0)
 
-    is the boundary condition.
-
-    denotes the rate from state :math:`\\alpha` to :math:`\\beta`.
+    is the boundary condition..
 
     The solution of this problem is returned as a discrete simulation of :math:`\\vec{P}`. (See HaPPPy.MasterEquation.Simulation for more details.)
 
@@ -55,17 +53,17 @@ class MasterEquationSolver:
 
         I : [0, t_{max}] \\to \mathbb{R}, t \mapsto I(t) \\\\
         I^k : [0, t_{max}] \\to \mathbb{R}, t \mapsto I^k(t), k \in \\{ L, R \\} \\\\
-        I^k = e \sum_{\\alpha, \\beta} \Gamma^k_{\\alpha \\rightarrow \\beta} P_{\\alpha} \\\\
+        I^k = q \sum_{\\alpha, \\beta} \Gamma^k_{\\alpha \\rightarrow \\beta} P_{\\alpha} \\\\
         I = I^L - I^R = q \sum_{\\alpha, \\beta} \\left ( \Gamma^L_{\\alpha \\rightarrow \\beta} - \Gamma^R_{\\alpha \\rightarrow \\beta} \\right ) P_{\\alpha}
 
-    It is assumed that the charge :math:`q = 1`.
+    It is assumed that the charge per particle :math:`q = 1`.
 
-    :math:`I^L,I^R` descibe the current the the *left* resp. *right* barrier, hence :math:`I` describes the netto flow.
+    :math:`I^L,I^R` descibe the current through the *left* resp. *right* barrier, hence :math:`I` describes the netto flow from left to right.
 
     The solution of this problem is returned as a discrete simulation as well. (See HaPPPy.MasterEquation.Simulation for more details.)
 
     :example: .. code-block:: Python
-            :emphasize-lines: 1-2,7-8,10, 12
+            :emphasize-lines: 1-2,7-8,10, 12-13
 
             import HaPPPy
             import numpy as np
@@ -103,14 +101,14 @@ class MasterEquationSolver:
 
     def getε(self):
         """
-        :return: Returns ε - a tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :return: Returns ε - a tolerance value: The sum of all probabilities must be equals to 1 within this tolerance.
         :rtype: float
         """
         return self.ε
 
     def setε(self, ε):
         """
-        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :param ε: Tolerance value: The sum of all probabilities must be equals to 1 within this tolerance.
         :type ε: float
         """
         self.ε = ε
@@ -118,7 +116,7 @@ class MasterEquationSolver:
     @staticmethod
     def getDefaultε():
         """
-        :return: Returns the default value of ε - a tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :return: Returns the default value of ε - a tolerance value: The sum of all probabilities must be equals to 1 within this tolerance.
         :rtype: float
         """
         return 1E-10
@@ -128,17 +126,17 @@ class MasterEquationSolver:
         See class description of Happy.MasterEquationSolver for details.
 
         :param P_0: Start value of propabilities where :code:`P_0` ≣ :math:`\\vec{P_0}`. Must be either a list or a ``nx1`` matrix.
-        :type P_0: numpy.array
-        :param Γ_L: Matrix containing the transition rates regarding electrons going to the *left* where :code:`Γ_L[i][j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
-        :type Γ_L: numpy.array
-        :param Γ_R: Matrix containing the transition rates regarding electrons going to the *right* where :code:`Γ_R[i][j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
-        :type Γ_R: numpy.array
-        :param t_max: Last point in time to be simulated. Must be >= 0.
+        :type P_0: numpy.array or numpy.ndarray
+        :param Γ_L: Matrix containing the transition rates regarding electrons tunneling trough the *left* barrier where :code:`Γ_L[i][j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
+        :type Γ_L: numpy.ndarray
+        :param Γ_R: Matrix containing the transition rates regarding electrons tunneling trough the *right* barrier where :code:`Γ_R[i][j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
+        :type Γ_R: numpy.ndarray
+        :param t_max: Last point in time to be simulated. Must fulfil :code:`t_max >= 0`.
         :type t_max: float
-        :param Δt: Length of the time tintervall between two simulated events. Must be > 0.
+        :param Δt: Length of the time tintervall between two simulated events. Must fulfil :code:`Δt > 0`.
         :type Δt: float
 
-        :return: Returns :code:`sim_time_dev_prop, sim_current` where both values are a HaPPPy.MasterEquation.Simulation pf :math:`\\vec{P}` rep. :math:`I`.
+        :return: Returns :code:`sim_time_dev_prop, sim_current` where both values are a HaPPPy.MasterEquation.Simulation of :math:`\\vec{P}` rep. :math:`I`.
         :rtype: (HaPPPy.MasterEquation.Simulation, HaPPPy.MasterEquation.Simulation)
         """
 
@@ -345,7 +343,6 @@ class Simulation():
     """
     This class represents a simulation crated by HaPPPy.MasterEquation.MasterEquationSolver.doCalculation().
     A function :math:`f : [0, t_{max}] \\to X, t \mapsto f(t)` is approximated by calculating its discrete values :math:`f(n \\cdot \\Delta t)` where :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}`.
-    A Simulation returned by the calculation function stores the values:
 
     If :code:`sim` is a valid HaPPPy.MasterEquation.Simulation then:
 
@@ -429,6 +426,17 @@ class Simulation():
     def quickPlot(self, title=None, xlabel=None, ylabel=None, xunit=None, yunit=None):
         """
         Simple plotting method to quickly get an overview on the simulation.
+
+        :param title: The title of the plot. (optional)
+        :type title: string
+        :param xlabel: The symbol to retresent the parameter. (optional)
+        :type xlabel: string
+        :param ylabel: The symbol to retresent the function values. (optional)
+        :type ylabel: string
+        :param xunit: The unit the paramter is meassured in. (optional)
+        :type xunit: string
+        :param yunit: The unit the function valuesare meassured in. (optional)
+        :type yunit: string
 
         :example: See the example given at the documentation of HaPPPy.MasterEquation.MasterEquationSolver.
         """
