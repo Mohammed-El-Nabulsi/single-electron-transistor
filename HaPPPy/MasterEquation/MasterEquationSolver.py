@@ -240,7 +240,9 @@ class MasterEquationSolver:
         sim_successful = True
 
         # set-up Λ-matrix
+        # positive coefficients in master equation
         Λ_in = Γ
+        # negative coefficients in master equation
         Λ_out = np.diag([sum([Γ[i][j] for j in range(Γ.shape[0])]) for i in range(Γ.shape[0])])
         Λ = Λ_in - Λ_out
         if verbose: print("Λ_in = \n", Λ_in)
@@ -269,21 +271,27 @@ class MasterEquationSolver:
         if (np.dot(Λ_evecs_T_inv, Λ_evecs_T) != np.identity(Λ.shape[0])).all():
             raise RuntimeError("Can not invert Λ = \n" + str(Λ))
 
-        verbose = False
         # simulate time development discretly
         valid = True
         sim = Simulation(Δt, t_max)
         P_0_evb = np.dot(Λ_evecs_T, P_0)
         for t in np.arange(0, t_max + Δt, Δt):
             if verbose: print("\nt = ", t)
+
+            # calculate time development in eigenvector base
             #exp_tΛ_evb = np.diag(np.power(Λ_evals, t)) # Does not behave well due to numerical issues!
             exp_tΛ_evb = np.diag(np.exp(t * Λ_evals))
             if verbose: print("exp(" + str(t) + " * Λ) in Λ.eigenvectorbase = \n", exp_tΛ_evb)
             P_evb_t = np.dot(exp_tΛ_evb, P_0_evb)
             if verbose: print("P(t=" + str(t) + ") in Λ.eigenvectorbase = \n", P_evb_t)
+
+            # change to original base
             P_t = np.dot(Λ_evecs_T_inv, P_evb_t)
             if verbose: print("P(t=" + str(t) + ") = \n", P_t)
+
+            # append new values to simulation
             sim.append(np.array([P_t[i][0] for i in range(P_t.shape[0])]))
+
             # check if sum of coefficients of P_t is still 1
             P_sum = sum(P_t)
             if check_tolerance and (P_sum < 1 - self.ε or P_sum > 1 + self.ε):
