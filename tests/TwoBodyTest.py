@@ -30,7 +30,9 @@ class TwoBodyTestSuite(unittest.TestCase):
         wave1 = np.array([-0.0, -0.5, -0.9, -1.0, -2.0, 2.0, 1.0, 0.9, 0.5, 0.0])
         # save to file
         loader1 = SpectrumData()
-        loader1.init(path, 2, 10, -1.0, 1.0)
+        loader1.init(path, 2, 10, L=5)
+        self.assertAlmostEqual(loader1.n * loader1.dx, 5, msg='wrong grid size!')
+        self.assertAlmostEqual((loader1.n - 1) * loader1.dx, loader1.x1 - loader1.x0, msg='wrong grid bounds!')
         loader1.energies[:] = energies
         loader1.waves[0,:] = wave0
         loader1.waves[1,:] = wave1
@@ -39,14 +41,14 @@ class TwoBodyTestSuite(unittest.TestCase):
         loader2 = SpectrumData()
         loader2.open(path)
         # compare data
-        self.assertEqual(loader1.x0, loader2.x0)
-        self.assertEqual(loader1.x1, loader2.x1)
-        self.assertEqual(loader1.dx, loader2.dx)
-        self.assertEqual(loader1.m, loader2.m)
-        self.assertEqual(loader1.n, loader2.n)
-        self.assertTrue(np.allclose(loader2.energies[:], energies))
-        self.assertTrue(np.allclose(loader2.waves[0,:], wave0))
-        self.assertTrue(np.allclose(loader2.waves[1,:], wave1))
+        self.assertAlmostEqual(loader1.x0, loader2.x0, msg='corrupted grid bounds!')
+        self.assertAlmostEqual(loader1.x1, loader2.x1, msg='corrupted grid bounds!')
+        self.assertAlmostEqual(loader1.dx, loader2.dx, msg='corrupted grid size!')
+        self.assertEqual(loader1.m, loader2.m, msg='wrong dataset dimensions!')
+        self.assertEqual(loader1.n, loader2.n, msg='wrong dataset dimensions!')
+        self.assertTrue(np.allclose(loader2.energies[:], energies), msg='corrupted eigenenergy values')
+        self.assertTrue(np.allclose(loader2.waves[0,:], wave0), msg='corrupted wavefunction data')
+        self.assertTrue(np.allclose(loader2.waves[1,:], wave1), msg='corrupted wavefunction data')
         loader2.close()
 
 if __name__ == '__main__':

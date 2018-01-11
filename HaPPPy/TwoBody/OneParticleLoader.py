@@ -1,8 +1,8 @@
 import h5py
 
 #private constants holding the dataset names
-_EN_NAME = "eigenvalues_group1"
-_EV_NAME = "eigenvectors_group1"
+_EN_NAME = "eigenvalues"
+_EV_NAME = "eigenvectors"
 _OPT_NAME = "settings"
 
 class SpectrumData:
@@ -35,21 +35,38 @@ class SpectrumData:
 		self.m = len(self.energies)
 		self.dx = (self.x1 - self.x0) / (self.n - 1)
 	
-	def init(self, filename, m, n, x0, x1):
+	def init(self, filename, m, n, x0=None, x1=None, dx=None, L=None):
 		"""Initialize with empty data and create the datasets for a new hdf5-file
 		
 		Arguments:
 		filename -- path to the file to store the data in (without the '.hsf5' ending)
 		m -- the number of eigenvalues/-functions
 		n -- the number of grid points used to represent the wavefunctions
-		x0 -- the spacial location of the 0-th grid point in [nm]
-		x1 -- the spacial location of the (n-1)-th grid point in [nm]
+		x0 -- the spacial location of the 0-th grid point in [nm] (optional)
+		x1 -- the spacial location of the (n-1)-th grid point in [nm] (optional)
+		dx -- the spacial distance between grid points in [nm] (optional): (n-1) * dx = x1-x0
+		L -- the spacial width of the whole grid in [nm] (optional): L = n * dx
+		of the arguments x0, x1, dx and L either dx, L or both x0 and x1 must be given otherwise a ValueError is raised!
 		"""
+		if L:
+			dx = L / n
+		if dx:
+			if x0:
+				x1 = x0 + (n-1) * dx
+			elif x1:
+				x0 = x1 - (n-1) * dx
+			else:
+				x1 = (n-1) * dx / 2.0
+				x0 = -x1
+		elif x0 and x1:
+			dx = (x1-x0) / (n-1)
+		else:
+			raise ValueError("Insuficient grid parameters given!")
 		self.m = m
 		self.n = n
 		self.x0 = x0
 		self.x1 = x1
-		self.dx = (x1 - x0) / (n - 1)
+		self.dx = dx
 		self.file = h5py.File(filename + ".hdf5", "w")
 		self.energies = self.file.create_dataset(_EN_NAME, (m,))
 		self.waves = self.file.create_dataset(_EV_NAME, (m, n))
