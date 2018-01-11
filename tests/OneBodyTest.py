@@ -24,6 +24,9 @@ class OneBodyTestSuite(unittest.TestCase):
         OBSolver = HaPPPy.OneBody.OneBodySolver()
         self.assertEqual(OBSolver.doCalculation(), 42.0)
 
+
 if __name__ == '__main__':
-    one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)
-    unittest.TextTestRunner(verbosity=2, buffer=True).run(one_body_suite)
+	OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
+	OBSolver.calcualteHarmonocPotential( 1,2,3)
+	#    one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)
+#    unittest.TextTestRunner(verbosity=2, buffer=True).run(one_body_suite)
