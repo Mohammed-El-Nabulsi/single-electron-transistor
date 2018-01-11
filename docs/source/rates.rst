@@ -1,16 +1,20 @@
 Rates Module
 ============
 
-Wir benötigen:
+we need:
 
-Von Gruppe 1: Array an Energieeigenwerten der Einteilchenzustände
-von Gruppe 2: Array an Koeffizientenmatrizen zugehörig zu den jeweiligen 2-Teilchenzuständen in der Produktbasis, Array mit Energieeigenwerten in gleicher Sortierung wie das Koeffizientenmatrixarray
-Von Gruppe 3: Transmissionskoeffizientenfunktion
-Von Main: Temperatur, chemische Potentiale L&R, Potential in Arrayform
+from group  1: array of energy-eigenvalues of the single-particle-eigenstates
 
-Wir geben aus:
+from group  2: array of coefficients-matrices, where each matrix represents a two-particle-state in the product-basis,
+array of energy-eigenvalues of two-particle-states in the same order as the array of coefficient-matrices
 
-Array an Ratenmatrizen in der Reihenfolge (Gamma_01L,Gamma_01R,Gamma_10L,Gamma_10R,Gamma_12L,Gamma_12R,Gamma_21L,Gamma_21R)
+from group  3: function that gives us the transmission-coefficients
+
+from main: temperature, chemical potential L&R, tunnel-potential in form of an array
+
+our output:
+
+array of rate-matrices sorted in the following order: (Gamma_01L,Gamma_01R,Gamma_10L,Gamma_10R,Gamma_12L,Gamma_12R,Gamma_21L,Gamma_21R)
 
 
 .. automodule:: HaPPPy.Rates
