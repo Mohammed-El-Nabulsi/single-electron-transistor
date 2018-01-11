@@ -1,15 +1,17 @@
 import numpy as np 
 from .MatrixElement import getMatrixElement, testFunction
+from .OneParticleLoader.py import SpectrumData
 
 def getOneParticleData():
-	SP_EE = None
-	SP_EV = None
+	#Internal function loading the one-particle data from a file via the SpectrumData class
+	data = SpectrumData.open("HaPPPy/OneBody/data_group1.hdf5") #This is untested _and_ breaks whenever the save location is changed in the OneBody code. This could be improved by a function in the OneBodySolver that returns the path of the file.
+	SP_EE = data.energies
+	SP_EV = data.waves
 	return [SP_EE,SP_EV]
 
 
 def createTwoParticleData():
-	""" Calculate and return the two-electron eigenfunctions from the single-electron eigenfunctions. Returns an array Q of matrices of the shape [i,j,n], where Q[i,j,n] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function.
-	"""	
+	""" Calculate and return the two-electron eigenvalues and eigenvectors from the single-electron eigenfunctions. Returns [E,Q], where E is an array of (scalar) eigen values and Q is an array of matrices of the shape [i,j,n], where Q[i,j,n] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function. These arrays do not have a special ordering, but Q[:,:,n] is the eigenvector belonging to E[n]."""
 	[SP_EE,SP_EV] = getOneParticleData()
 		
 	n = len(SP_EE)
@@ -19,6 +21,9 @@ def createTwoParticleData():
 	#       Singuletts: n - terms: |1>|1>, ...|n>|n>
 	#                   1/2 n(n-1) terms: |1>|2>, ....|1>|n>, |2>|3>,..., |2>|n>, ..., |n-1>|n>  
 	#       Tripletts: 1/2 n(n-1) terms: |1>|2>, ....|1>|n>, |2>|3>,..., |2>|n>, ..., |n-1>|n>
+	#
+	# The index set I is the ordering of the mixed singlet and triplet terms: I[k] is a pair of indices [i,j] meaning the basis element corresponding to |i,j>.
+	# In the case of singlets/triplets, this is the function 1/sqrt(2)(|i,j> +/- |j,i>)
 	I=np.zeros((int(1/2*n*(n-1)),2))
 	k=0
 	for i in range(n): 
@@ -96,6 +101,7 @@ def createTwoParticleData():
 
 	Eigenvectors_Productbasis = np.zeros((n**2,n**2))
 	
+	#Z is the Matrix of the basis change from the product basis to the singlet/triplet-basis
 	Z = np.zeros((n**2,n**2))
 	for i in range(n**2):
 		if(i<n):
@@ -107,8 +113,10 @@ def createTwoParticleData():
 			Z[i,i]=(-1)/np.sqrt(2)
 			Z[i,i-L]=1/np.sqrt(2)
 
+	#Eigenvectors are the eigenvectors in the singlet/triplet-basis, so the basis transformation Z gives the eigenvectors in the product basis.
 	Eigenvectors_Productbasis = np.dot(Eigenvectors, Z)
-	#Transform  Eigenvectors_Productbasis into n**2 Matrices with the coeeficients 
+	
+	#Transform  Eigenvectors_Productbasis into n**2 Matrices with the coefficients 
 	Q=np.zeros((n,n, n**2))
 	for i in range(n):
 		for j in range(n):
@@ -120,6 +128,4 @@ def createTwoParticleData():
 				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1+L,:]				
 	
 
-	#print(Eigenenergies)
-	#print(Eigenvectors)#_Productbasis)
-	return Q
+	return [Eigenenergies, Q]
