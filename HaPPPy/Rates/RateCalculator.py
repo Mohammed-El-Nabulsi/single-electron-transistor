@@ -14,7 +14,7 @@ from HaPPPy.MasterEquation import MasterEquationSolver
 #muL, muR,T, Vinput aus main importieren 
 #Transimissionsmatrix wird in def Gamma importiert
 class RateCalculator:
-
+    
     def __init__(self):
         """ The constructor.
         """
@@ -29,14 +29,22 @@ class RateCalculator:
     
 
     #definiere Fermifunktion
-    def doCalculation(self, E1, E2, muL, muR, T, V, C): 
+    def doCalculation(self, E1, E2, muL, muR, T, V, C):
+        kB=1
         def fermi(E,mu,T):
             f=1/(math.exp((E-mu)/(kB*T) )+1)
             return(f)
 
+        def D(A):
+            if A == 0:
+                return(1)
+            else:
+                return(0)
         def Gamma(Ea,Eb,V):
-            return (np.absolute(TMCal.calculate_transmission(np.absolute(Eb-Ea),V[:half]))**2*D(np.absolute(Ea-Eb)))
+            return (np.absolute(t(np.absolute(Eb-Ea),V))**2*D(np.absolute(Ea-Eb)))
 
+        def t(E, V):
+            return(0.1)
         NEcut= np.size(E2)
           
         #Um Tunnelraten zu berechnen, die durch die linke Tunnerlbariere gehen, muss als Parameter mu das chemische Potential der linken Tunnelbariere eingesetzt werden. Umgekehrt symmetrisch für die rechte Tunnelbariere
@@ -89,9 +97,10 @@ class RateCalculator:
             Gamma_01R[np.where(E1==i)[0][0]]=Gamma_01(i,muR,T)
             Gamma_10L[np.where(E1==i)[0][0]]=Gamma_10(i,muL,T)
             Gamma_10R[np.where(E1==i)[0][0]]=Gamma_10(i,muR,T)
+        print(Gamma_01L,Gamma_01R,Gamma_10L,Gamma_10R,Gamma_12L,Gamma_12R,Gamma_21L,Gamma_21R)
         print('reihenfolge 01L,01R,10L,10R,12L,12R,21L,21R')
         return(Gamma_01L,Gamma_01R,Gamma_10L,Gamma_10R,Gamma_12L,Gamma_12R,Gamma_21L,Gamma_21R)
-
+        
 
 
 
