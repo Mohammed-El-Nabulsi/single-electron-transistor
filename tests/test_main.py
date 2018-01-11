@@ -111,10 +111,10 @@ class MasterEquationTestSuite(unittest.TestCase):
         do_test_2 = True
         do_test_3 = True
         do_test_4 = True
+        do_test_5 = True
 
         if do_test_1:
             ## test 1:
-            # todo: add description / motivation
 
             # instanciate a MasterEquationSolver
             mes = HaPPPy.MasterEquation.MasterEquationSolver()
@@ -133,17 +133,20 @@ class MasterEquationTestSuite(unittest.TestCase):
             P_0 = np.array([p0, p1, p2])
             # simulate
             sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
+            # check validity
+            self.assertTrue(sim_tdp.valid())
+            self.assertTrue(sim_cur.valid())
             # check development of porpabilities
             Ps = sim_tdp.getValues()
             #     a. check conservation of total probability
             for P in Ps:
-                self.assertTrue(-ε < sum(P) < 1 + ε)
+                self.assertTrue(1 - ε <= sum(P) <= 1 + ε)
             #     b. check values after a 'long' time period
             #        expected: propability of state 1 'shifts' to state 2
             #                  state 3 is constant
-            self.assertTrue(Ps[t_max][0] < ε)
-            self.assertTrue(Ps[t_max][1] < p0 + p1 + ε)
-            self.assertTrue(Ps[t_max][2] < p2 + ε)
+            self.assertTrue(Ps[t_max][0] <= ε)
+            self.assertTrue(Ps[t_max][1] <= p0 + p1 + ε)
+            self.assertTrue(Ps[t_max][2] <= p2 + ε)
             # plot result
             if plot_figures:
                 sim_tdp.quickPlot(xlabel="t", ylabel="P")
@@ -151,7 +154,6 @@ class MasterEquationTestSuite(unittest.TestCase):
 
         if do_test_2:
             ## test 2:
-            # todo: add description / motivation
             # symmetric Γ = Γ_L - Γ_R --> uniform distibution of propability
 
             # instanciate a MasterEquationSolver
@@ -169,15 +171,18 @@ class MasterEquationTestSuite(unittest.TestCase):
             P_0 = P_0 / sum(P_0)
             # simulate
             sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
+            # check validity
+            self.assertTrue(sim_tdp.valid())
+            self.assertTrue(sim_cur.valid())
             # check development of porpabilities
             Ps = sim_tdp.getValues()
             #     a. check conservation of total probability
             for P in Ps:
-                self.assertTrue(-ε < sum(P) < 1 + ε)
+                self.assertTrue(1 - ε <= sum(P) <= 1 + ε)
             #     b. check values after a 'long' time period
             #        expected: uniform distribution
             for P_i in Ps[t_max]:
-                self.assertTrue(1/n - ε < P_i < 1/n + ε)
+                self.assertTrue(1/n - ε <= P_i <= 1/n + ε)
             # plot result
             if plot_figures:
                 sim_tdp.quickPlot(xlabel="t", ylabel="P")
@@ -185,7 +190,6 @@ class MasterEquationTestSuite(unittest.TestCase):
 
         if do_test_3:
             ## test 3:
-            # todo: add description / motivation
 
             # instanciate a MasterEquationSolver
             mes = HaPPPy.MasterEquation.MasterEquationSolver()
@@ -202,25 +206,28 @@ class MasterEquationTestSuite(unittest.TestCase):
             P_0 = P_0 / sum(P_0)
             # simulate
             sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
+            # check validity
+            self.assertTrue(sim_tdp.valid())
+            self.assertTrue(sim_cur.valid())
             # check development of porpabilities
             Ps = sim_tdp.getValues()
             #     a. check conservation of individual probabilities
             for P in Ps:
-                self.assertTrue(-ε < sum(abs(P - P_0)) < ε)
+                self.assertTrue(-ε <= sum(abs(P - P_0)) <= ε)
             # check current
             Is = sim_cur.getValues()
             #     a. check if current is constntly 0
             for I in Is:
-                self.assertTrue(-ε < abs(I) < 1 + ε)
+                self.assertTrue(-ε <= abs(I) <= +ε)
             # plot result
             if plot_figures:
                 sim_tdp.quickPlot(xlabel="t", ylabel="P")
                 sim_cur.quickPlot(xlabel="t", ylabel="I")
 
         if do_test_4:
-            ## test 3:
-            # todo: add description / motivation
-            # like test 2 but with large n to test accuracy
+            ## test 4:
+            # test if algorith can handle large inputs
+            # (like test 2 but with large n to test accuracy)
 
             # instanciate a MasterEquationSolver
             mes = HaPPPy.MasterEquation.MasterEquationSolver()
@@ -237,15 +244,45 @@ class MasterEquationTestSuite(unittest.TestCase):
             P_0 = P_0 / sum(P_0)
             # simulate
             sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
+            # check validity
+            self.assertTrue(sim_tdp.valid())
+            self.assertTrue(sim_cur.valid())
             # check development of porpabilities
             Ps = sim_tdp.getValues()
             #     a. check conservation of total probability
             for P in Ps:
-                self.assertTrue(-ε < sum(P) < 1 + ε)
+                self.assertTrue(1 - ε <= sum(P) <= 1 + ε)
             #     b. check values after a 'long' time period
             #        expected: uniform distribution
             for P_i in Ps[t_max]:
-                self.assertTrue(1/n - ε < P_i < 1/n + ε)
+                self.assertTrue(1/n - ε <= P_i <= 1/n + ε)
+
+        if do_test_5:
+            ## test 5:
+            # test tolerance behaviour
+
+            # parameters of this tets:
+            ε = 1E-100 # ridiculously precise
+            Δt = 1
+            t_max = 100
+            n = 10
+            # set-up a reasonable Γ-matrix
+            Γ_L = np.array([[2*(i + j)/n**2 for j in range(n)] for i in range(n)])
+            Γ_R = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
+            # choose a legitimate start value for P_0 (P_0 = P(t=0))
+            P_0 = np.array([i for i in range(n)])
+            P_0 = P_0 / sum(P_0)
+            # instanciate a MasterEquationSolver
+            mes = HaPPPy.MasterEquation.MasterEquationSolver(ε=ε)
+            # simulate
+            sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
+            # check validity
+            self.assertTrue(not sim_tdp.valid())
+            self.assertTrue(not sim_cur.valid())
+            # plot result
+            if plot_figures:
+                sim_tdp.quickPlot(xlabel="t", ylabel="P")
+                sim_cur.quickPlot(xlabel="t", ylabel="I")
 
 if __name__ == '__main__':
     happy_suite = unittest.TestLoader().loadTestsFromTestCase(HappyBasicTestSuite)
