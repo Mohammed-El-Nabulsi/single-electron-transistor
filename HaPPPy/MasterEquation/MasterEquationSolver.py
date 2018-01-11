@@ -8,75 +8,123 @@ import math
 __docformat__ = 'reStructuredText'
 
 class MasterEquationSolver:
+    """
+    Simulates the time development of propabilities P(t) for an ``n`` state system with transition rates Γ including the netto current.
+
+    This method returns numerical approximations of the solution to the following problems.
+
+    **1st Problem: Time Development of Propabilities**
+
+    Let
+
+    .. math::
+
+        n \in \mathbb{N}, t_{max} \in \mathbb{R}^+_0, \Delta t \in \mathbb{R}^+ \\\\ \Gamma = \Gamma^L + \Gamma^R \in Mat(n, n, \mathbb{R}^+_0), \\vec{P} : [0, t_{max}] \\to { \left ( \mathbb{R}^+_0 \\right ) }^n, t \mapsto \\vec{P}(t)
+
+    The differential equation of first order with constant coefficients to be solved is stated as
+
+    .. math::
+
+        \\frac{d P_{\\alpha}}{d t} = \sum_{\\beta} \Gamma_{\\beta \\rightarrow \\alpha} P_{\\beta} - \sum_{\\beta} \Gamma_{\\alpha \\rightarrow \\beta} P_{\\alpha}
+
+    where
+
+    .. math::
+
+        \Gamma_{\\alpha \\rightarrow \\beta} \equiv \Gamma_{\\alpha \\beta}
+
+    and
+
+    .. math::
+
+        \\vec{P_0} = \\vec{P}(t=0)
+
+    is the boundary condition.
+
+    denotes the rate from state :math:`\\alpha` to :math:`\\beta`.
+
+    The solution of this problem is returned as a discrete simulation of :math:`\\vec{P}`. (See HaPPPy.MasterEquation.Simulation for more details.)
+
+    **2nd Problem: Netto Current**
+
+    From the time develpment of probabilities the netto current is derived.
+
+    In addition to the 1st problem let
+
+    .. math::
+
+        I : [0, t_{max}] \\to \mathbb{R}, t \mapsto I(t) \\\\
+        I^k : [0, t_{max}] \\to \mathbb{R}, t \mapsto I^k(t), k \in \\{ L, R \\} \\\\
+        I^k = e \sum_{\\alpha, \\beta} \Gamma^k_{\\alpha \\rightarrow \\beta} P_{\\alpha} \\\\
+        I = I^L - I^R = q \sum_{\\alpha, \\beta} \\left ( \Gamma^L_{\\alpha \\rightarrow \\beta} - \Gamma^R_{\\alpha \\rightarrow \\beta} \\right ) P_{\\alpha}
+
+    It is assumed that the charge :math:`q = 1`.
+
+    :math:`I^L,I^R` descibe the current the the *left* resp. *right* barrier, hence :math:`I` describes the netto flow.
+
+    The solution of this problem is returned as a discrete simulation as well. (See HaPPPy.MasterEquation.Simulation for more details.)
+
+    :example: .. code-block:: Python
+            :emphasize-lines: 1-2,7-8,10, 12
+
+            import HaPPPy
+            import numpy as np
+            import matplotlib.pyplot as plt
+
+            ## simple simulation with the MasterEquationSolver class
+            # set-up a reasonable Γ-matrix
+            Γ_L = np.array([[0, 0.5, 0.5], [0.5, 0, 0.5], [0.5, 0.5, 0]])
+            Γ_R = np.array([[0, 0.0, 0.5], [0.0, 0, 0.5], [0.0, 0.5, 0]])
+            # choose a legitimate start value for P_0 (P_0 = P(t=0))
+            P_0 = np.array([0.9, 0.0, 0.1])
+            # simulate
+            mes = HaPPPy.MasterEquation.MasterEquationSolver()
+            sim_time_dev_prop, sim_current = mes.doCalculation(0.1, 10, P_0, Γ_L, Γ_R)
+
+            ## plot results
+            # 1st plot: time development of propabilities
+            sim_time_dev_prop.quickPlot(xlabel="t", ylabel="P")
+            # 2nd plot: time development of netto current
+            sim_current.quickPlot(xlabel="t", ylabel="I")
+
+
+        The relevant lines of code for the simulation to work are highlighted. To give a real live example and to demonstarte the usage of the result some code to plot the result is added.
+
+    """
+    # Don't remove the last dot/paragrph since it is a workaround to shpinx's
+    # code-block interpreter.
+
+    def __init__(self, ε=1E-10):
+        """
+        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :type ε: float
+        """
+        self.ε = ε
+
+    def getε(self):
+        """
+        :return: Returns ε - a tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :rtype: float
+        """
+        return self.ε
+
+    def setε(self, ε):
+        """
+        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :type ε: float
+        """
+        self.ε = ε
 
     def doCalculation(self,
-                      P_0,
-                      Γ_L,
-                      Γ_R,
-                      t_max,
-                      Δt,
-                      ε=1E-10,
+                      Δt=None,
+                      t_max=None,
+                      P_0=None,
+                      Γ_L=None,
+                      Γ_R=None,
                       check_tolerance=True
                      ):
-        """Simulates the time development of propabilities P(t) for an ``n`` state system with transition rates Γ including the netto current.
-
-        .. todo::
-
-            - Missing e in current simulation?
-            - Extra return type for each simulation recommended.
-
-        This method returns numerical approximations of the solution to the following problems.
-
-        **1st Problem: Time Development of Propabilities**
-
-        Let
-
-        .. math::
-
-            n \in \mathbb{N}, t_{max} \in \mathbb{R}^+_0, \Delta t \in \mathbb{R}^+ \\\\ \Gamma = \Gamma^L + \Gamma^R \in Mat(n, n, \mathbb{R}^+_0), \\vec{P} : [0, t_{max}] \\to { \left ( \mathbb{R}^+_0 \\right ) }^n, t \mapsto \\vec{P}(t)
-
-        The differential equation of first order with constant coefficients to be solved is stated as
-
-        .. math::
-
-            \\frac{d P_{\\alpha}}{d t} = \sum_{\\beta} \Gamma_{\\beta \\rightarrow \\alpha} P_{\\beta} - \sum_{\\beta} \Gamma_{\\alpha \\rightarrow \\beta} P_{\\alpha}
-
-        where
-
-        .. math::
-
-            \Gamma_{\\alpha \\rightarrow \\beta} \equiv \Gamma_{\\alpha \\beta}
-
-        and
-
-        .. math::
-
-            \\vec{P_0} = \\vec{P}(t=0)
-
-        is the boundary condition.
-
-        denotes the rate from state :math:`\\alpha` to :math:`\\beta`.
-
-        The solution of this problem is returned as a discrete version of :math:`\\vec{P}`. Therefore it consists of pairs :math:`(t_i, \\vec{P}(t_i))` where :math:`t_i \in \{n \cdot \Delta t | n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \}`.
-
-        **2nd Problem: Netto Current**
-
-        From the time develpment of probabilities the netto current is derived.
-
-        In addition to the 1st problem let
-
-        .. math::
-
-            I : [0, t_{max}] \\to \mathbb{R}, t \mapsto I(t) \\\\
-            I^k : [0, t_{max}] \\to \mathbb{R}, t \mapsto I^k(t), k \in \\{ L, R \\} \\\\
-            I^k = e \sum_{\\alpha, \\beta} \Gamma^k_{\\alpha \\rightarrow \\beta} P_{\\alpha} \\\\
-            I = I^L - I^R = e \sum_{\\alpha, \\beta} \\left ( \Gamma^L_{\\alpha \\rightarrow \\beta} - \Gamma^R_{\\alpha \\rightarrow \\beta} \\right ) P_{\\alpha}
-
-        With :math:`e \\approx 1.602 \cdot 10^{-19} Coulomb`.
-
-        :math:`I^L,I^R` descibe the current the the *left* resp. *right* barrier, hence :math:`I` describes the netto flow.
-
-        The solution of this problem is returned as a discrete version as well. It consists of pairs :math:`(t_i, I(t_i))` where :math:`t_i \in \{n \cdot \Delta t | n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \}`. (Just like in the first problem.)
+        """
+        See class description of Happy.MasterEquationSolver for details.
 
         :param P_0: Start value of propabilities where :code:`P_0` ≣ :math:`\\vec{P_0}`. Must be either a list or a ``nx1`` matrix.
         :type P_0: numpy.array
@@ -88,73 +136,10 @@ class MasterEquationSolver:
         :type t_max: float
         :param Δt: Length of the time tintervall between two simulated events. Must be > 0.
         :type Δt: float
-        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
-        :type ε: float
-        :param check_tolerance: Enables initial and successive check as described for ε.
-        :type check_tolerance: bool
 
-        :return: Returns :code:`sim_time_dev_prop, sim_current` where :code:`sim_time_dev_prop[i][0]` ≣ :math:`i \cdot \Delta t`, :code:`sim_time_dev_prop[i][1][j]` ≣ :math:`P_j(i \cdot \Delta t)`, :code:`sim_current[i][0]` ≣ :math:`i \cdot \Delta t` and :code:`sim_current[i][1]` ≣ :math:`I(i \cdot \Delta t)`.
-        :rtype: (list, list)
-
-        :example: .. code-block:: python
-                :emphasize-lines: 1,3,7-8,10-18
-
-                import numpy as np
-                import matplotlib.pyplot as plt
-                from HaPPPy.MasterEquation.MasterEquationSolver import MasterEquationSolver as MES
-
-                ## simple simulation with the MasterEquationSolver class
-                # set-up a reasonable Γ-matrix
-                Γ_L = np.array([[0, 0.5, 0.5], [0.5, 0, 0.5], [0.5, 0.5, 0]])
-                Γ_R = np.array([[0, 0.0, 0.5], [0.0, 0, 0.5], [0.0, 0.5, 0]])
-                # choose a legitimate start value for P_0 (P_0 = P(t=0))
-                P_0 = np.array([0.9, 0.0, 0.1])
-                # simulate
-                mes = MES()
-                sim_time_dev_prop, sim_current = mes.doCalculation(P_0,
-                                                                   Γ_L,
-                                                                   Γ_R,
-                                                                   t_max=10,
-                                                                   Δt=0.1
-                                                                  )
-
-                ## plot results
-                # 1st plot: time development of propabilities
-                # seperate x value (time) from y values (P) to be able to plot it
-                ts = [sim_time_dev_prop[i][0] for i in range(len(sim_time_dev_prop))]
-                Ps = [sim_time_dev_prop[i][1] for i in range(len(sim_time_dev_prop))]
-                # plot
-                plt.plot(ts, Ps)
-                plt.xlabel("t")
-                plt.ylabel("P")# create legend
-                n = len(sim_time_dev_prop[0][1]) # dimension of P
-                legend_names = ["$P_" + str(i) + "$" for i in range(n)]
-                plt.legend(legend_names)
-                plt.grid()
-                plt.show()
-
-                # 2nd plot: time development of netto current
-                # seperate x value (time) from y values (P) to be able to plot it
-                ts = [sim_current[i][0] for i in range(len(sim_current))]
-                Is = [sim_current[i][1] for i in range(len(sim_current))]
-                # plot
-                plt.plot(ts,Is)
-                plt.xlabel("t")
-                plt.ylabel("I")
-                # create legend
-                legend_names = ["$I$"]
-                plt.legend(legend_names)
-                plt.grid()
-                plt.show()
-                plt.show()
-
-
-            The relevant lines of code for the simulation to work are highlighted. To give a real live example and to demonstarte the usage of the result some code to plot the result is added.
-
+        :return: Returns :code:`sim_time_dev_prop, sim_current` where both values are a HaPPPy.MasterEquation.Simulation pf :math:`\\vec{P}` rep. :math:`I`.
+        :rtype: (HaPPPy.MasterEquation.Simulation, HaPPPy.MasterEquation.Simulation)
         """
-        # Don't remove the last dot/paragrph since it is a workaround to shpinx's
-        # code-block interpreter.
-
 
         ## type conversions
         # if necessary: reformat P_0 as matrix (otherwise P_0 could not be multiplicated with matricies)
@@ -163,8 +148,8 @@ class MasterEquationSolver:
 
         ## input checks
         # warn if tolerance value is unreasonable
-        if check_tolerance and ε <= 0:
-            raise RuntimeError("ε must be a positive number > 0. \nε = " + str(ε))
+        if check_tolerance and self.ε <= 0:
+            raise RuntimeError("ε must be a positive number > 0. \nε = " + str(self.ε))
         # P_0 must be a nx1 matrix (with n matching Λ)
         if P_0.ndim != 2 or P_0.shape[1] != 1:
             raise RuntimeError("P_0 must be a "
@@ -183,9 +168,9 @@ class MasterEquationSolver:
             raise RuntimeError("P_0 must have coefficients >= 0. \nP_0 = \n" + str(P_0))
         # coefficients of P_0 must add up to 1
         P_sum = sum(P_0)
-        if check_tolerance and (P_sum < 1 - ε or P_sum > 1 + ε):
+        if check_tolerance and (P_sum < 1 - self.ε or P_sum > 1 + self.ε):
             raise RuntimeError("Coefficients of P_0 must add up to 1 (within tolerance ε = "
-                               + str(ε)
+                               + str(self.ε)
                                + "). \nP_0 = \n"
                                + str(P_0)
                                + "\n Σ = "
@@ -201,22 +186,22 @@ class MasterEquationSolver:
 
         ## calculation
         Γ = Γ_L + Γ_R
-        sim_successful, sim = self.__simulate_time_development_of_propabilities(P_0, Γ, t_max, Δt, ε, check_tolerance)
-        if sim_successful:
-            I_t = self.__simulate_current(Γ_L, Γ_R, sim, ε)
+        sim_tdp_successful, sim_tdp = self.__simulateTimeDevelopmentOfPropabilities(Δt, t_max, P_0, Γ, check_tolerance)
+        if sim_tdp_successful:
+            sim_cur = self.__simulateCurrent(Γ_L, Γ_R, sim_tdp)
 
-        return sim, I_t
+        return sim_tdp, sim_cur
 
-    def __simulate_time_development_of_propabilities(self,
-                                                   P_0,
-                                                   Γ,
-                                                   t_max,
-                                                   Δt,
-                                                   ε=1E-10,
-                                                   check_tolerance=True,
-                                                   verbose=False
-                                                  ):
-        """Simulates the time development of propabilities P(t) for an :math:`n`-state system with transition rates Γ.
+    def __simulateTimeDevelopmentOfPropabilities(self,
+                                                 Δt,
+                                                 t_max,
+                                                 P_0,
+                                                 Γ,
+                                                 check_tolerance=True,
+                                                 verbose=False
+                                                ):
+        """
+        Simulates the time development of propabilities P(t) for an :math:`n`-state system with transition rates Γ.
 
         .. todo::
 
@@ -236,7 +221,7 @@ class MasterEquationSolver:
             print("P(t=0) = \n", P_0)
             print("Γ = \n", Γ)
             if check_tolerance:
-                print("ε = ", ε)
+                print("ε = ", self.ε)
 
         ## simulation
         # track if simulation had any issues
@@ -274,7 +259,7 @@ class MasterEquationSolver:
 
         verbose = False
         # simulate time development discretly
-        sim = []
+        sim = Simulation(Δt, t_max)
         P_0_evb = np.dot(Λ_evecs_T, P_0)
         for t in np.arange(0, t_max + Δt, Δt):
             if verbose: print("\nt = ", t)
@@ -285,14 +270,14 @@ class MasterEquationSolver:
             if verbose: print("P(t=" + str(t) + ") in Λ.eigenvectorbase = \n", P_evb_t)
             P_t = np.dot(Λ_evecs_T_inv, P_evb_t)
             if verbose: print("P(t=" + str(t) + ") = \n", P_t)
-            sim.append((t, [P_t[i][0] for i in range(P_t.shape[0])]))
+            sim.append(np.array([P_t[i][0] for i in range(P_t.shape[0])]))
             # check if sum of coefficients of P_t is still 1
             P_sum = sum(P_t)
-            if check_tolerance and (P_sum < 1 - ε or P_sum > 1 + ε):
+            if check_tolerance and (P_sum < 1 - self.ε or P_sum > 1 + self.ε):
                 print("Warning! Calculation aborted Coefficients of P_(t="
                       + str(t)
                       + ") must add up to 1 (within tolerance ε = "
-                      + str(ε)
+                      + str(self.ε)
                       + "). \nP_(t="
                       + str(t)
                       + ") = \n"
@@ -311,8 +296,14 @@ class MasterEquationSolver:
         # simulation up to the point of failure but must be analysed more carefully.
         return sim_successful, sim
 
-    def __simulate_current(self, Γ_L, Γ_R, sim_time_dev_prop, ε=1E-10, verbose=False):
-        """Simulates the time current I(t) for an :math:`n`-state system with transition rates Γ.
+    def __simulateCurrent(self,
+                           Γ_L,
+                           Γ_R,
+                           sim_time_dev_prop,
+                           verbose=False
+                          ):
+        """
+        Simulates the time current I(t) for an :math:`n`-state system with transition rates Γ.
 
         .. todo::
 
@@ -332,9 +323,127 @@ class MasterEquationSolver:
         if verbose: print("Γ: \n", Γ)
 
         # simulate the current discretly
-        sim = []
+        sim = Simulation(sim_time_dev_prop.getΔt(), sim_time_dev_prop.getT_max())
         for i in range(len(sim_time_dev_prop)):
-            sim.append((sim_time_dev_prop[i][0], sum(np.dot(ΔΓ, sim_time_dev_prop[i][1]))))
-            if verbose: print("I_t[" + str(i) + "= \n", sim[i])
-
+            I_i = sum(sum(np.dot(ΔΓ, sim_time_dev_prop[i][1])))
+            sim.append(I_i)
+            if verbose: print("I_t[" + str(i) + "= \n", I_i)
         return sim
+
+class Simulation():
+    """
+    This class represents a simulation crated by HaPPPy.MasterEquation.MasterEquationSolver.doCalculation().
+    A function :math:`f : [0, t_{max}] \\to X, t \mapsto f(t)` is approximated by calculating its discrete values :math:`f(n \\cdot \\Delta t)` where :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}`.
+    A Simulation returned by the calculation function stores the values:
+
+    If :code:`sim` is a valid HaPPPy.MasterEquation.Simulation then:
+
+    :code:`sim.getTimeBins()` ≣ :math:`\\{n \\cdot \\Delta t | n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \\}`
+
+    and
+
+    :code:`sim.getValues()` ≣ :math:`\\{f(n \\cdot \\Delta t) | n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \\}`.
+
+    Both in increasing order of :math:`n`.
+    """
+
+    def __init__(self, Δt, t_max):
+        """
+        :param Δt: :code:`Δt` ≣ :math:`\\Delta t > 0`
+        :type: float
+        :param t_max: :code:`t_max` ≣ :math:`t_{max} \\geq 0`
+        :type: float
+        """
+        self.Δt = Δt
+        self.t_max = t_max
+        self.__values= []
+
+    def getΔt(self):
+        """
+        :return: Returns :code:`Δt` ≣ :math:`\\Delta t`.
+        :rtype: float
+        """
+        return self.Δt
+
+    def getT_max(self):
+        """
+        :return: Returns :code:`t_max` ≣ :math:`t_{max}`.
+        :rtype: float
+        """
+        return self.t_max
+
+    def getTimeBins(self):
+        """
+        :return: All values :math:`n \\cdot \\Delta t` where :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}` with increasing :math:`n`.
+        :rtype: numpy.ndarray
+        """
+        return np.arange(0, self.t_max + self.Δt, self.Δt)
+
+    def getValues(self):
+        """
+        :return: All values :math:`f(n \\cdot \\Delta t)` where :math:`f` is the simulated function and :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}` with increasing :math:`n`.
+        :rtype: numpy.ndarray
+        """
+        return np.array(self.__values)
+
+    def append(self, value):
+        """
+        For internal use unly.
+        """
+        self.__values.append(value)
+
+    def __getitem__(self, n):
+        """
+        :param n: :code:`n` ≣ :math:`n`.
+        :return: Returns :math:`f(n \\cdot \\Delta t)`.
+        :rtype: float or numpy.ndarray
+        """
+        return self.__values[n]
+
+    def __len__(self):
+        """
+        :return: Number of (current) calculated values in simulation.
+        :rtype: integer
+        """
+        return len(self.__values)
+
+    def __repr__(self):
+        ts = self.getTimeBins()
+        vs = self.getValues()
+        return "Sim<" + str([(ts[i], vs[i]) for i in range(len(self))]) + ">"
+
+    def __str__(self):
+        return repr(self)
+
+    def quickPlot(self, title=None, xlabel=None, ylabel=None, xunit=None, yunit=None):
+        """
+        Simple plotting method to quickly get an overview on the simulation.
+
+        :example: See the example given at the documentation of HaPPPy.MasterEquation.MasterEquationSolver.
+        """
+        # auquire values
+        ts = self.getTimeBins()
+        vs = self.getValues()
+        # plot
+        plt.plot(ts, vs)
+        # title
+        if title != None:
+            plt.title(str(title))
+        # labels
+        if xlabel != None:
+            if xunit != None:
+                plt.xlabel(str(xlabel) + "/" + str(xunit))
+            else:
+                plt.xlabel(str(xlabel))
+        if ylabel != None:
+            if yunit != None:
+                plt.ylabel(str(ylabel) + "/" + str(yunit))
+            else:
+                plt.ylabel(str(ylabel))
+        # legend
+        if ylabel != None and (type(vs[0]) == list or type(vs[0]) == np.ndarray) and len(vs[0]) > 1:
+            n = len(vs[0]) # dimension of v
+            legend = ["$" + str(ylabel) + "_" + str(i) + "$" for i in range(n)]
+            plt.legend(legend)
+        plt.grid()
+        plt.show()

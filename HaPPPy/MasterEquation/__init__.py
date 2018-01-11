@@ -10,3 +10,4 @@ See documentation of MasterEquationSolver.doCalculation for details.
 """
 
 from .MasterEquationSolver import MasterEquationSolver
+from .MasterEquationSolver import Simulation
