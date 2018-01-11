@@ -3,9 +3,9 @@ import HaPPPy
 import unittest
 import numpy as np
 
-Energie_Einteilchen =  [0.1, 3, 4] #Energieeigenwerte von Gruppe 1
-Vinput = [6, 3, 1, 0, 0, 1, 3, 6] #Vorgegebene Tunnelbarriere
-Energie_Zweiteilchen = [0.7, 2.4, 3.6] #Energieegenwerte von Gruppe 2
+Energie_Einteilchen =  np.array([0.1, 3, 4]) #Energieeigenwerte von Gruppe 1
+Vinput = np.array([6, 3, 1, 0, 0, 1, 3, 6]) #Vorgegebene Tunnelbarriere
+Energie_Zweiteilchen = np.array([0.7, 2.4, 3.6]) #Energieegenwerte von Gruppe 2
 Koeeffizienten_Zweiteilchen= np.array([[[0, 1, 0],[1, 2, 0],[0, 0, 1]],[[1, 0 ,0],[0.2, 0.5, 0],[0.1, 0.3, 1]],[[0, 0, 0.5],[1, 0, 0.1],[0, 1, 0.1]]]) #Koeeffizientenmatrizen von Gruppe 2
 muL = 31
 muR= 95
