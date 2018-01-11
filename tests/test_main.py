@@ -4,7 +4,6 @@
 import HaPPPy
 import unittest
 import numpy as np
-import matplotlib.pyplot as plt
 
 class HappyBasicTestSuite(unittest.TestCase):
     """A test class to test HaPPPy in general.
