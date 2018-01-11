@@ -2,20 +2,19 @@ import numpy as np
 from .MatrixElement import getMatrixElement, testFunction
 from .OneParticleLoader.py import SpectrumData
 
-def getOneParticleData():
-	#Internal function loading the one-particle data from a file via the SpectrumData class
-	data = SpectrumData.open("HaPPPy/OneBody/data_group1.hdf5") #This is untested _and_ breaks whenever the save location is changed in the OneBody code. This could be improved by a function in the OneBodySolver that returns the path of the file.
-	SP_EE = data.energies
-	SP_EV = data.waves
-	return [SP_EE,SP_EV]
 
-
-def createTwoParticleData():
-	""" Calculate and return the two-electron eigenvalues and eigenvectors from the single-electron eigenfunctions. Returns [E,Q], where E is an array of (scalar) eigen values and Q is an array of matrices of the shape [i,j,n], where Q[i,j,n] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function. These arrays do not have a special ordering, but Q[:,:,n] is the eigenvector belonging to E[n]."""
-	[SP_EE,SP_EV] = getOneParticleData()
-		
-	n = len(SP_EE)
-	X = len(SP_EV[0])
+def createTwoParticleData(opData):
+	""" Calculate and return the two-electron eigenvalues and eigenvectors from the single-electron eigenfunctions.
+	
+	Arguments:
+	opData -- the SpectrumData object containing the single-electron spectrum data to use for calculation
+	
+	Returns [E,Q], where E is an array of (scalar) eigen values and Q is an array of matrices of the shape [i,j,n], where Q[i,j,n] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function. These arrays do not have a special ordering, but Q[:,:,n] is the eigenvector belonging to E[n].
+	"""
+	SP_EE = opData.energies[:]
+	SP_EV = opData.waves[:,:]
+	n = opData.m
+	X = opData.n
 
 	# Basis: 
 	#       Singuletts: n - terms: |1>|1>, ...|n>|n>
