@@ -92,12 +92,15 @@ class MasterEquationSolver:
     # Don't remove the last dot/paragrph since it is a workaround to shpinx's
     # code-block interpreter.
 
-    def __init__(self, ε=1E-10):
+    def __init__(self, ε=None):
         """
-        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance. If :code:`ε == None` the fedault value is used (see getDefaultε()).
         :type ε: float
         """
-        self.setε(self.getDefaultε())
+        if ε == None:
+            self.setε(self.getDefaultε())
+        else:
+            self.ε = ε
 
     def getε(self):
         """
