@@ -143,27 +143,37 @@ class MasterEquationSolver:
         """
 
         ## type conversions
-        # if necessary: reformat P_0 as matrix (otherwise P_0 could not be multiplicated with matricies)
+        # if necessary: reformat P_0 as nx1 matrix (otherwise P_0 could not be multiplicated with matricies)
         if P_0.ndim == 1:
             P_0 = np.array([P_0]).transpose()
 
         ## input checks
+        # get dimension
+        n = P_0.shape[0]
         # warn if tolerance value is unreasonable
         if check_tolerance and self.ε <= 0:
             raise RuntimeError("ε must be a positive number > 0. \nε = " + str(self.ε))
         # P_0 must be a nx1 matrix (with n matching Λ)
         if P_0.ndim != 2 or P_0.shape[1] != 1:
             raise RuntimeError("P_0 must be a "
-                               + str(Γ.shape[0])
+                               + str(n)
                                + "x1 matrix (aka. a 'dotable vector')! \nP_0 = \n"
                                + str(P_0)
                               )
         # Γ_L must be a nxn matrix
         if Γ_L.ndim != 2 or Γ_L.shape[0] != P_0.shape[0] or Γ_L.shape[1] != P_0.shape[0] or not (Γ_L >= 0).all():
-            raise RuntimeError("Γ_L must be a nxn matrix with coefficients >= 0. \nΓ_L = \n" + str(Γ_L))
+            raise RuntimeError("Γ_L must be a "
+                               + str(n) + "x" + str(n)
+                               + " matrix with coefficients >= 0."
+                               + "\nΓ_L = \n" + str(Γ_L)
+                              )
         # Γ_R must be a nxn matrix
         if Γ_R.ndim != 2 or Γ_R.shape[0] != P_0.shape[0] or Γ_R.shape[1] != P_0.shape[0] or not (Γ_R >= 0).all():
-            raise RuntimeError("Γ_R must be a nxn matrix with coefficients >= 0. \nΓ_R = \n" + str(Γ_R))
+            raise RuntimeError("Γ_R must be a "
+                               + str(n) + "x" + str(n) +
+                               " matrix with coefficients >= 0."
+                               + "\nΓ_R = \n" + str(Γ_R)
+                              )
         # P_0 must have coefficients >= 0
         if not (P_0 >= 0).all():
             raise RuntimeError("P_0 must have coefficients >= 0. \nP_0 = \n" + str(P_0))
