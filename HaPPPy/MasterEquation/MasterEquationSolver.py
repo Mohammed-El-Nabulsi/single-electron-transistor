@@ -271,6 +271,7 @@ class MasterEquationSolver:
 
         verbose = False
         # simulate time development discretly
+        valid = True
         sim = Simulation(Δt, t_max)
         P_0_evb = np.dot(Λ_evecs_T, P_0)
         for t in np.arange(0, t_max + Δt, Δt):
@@ -297,8 +298,11 @@ class MasterEquationSolver:
                       + "\n Σ = "
                       + str(P_sum[0])
                      )
-                sim_successful = False
+                valid = False
                 break
+
+        if valid:
+            sim.validate()
 
         # Use either:
         #   return sim_successful ? sim : None
@@ -330,16 +334,22 @@ class MasterEquationSolver:
 
         """
 
+        valid = sim_time_dev_prop.valid()
+        sim = Simulation(sim_time_dev_prop.getΔt(), sim_time_dev_prop.getT_max())
+
         # calculate ΔΓ (direction sensivtive form)
         ΔΓ = Γ_L - Γ_R
         if verbose: print("ΔΓ: \n", ΔΓ)
 
         # simulate the current discretly
-        sim = Simulation(sim_time_dev_prop.getΔt(), sim_time_dev_prop.getT_max())
         for i in range(len(sim_time_dev_prop)):
             I_i = sum(sum(np.dot(ΔΓ, sim_time_dev_prop[i][1])))
             sim.append(I_i)
             if verbose: print("I_t[" + str(i) + "= \n", I_i)
+
+        if valid:
+            sim.validate()
+
         return sim
 
 class Simulation():
@@ -368,6 +378,7 @@ class Simulation():
         self.Δt = Δt
         self.t_max = t_max
         self.__values= []
+        self.__valid = False
 
     def getΔt(self):
         """
@@ -398,10 +409,19 @@ class Simulation():
         return np.array(self.__values)
 
     def append(self, value):
-        """
-        For internal use unly.
-        """
+        # for internal use only
         self.__values.append(value)
+
+    def valid(self):
+        """
+        :return: True iff simulation was not abroted.
+        :rtype: bool
+        """
+        return self.__valid
+
+    def validate(self):
+        # for internal use only
+        self.__valid = True
 
     def __getitem__(self, n):
         """
@@ -446,8 +466,17 @@ class Simulation():
         # auquire values
         ts = self.getTimeBins()
         vs = self.getValues()
+        if (not self.valid())and len(vs) < len(ts):
+            ts = ts[:len(vs)]
+
         # plot
         plt.plot(ts, vs)
+        # validity
+        if not self.valid():
+            if title == None:
+                title = " (not valid)"
+            else:
+                title = str(title) + " (not valid)"
         # title
         if title != None:
             plt.title(str(title))
@@ -467,5 +496,7 @@ class Simulation():
             n = len(vs[0]) # dimension of v
             legend = ["$" + str(ylabel) + "_" + str(i) + "$" for i in range(n)]
             plt.legend(legend)
+        # grid
         plt.grid()
+        # show
         plt.show()
