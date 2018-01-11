@@ -1,4 +1,6 @@
 import h5py
+import numpy as np
+import math
 
 #private constants holding the dataset names
 _EN_NAME = "eigenvalues"
@@ -11,7 +13,7 @@ class SpectrumData:
 	Fields available after initializing with 'open()' or 'init()':
 	file -- reference to the hdf5 file handle
 	energies -- dataset containing the energy eigenvalues in [meV] as floating point numbers: energies[i] stores the i-th eigenvalue
-	waves -- dataset containing the wavefunctions as rasterized floating point arrays of probabilities in [1/nm]: waves[i,j] stores the j-th grid entry of the i-th eigenvector
+	waves -- dataset containing the wavefunctions as rasterized floating point arrays of probabilities in [nm^(-1/2)]: waves[i,j] stores the j-th grid entry of the i-th eigenvector
 	m -- the number of eigenvalues/-functions
 	n -- the number of grid points used to represent the wavefunctions
 	dx -- the spacial distance between grid points in [nm]: (x1-x0) = dx * (n-1)
@@ -68,9 +70,9 @@ class SpectrumData:
 		self.x1 = x1
 		self.dx = dx
 		self.file = h5py.File(filename + ".hdf5", "w")
-		self.energies = self.file.create_dataset(_EN_NAME, (m,))
-		self.waves = self.file.create_dataset(_EV_NAME, (m, n))
-		par = self.file.create_dataset(_OPT_NAME, (2,))
+		self.energies = self.file.create_dataset(_EN_NAME, (m,), dtype='d')
+		self.waves = self.file.create_dataset(_EV_NAME, (m, n), dtype='d')
+		par = self.file.create_dataset(_OPT_NAME, (2,), dtype='d')
 		par[0] = x0
 		par[1] = x1
 		self.file.flush()
@@ -81,4 +83,15 @@ class SpectrumData:
 		After this the datasets won't be accessible anymore!
 		"""
 		self.file.close()
+	
+	def getNormalizedWaves(self):
+		""""Helper method to get the eigenvectors normalized (in case the data is potentially not nomalized yet)
+		
+		return a 2D numpy array containing all eigenvectors (v) spatially normalized: sum x in v of (|x|² * self.dx) = 1.0
+		"""
+		waves = np.empty((self.m, self.n))
+		for i in range(self.m):
+			vec = self.waves[i,:]
+			waves[i,:] = vec / math.sqrt(np.inner(vec, vec) * self.dx)
+		return waves
 

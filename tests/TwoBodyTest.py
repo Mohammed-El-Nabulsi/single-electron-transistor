@@ -26,7 +26,7 @@ class TwoBodyTestSuite(unittest.TestCase):
         # create test data
         path = "/tmp/oneParticleTest"
         energies = np.array([1.0, 2.0])
-        wave0 = np.array([0.0, 0.5, 0.9, 1.0, 1e29, -1e-29, -1.0, -0.9, -0.5, -0.0])
+        wave0 = np.array([0.0, 0.5, 0.9, 1.0, 1e40, -1e-40, -1.0, -0.9, -0.5, -0.0])
         wave1 = np.array([-0.0, -0.5, -0.9, -1.0, -2.0, 2.0, 1.0, 0.9, 0.5, 0.0])
         # save to file
         loader1 = SpectrumData()
@@ -47,8 +47,14 @@ class TwoBodyTestSuite(unittest.TestCase):
         self.assertEqual(loader1.m, loader2.m, msg='wrong dataset dimensions!')
         self.assertEqual(loader1.n, loader2.n, msg='wrong dataset dimensions!')
         self.assertTrue(np.allclose(loader2.energies[:], energies), msg='corrupted eigenenergy values')
-        self.assertTrue(np.allclose(loader2.waves[0,:], wave0), msg='corrupted wavefunction data')
-        self.assertTrue(np.allclose(loader2.waves[1,:], wave1), msg='corrupted wavefunction data')
+        self.assertTrue(np.allclose(loader2.waves[1,:], wave0), msg='corrupted wavefunction data')
+        self.assertTrue(np.allclose(loader2.waves[0,:], wave1), msg='corrupted wavefunction data probably too low precision')
+        # test normalisation
+        waves = loader2.getNormalizedWaves()
+        for i in range(loader2.m):
+            wave = waves[i,:]
+            self.assertEqual(len(wave), loader2.n, msg='result has wrong dimensions!')
+            self.assertAlmostEqual(np.inner(wave, wave) * loader2.dx, 1.0, msg='incorrectly normalized!')
         loader2.close()
 
 if __name__ == '__main__':
