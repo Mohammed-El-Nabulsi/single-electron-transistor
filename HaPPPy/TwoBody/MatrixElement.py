@@ -7,14 +7,21 @@ from numpy import sin, exp
 _epsilon = 1e-1
 _coulomb_consts = 1.440343e3 #[nm*meV]
 
-def getMatrixElement(Phi1, Phi2, Phi3, Phi4):
-
-	n = len(Phi1)
-	dX = 1.0 / n
-	epsilon_Sq = _epsilon**2
+def getMatrixElement(dX, n, Phi1, Phi2, Phi3, Phi4):
+	"""Compute the coulomb energy matrix element for two pairs of single-electron wavefunctions.
+	
+	Arguments:
+	dX -- spacial distance between the grid points used to model the wavefunctions in [nm]
+	n -- number of grid points used to model the wavefunctions
+	Phi1 -- wavefunction of electron A from first entry
+	Phi2 -- wavefunction of electron B from first entry
+	Phi3 -- wavefunction of electron A from second entry
+	Phi4 -- wavefunction of electron B from second entry
+	Return energy of coulomb interaction in [meV]
+	"""
 	sum = 0.0
-	for i1 in range(0, n):
-		for i2 in range(0, n):
+	for i1 in range(n):
+		for i2 in range(n):
 			if i1 == i2:
 				r = _epsilon * dX
 			else:
