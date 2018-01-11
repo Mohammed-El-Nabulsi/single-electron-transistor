@@ -331,7 +331,7 @@ class MasterEquationSolver:
 
         # calculate ΔΓ (direction sensivtive form)
         ΔΓ = Γ_L - Γ_R
-        if verbose: print("Γ: \n", Γ)
+        if verbose: print("ΔΓ: \n", ΔΓ)
 
         # simulate the current discretly
         sim = Simulation(sim_time_dev_prop.getΔt(), sim_time_dev_prop.getT_max())
