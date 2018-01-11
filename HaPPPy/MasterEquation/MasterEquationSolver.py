@@ -115,14 +115,7 @@ class MasterEquationSolver:
         """
         self.ε = ε
 
-    def doCalculation(self,
-                      Δt=None,
-                      t_max=None,
-                      P_0=None,
-                      Γ_L=None,
-                      Γ_R=None,
-                      check_tolerance=True
-                     ):
+    def doCalculation(self, Δt, t_max, P_0, Γ_L, Γ_R, check_tolerance=True):
         """
         See class description of Happy.MasterEquationSolver for details.
 
