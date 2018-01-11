@@ -99,7 +99,7 @@ class MasterEquationSolver:
         :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
         :type ε: float
         """
-        self.ε = ε
+        self.setε(self.getDefaultε())
 
     def getε(self):
         """
@@ -114,6 +114,14 @@ class MasterEquationSolver:
         :type ε: float
         """
         self.ε = ε
+
+    @staticmethod
+    def getDefaultε():
+        """
+        :return: Returns the default value of ε - a tolerance value. Sum of all probabilities must be equals to 1 within this tolerance.
+        :rtype: float
+        """
+        return 1E-10
 
     def doCalculation(self, Δt, t_max, P_0, Γ_L, Γ_R, check_tolerance=True):
         """
