@@ -139,13 +139,13 @@ class OneBodySolver:
                 pot_mat[i, i] = a[i]
                 i += 1
             return pot_mat
-		
+
         for x in np.nditer(self.a, op_flags=['readwrite']):
             x[...] = A*(-np.exp(-np.power((x) / sigma, 2.) / 2.))
         mat_build(self.a)  # build pot_mat
 
-		
-		# creating body of kinetic matrix with second derivate of the location
+
+        # creating body of kinetic matrix with second derivate of the location
         kin_mat = np.zeros((self.n, self.n))
 
         i = 0
@@ -157,9 +157,9 @@ class OneBodySolver:
             kin_mat[i, i+1] = kin_mat[i+1, i] = -1
             i += 1
         print(kin_mat)
-		
-		unit_pot = A
-		unit_kin = ((self.hbar**2)*1000)/(2*self.me*(10**-18)*self.e)
+
+        unit_pot = A
+        unit_kin = ((self.hbar**2)*1000)/(2*self.me*(10**-18)*self.e)
         print(unit_kin, "\n", unit_pot)  # control print for unit
         # dx for the derivate of the matrix
         dx = self.l/self.n
@@ -168,7 +168,7 @@ class OneBodySolver:
         
         # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
         la, v = np.linalg.eigh(ham_mat)
-		
+
         # printing eingenvalues and eigenvectors
         # as option for debugging
         for i in range(10):
