@@ -37,7 +37,7 @@ class OneBodyTestSuite(unittest.TestCase):
 
 if __name__ == '__main__':
     OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
-    la, vabcd, i = OBSolver.calcualteHarmonocPotential(0)
+    la, vabcd, i = OBSolver.calcualteHarmonicPotential(0)
     OBSolver.exportData(la, vabcd, i)
     print(vabcd)
     
