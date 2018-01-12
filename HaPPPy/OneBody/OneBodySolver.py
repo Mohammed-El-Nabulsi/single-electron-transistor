@@ -28,7 +28,7 @@ class OneBodySolver:
         #aplot = np.linspace((-self.l / 2), (self.l / 2), self.n)
         print(self.a)
         print("der geht")
-
+		return self.a
     
 
 
@@ -46,59 +46,77 @@ class OneBodySolver:
         
         exit()
     
-    
-    def calcualteHarmonocPotential(self, n, intersection, factor):
+    # possible input factor but we defined factor already as unit_pot
+    def calcualteHarmonocPotential(self, n, intersection):
         
         print("Hallo Welt")
 		
-        # # creating potential matrix with user input elements
-        # pot_mat = np.zeros((self.n, self.n))
+        # creating potential matrix with user input n elements
+        pot_mat = np.zeros((self.n, self.n))
         
-        # # function to build potential matrix out of user adjusted array
-        # def mat_build(a):
-            # i = 0
-            # while i < self.n:
-                # pot_mat[i, i] = a[i]
-                # i += 1
-            # return pot_mat
+        # function to build potential matrix out of user adjusted array
+        def mat_build(a):
+            i = 0
+            while i < self.n:
+                pot_mat[i, i] = a[i]
+                i += 1
+            return pot_mat
         
-        # for x in np.nditer(a, op_flags=['readwrite']):
-            # x[...] = self.factor * (x**2) + self.intersection
-        # mat_build(a)  # build pot_mat
+        for x in np.nditer(self.a, op_flags=['readwrite']):
+            x[...] =(x**2) + self.intersection
+        mat_build(self.a)  # build pot_mat
+        print(pot_mat)
         
-        
-        # # creating body of the kinetic matrix with second derivate of the location
-        # kin_mat = np.zeros((n, n))
+        # creating body of kinetic matrix with second derivate of the location
+        kin_mat = np.zeros((self.n, self.n))
 
-        # i = 0
-        # while i < n:
-            # kin_mat[i, i] = 2
-            # i += 1
+        i = 0
+        while i < self.n:
+            kin_mat[i, i] = 2
+            i += 1
+        i = 0
+        while i < n-1:
+            kin_mat[i, i+1] = kin_mat[i+1, i] = -1
+            i += 1
+        print(kin_mat)
 
-        # i = 0
-        # while i < n-1:
-            # kin_mat[i, i+1] = kin_mat[i+1, i] = -1
-            # i += 1
-        # print(kin_mat)
+        # unit system and calculation of final hamiltonian matrix ham_mat
+        # factor 1000 for the unit system in order to reach meV
+        unit_pot = ((1/2)*me*(3.5174*(10**29))*((10**-9))**2)/e  # potential matrix in meV
 
-        # # unit system and calculation of final hamiltonian matrix ham_mat
-        # # factor 1000 for the unit system in order to reach meV
-        # # unit_pot = ((1/2)*me*(3.5174*(10**29))*((10**-9))**2)/e  # potential matrix in meV
+        unit_kin = ((hbar**2)*1000)/(2*me*(10**-18)*e)
+        print(unit_kin, "\n", unit_pot)  # control print for unit
+        # dx for the derivate of the matrix
+        dx = self.l/self.n
+        # build the final hamilton matrix ham_mat
+        ham_mat = unit_kin * kin_mat * (1/(dx*dx)) + unit_pot * pot_mat
 
-        # unit_kin = ((hbar**2)*1000)/(2*me*(10**-18)*e)
-        # print(unit_kin, "\n", unit_pot)  # control print for unit
-        # # dx for the derivate of the matrix
-        # dx = l/n
-        # # build the final hamilton matrix ham_mat
-        # ham_mat = unit_kin * kin_mat * (1/(dx*dx)) + unit_pot * pot_mat
+        # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
+        la, v = np.linalg.eigh(ham_mat)
 
-        # # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
-        # la, v = np.linalg.eigh(ham_mat)
+		# printing eingenvalues and eigenvectors
+		# as option for debugging
+		for i in range(10):
+			print("Eigenvalue:\t\t ", la[i])
+		
+		# creat norm of the eigenvectors
+		norm = 0.0
+		for i in range(self.n):
+			norm += (v[i,0]*v[i,0]) * dx
 
-        
+		sqrt_norm = sqrt(norm)
+		print(sqrt_norm)
 
-        
-        # return la, V
+		v_norm = v / sqrt_norm # v is now norm matrix of eigenvectors
+
+        # test if eigenvectors are normed here 25. 
+		#norm = 0.0
+		#for i in range(self.n):
+		#	norm += (v[i,25]*v[i,25]) * dx
+		#print(norm)
+		
+		
+        return la, v_norm
         
         
     def calcualteGaussPotential(absdfjksdf):
@@ -113,3 +131,6 @@ class OneBodySolver:
     
 
         return 42.5
+	
+	def exportData(self.la, self.v):
+		
