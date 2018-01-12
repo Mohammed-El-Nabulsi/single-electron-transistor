@@ -47,7 +47,7 @@ class OneBodySolver:
         exit()
     
     # possible input factor but we defined factor already as unit_pot
-    def calcualteHarmonocPotential(self, n, intersection):
+    def calcualteHarmonocPotential(self, intersection):
         
         print("Hallo Welt")
 		
