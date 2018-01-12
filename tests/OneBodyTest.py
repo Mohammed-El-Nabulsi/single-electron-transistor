@@ -26,7 +26,10 @@ class OneBodyTestSuite(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
-	OBSolver.calcualteHarmonocPotential(0)
+    OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
+    la, vabcd, i = OBSolver.calcualteHarmonocPotential(0)
+    OBSolver.exportData(la, vabcd, i)
+    print(vabcd)
+
 	#    one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)
 #    unittest.TextTestRunner(verbosity=2, buffer=True).run(one_body_suite)
