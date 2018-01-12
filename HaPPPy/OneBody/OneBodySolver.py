@@ -48,7 +48,13 @@ class OneBodySolver:
     
     # possible input factor but we defined factor already as unit_pot
     def calcualteHarmonocPotential(self, intersection):
+        """ Gives the energy levels and energy eigenvalues and eigenvectors
+            It uses (x^2 + m) as the potential
         
+        Returns:
+            double.  The result
+
+        """
         print("Hallo Welt")
 		
         # creating potential matrix with user input n elements
@@ -115,8 +121,11 @@ class OneBodySolver:
 		#	norm += (v[i,25]*v[i,25]) * dx
 		#print(norm)
 		
+		# list of tuples for calculation information
+		Info = np.array([("n-grids point" ,n),("l-lenght of potential",l),("HarmonocPotential",True), \
+        ("GaussPotential",False),("BoxPotential",False)])
 		
-        return la, v_norm
+        return la, v_norm , Info
         
         
     def calcualteGaussPotential(absdfjksdf):
@@ -132,5 +141,10 @@ class OneBodySolver:
 
         return 42.5
 	
-	def exportData(self.la, self.v):
-		
+	def exportData(self, self.la, self.v_norm):
+		# export data as hdf5 file in two sets
+		dataFile = h5py.File("data_group1.hdf5", "w")
+		# dataSet_calcInfo = dataFile.create_dataset("Input Information", data=self.Info)
+		dataSet_eigvalues = dataFile.create_dataset("eigenvalues_group1", data=self.la)  
+		dataSet_eigvectors = dataFile.create_dataset("eigenvectors_group1", data=self.v_norm)
+		dataFile.close()
