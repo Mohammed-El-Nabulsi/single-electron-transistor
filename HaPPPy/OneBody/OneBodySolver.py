@@ -126,18 +126,81 @@ class OneBodySolver:
         return la, v_norm , Info
         
         
-    def calcualteGaussPotential(absdfjksdf):
+    def calcualteGaussPotential(A, sigma):
+        print("\nYou have chosen the Gauss potential!")
+
+        # creating potential matrix with user input n elements
+        pot_mat = np.zeros((self.n, self.n))
+        
+        # function to build potential matrix out of user adjusted array
+        def mat_build(a):
+            i = 0
+            while i < self.n:
+                pot_mat[i, i] = a[i]
+                i += 1
+            return pot_mat
+		
+        for x in np.nditer(self.a, op_flags=['readwrite']):
+            x[...] = A*(-np.exp(-np.power((x) / sigma, 2.) / 2.))
+        mat_build(self.a)  # build pot_mat
+
+		
+		# creating body of kinetic matrix with second derivate of the location
+        kin_mat = np.zeros((self.n, self.n))
+
+        i = 0
+        while i < self.n:
+            kin_mat[i, i] = 2
+            i += 1
+        i = 0
+        while i < self.n-1:
+            kin_mat[i, i+1] = kin_mat[i+1, i] = -1
+            i += 1
+        print(kin_mat)
+		
+		unit_pot = A
+		unit_kin = ((self.hbar**2)*1000)/(2*self.me*(10**-18)*self.e)
+        print(unit_kin, "\n", unit_pot)  # control print for unit
+        # dx for the derivate of the matrix
+        dx = self.l/self.n
+        # build the final hamilton matrix ham_mat
+        ham_mat = unit_kin * kin_mat * (1/(dx*dx)) + unit_pot * pot_mat
+        
+        # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
+        la, v = np.linalg.eigh(ham_mat)
+		
+        # printing eingenvalues and eigenvectors
+        # as option for debugging
+        for i in range(10):
+            print("Eigenvalue:\t\t ", la[i])
+        
+        # creat norm of the eigenvectors
+        norm = 0.0
+        for i in range(self.n):
+            norm += (v[i,0]*v[i,0]) * dx
+
+        sqrt_norm = sqrt(norm)
+        print(sqrt_norm)
+
+        v_norm = v / sqrt_norm # v is now norm matrix of eigenvectors
+
+        # test if eigenvectors are normed here 25. 
+        #norm = 0.0
+        #for i in range(self.n):
+        #    norm += (v[i,25]*v[i,25]) * dx
+        #print(norm)
+        
+        # list of tuples for calculation information
+        Info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)],["HarmonocPotential",str(False)], \
+        ["GaussPotential",str(True)],["BoxPotential",str(False)]])
+        
+        return la, v_norm , Info
 
 
-        ham = kin + pot
-    
-        V = eigh(V)
-
-        return V
         
     
 
-        return 42.5
+
     
     def exportData(self, la, v_norm, info):
         # export data as hdf5 file in two sets
