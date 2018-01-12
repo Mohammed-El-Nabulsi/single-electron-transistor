@@ -26,8 +26,8 @@ class OneBodySolver:
         # creating transposed array a -> at
         self.a = np.linspace((-self.l / 2), (self.l / 2), self.n)
         #aplot = np.linspace((-self.l / 2), (self.l / 2), self.n)
-        print(self.a)
-        print("der geht")
+        
+        
 
 
     def doCalculation(self):
