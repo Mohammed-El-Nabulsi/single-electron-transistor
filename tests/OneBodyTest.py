@@ -39,6 +39,10 @@ if __name__ == '__main__':
     # la, vabcd, i = OBSolver.calcualteHarmonocPotential(0)
     # OBSolver.exportData(la, vabcd, i)
     # print(vabcd)
-
-   one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)
-   unittest.TextTestRunner(verbosity=2, buffer=True).run(one_body_suite)
+    
+	OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
+	la ,v = OBSolver.calcualteGaussPotential(1,5)
+	print(v)
+	
+   #one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)
+   #unittest.TextTestRunner(verbosity=2, buffer=True).run(one_body_suite)
