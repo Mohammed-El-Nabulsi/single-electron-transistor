@@ -14,7 +14,7 @@ class OneBodySolver:
     hbar = constants.hbar
     me = constants.m_e
     e = constants.e
-    a = ""
+
     #aplot = ""
     def __init__(self, l, n):
         """ The constructor.
@@ -32,7 +32,7 @@ class OneBodySolver:
 
     def doCalculation(self):
         """ Gives the energy levels and energy eigen states
-            If portenil is equal to 2 it uses A * x^2
+            If potential is equal to 2 it uses A * x^2
         
         Returns:
             double.  The result
@@ -45,7 +45,7 @@ class OneBodySolver:
         exit()
     
     # possible input factor but we defined factor already as unit_pot
-    def calcualteHarmonocPotential(self, intersection):
+    def calcualteHarmonicPotential(self, intersection):
         """ Gives the energy levels and energy eigenvalues and eigenvectors
             It uses (x^2 + m) as the potential
         
@@ -69,7 +69,7 @@ class OneBodySolver:
         for x in np.nditer(self.a, op_flags=['readwrite']):
             x[...] =(x**2) + intersection
         mat_build(self.a)  # build pot_mat
-        print(pot_mat)
+        #print(pot_mat)
         
         # creating body of kinetic matrix with second derivate of the location
         kin_mat = np.zeros((self.n, self.n))
@@ -82,14 +82,14 @@ class OneBodySolver:
         while i < self.n-1:
             kin_mat[i, i+1] = kin_mat[i+1, i] = -1
             i += 1
-        print(kin_mat)
+        #print(kin_mat)
 
         # unit system and calculation of final hamiltonian matrix ham_mat
         # factor 1000 for the unit system in order to reach meV
         unit_pot = ((1/2)*self.me*(3.5174*(10**29))*((10**-9))**2)/self.e  # potential matrix in meV
 
         unit_kin = ((self.hbar**2)*1000)/(2*self.me*(10**-18)*self.e)
-        print(unit_kin, "\n", unit_pot)  # control print for unit
+        #print(unit_kin, "\n", unit_pot)  # control print for unit
         # dx for the derivate of the matrix
         dx = self.l/self.n
         # build the final hamilton matrix ham_mat
@@ -100,10 +100,10 @@ class OneBodySolver:
 
         # printing eingenvalues and eigenvectors
         # as option for debugging
-        for i in range(10):
-            print("Eigenvalue:\t\t ", la[i])
+        #for i in range(10):
+        #    print("Eigenvalue:\t\t ", la[i])
         
-        # creat norm of the eigenvectors
+        # create norm of the eigenvectors
         norm = 0.0
         for i in range(self.n):
             norm += (v[i,0]*v[i,0]) * dx
@@ -126,11 +126,11 @@ class OneBodySolver:
         return la, v_norm , Info
         
         
-    def calcualteGaussPotential(A, sigma):
+    def calcualteGaussPotential(self, A, sigma):
         print("\nYou have chosen the Gauss potential!")
 
         # creating potential matrix with user input n elements
-        pot_mat = np.zeros((self.n, self.n))
+        pot_mat = np.zeros((self.n,self.n))
         
         # function to build potential matrix out of user adjusted array
         def mat_build(a):
@@ -194,11 +194,10 @@ class OneBodySolver:
         Info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)],["HarmonocPotential",str(False)], \
         ["GaussPotential",str(True)],["BoxPotential",str(False)]])
         
-        return la, v_norm
+        return la, v_norm, Info
 
 
-        
-    
+ 
 
 
     
