@@ -194,7 +194,7 @@ class OneBodySolver:
         Info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)],["HarmonocPotential",str(False)], \
         ["GaussPotential",str(True)],["BoxPotential",str(False)]])
         
-        return la, v_norm , Info
+        return la, v_norm
 
 
         
