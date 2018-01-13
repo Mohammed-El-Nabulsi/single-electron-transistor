@@ -36,14 +36,17 @@ class OneBodyTestSuite(unittest.TestCase):
         #self.assertEqual((la[0] - la[1]) - ( la[1] - la[2]) < 1e-5)
 
 if __name__ == '__main__':
-    OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
-    la, vabcd, i = OBSolver.calcualteHarmonicPotential(0)
-    OBSolver.exportData(la, vabcd, i)
-    print(vabcd)
+    #OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
+    #la, vabcd, i = OBSolver.calcualteHarmonicPotential(0)
+    #OBSolver.exportData(la, vabcd, i)
+    #print(vabcd)
     
     #OBSolver = HaPPPy.OneBody.OneBodySolver(100,2000)
     #la ,v = OBSolver.calcualteGaussPotential(1 ,5)
     #print(v)
 
+	OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
+	la, v , Info = OBSolver.calculateBoxPotential(1)
+	
     #one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)
     #unittest.TextTestRunner(verbosity=2, buffer=True).run(one_body_suite)
