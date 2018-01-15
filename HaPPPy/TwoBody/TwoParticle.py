@@ -1,50 +1,29 @@
 import numpy as np 
-#import Matrixelement
-
-## Set up  
-n=6 #number of one-particle eigenmodes 
-X=1000 # number of grid points 
-
-### Testfunctions for the eigenemodes 
-
-def test(x, n):
-    return np.sin(x*n)
-
-def getOneParticleStuff(n,V):
-	W=np.zeros((6, 1000))
-	for i in range(n):
-		for j in range(X):
-			W[i, j]=test(j, i)
-	e=[1, 2, 3, 4, 5, 6]
-	return [e,W]
+from .MatrixElement import getMatrixElement, testFunction
+from .OneParticleLoader import SpectrumData
 
 
-def getMatrixElement(a, b, c, d):
-    return 0
-
-
-#write the Eigenenergies and Eigenstates to a file
-def save(E,S):
-	return None
-
-#returns the i-th eigenenergy from the file created by createTwoParticleData. 
-#Gives an error if such a file does not exist (i.e. the creation function was not called)
-def getEigenenergy(i):
-	return 0
-
-#returns the i-th eigenvector from the file created by createTwoParticleData.
-#Gives an error if such a file does not exist.
-def getEigenvector(i):
-	return zeros(X)
-
-# Calculate and store the two-electron eigenfunctions in the potential V from the first n single-electron eigenfunctions. Returns None.
-def createTwoParticleData(n,V):
-	[SP_EE,SP_EV] = getOneParticleStuff(n,V)
+def createTwoParticleData(opData):
+	""" Calculate and return the two-electron eigenvalues and eigenvectors from the single-electron eigenfunctions.
 	
+	Arguments:
+	opData -- the SpectrumData object containing the single-electron spectrum data to use for calculation
+	
+	Returns [E,Q], where E is an array of (scalar) eigen values and Q is an array of matrices of the shape [i,j,n], where Q[i,j,n] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function. These arrays do not have a special ordering, but Q[:,:,n] is the eigenvector belonging to E[n].
+	"""
+	SP_EE = opData.energies[:]
+	SP_EV = opData.waves[:,:]
+	n = opData.m
+	X = opData.n
+	dx = opData.dx
+
 	# Basis: 
 	#       Singuletts: n - terms: |1>|1>, ...|n>|n>
 	#                   1/2 n(n-1) terms: |1>|2>, ....|1>|n>, |2>|3>,..., |2>|n>, ..., |n-1>|n>  
 	#       Tripletts: 1/2 n(n-1) terms: |1>|2>, ....|1>|n>, |2>|3>,..., |2>|n>, ..., |n-1>|n>
+	#
+	# The index set I is the ordering of the mixed singlet and triplet terms: I[k] is a pair of indices [i,j] meaning the basis element corresponding to |i,j>.
+	# In the case of singlets/triplets, this is the function 1/sqrt(2)(|i,j> +/- |j,i>)
 	I=np.zeros((int(1/2*n*(n-1)),2))
 	k=0
 	for i in range(n): 
@@ -61,7 +40,7 @@ def createTwoParticleData(n,V):
 	A=np.zeros((n,n))
 	for i in range (n):
 		for j in range(n):
-			A[i,j]=getMatrixElement(SP_EV[i, :], SP_EV[i, :], SP_EV[j, :], SP_EV[j, :])
+			A[i,j]=getMatrixElement(dx, X, SP_EV[i, :], SP_EV[i, :], SP_EV[j, :], SP_EV[j, :])
 
 	# Matrix B und Matrix B transponiert 
 	L=int(1/2*n*(n-1))
@@ -72,7 +51,7 @@ def createTwoParticleData(n,V):
 			a=int(I[j, 0])
 		   
 			b=int(I[j, 1])
-			B[j, i]=1/np.sqrt(2)*(getMatrixElement(SP_EV[a, :], SP_EV[b,:],SP_EV[i, :], SP_EV[i, :] )+getMatrixElement(SP_EV[b, :], SP_EV[a,:],SP_EV[i,:], SP_EV[i, :] ))
+			B[j, i]=np.sqrt(2)*getMatrixElement(dx, X, SP_EV[a, :], SP_EV[b,:],SP_EV[i, :], SP_EV[i, :] )
 
 	# Matrix C und D: 
 	C=np.zeros((L, L))
@@ -80,12 +59,12 @@ def createTwoParticleData(n,V):
 
 	for i in range(L): 
 		for j in range(i+1):
-			a=int(I[j, 0])
-			b=int(I[j, 1])
+			a=int(I[i, 0])
+			b=int(I[i, 1])
 			c=int(I[j, 0])
 			d=int(I[j, 1])
-			PartA=getMatrixElement(SP_EV[a, :], SP_EV[b, :],SP_EV[c, :], SP_EV[d, :])+getMatrixElement(SP_EV[b,:], SP_EV[a,:],SP_EV[d,:], SP_EV[c,:])
-			PartB=getMatrixElement(SP_EV[a,:], SP_EV[b,:],SP_EV[d,:], SP_EV[c,:])+getMatrixElement(SP_EV[b, :], SP_EV[a,:],SP_EV[c,:], SP_EV[d,:])
+			PartA=getMatrixElement(dx, X, SP_EV[a, :], SP_EV[b, :],SP_EV[c, :], SP_EV[d, :])+getMatrixElement(dx, X, SP_EV[b,:], SP_EV[a,:],SP_EV[d,:], SP_EV[c,:])
+			PartB=getMatrixElement(dx, X, SP_EV[a,:], SP_EV[b,:],SP_EV[d,:], SP_EV[c,:])+getMatrixElement(dx, X, SP_EV[b, :], SP_EV[a,:],SP_EV[c,:], SP_EV[d,:])
 			C[i,j]=1/2*(PartA+PartB)
 			C[j,i]=C[i,j]
 			D[i,j]=1/2*(PartA-PartB)
@@ -120,20 +99,33 @@ def createTwoParticleData(n,V):
 
 	#Transform the eigenvectors back to the product state basis
 
-	Eigenvectors_Productbasis = np.zeros((n,n,n**2))
+	Eigenvectors_Productbasis = np.zeros((n**2,n**2))
 	
+	#Z is the Matrix of the basis change from the product basis to the singlet/triplet-basis
+	Z = np.zeros((n**2,n**2))
+	for i in range(n**2):
+		if(i<n):
+			Z[i,i]=1
+		elif(i<n+L):
+			Z[i,i]=1/np.sqrt(2)
+			Z[i,i+L]=1/np.sqrt(2)
+		else:
+			Z[i,i]=(-1)/np.sqrt(2)
+			Z[i,i-L]=1/np.sqrt(2)
+
+	#Eigenvectors are the eigenvectors in the singlet/triplet-basis, so the basis transformation Z gives the eigenvectors in the product basis.
+	Eigenvectors_Productbasis = np.dot(Eigenvectors, Z)
+	
+	#Transform  Eigenvectors_Productbasis into n**2 Matrices with the coefficients 
+	Q=np.zeros((n,n, n**2))
 	for i in range(n):
 		for j in range(n):
 			if i==j:
-				Eigenvectors_Productbasis[i,j,:]=Eigenvectors[i,:]
+				Q[i,j,:]=Eigenvectors_Productbasis[i, :]
 			elif i<j:
-				Eigenvectors_Productbasis[i,j,:]=(1/np.sqrt(2))*(Eigenvectors[int((2*n-i-1)*i/2)+j-1,:] + Eigenvectors[int((2*n-i-1)*i/2)+j-1+L,:])
+				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1,:]
 			else:
-				Eigenvectors_Productbasis[i,j,:]=(Eigenvectors[int((2*n-i-1)*i/2)+j-1,:] - Eigenvectors[int((2*n-i-1)*i/2)+j-1+L,:])/np.sqrt(2)
+				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1+L,:]				
+	
 
-	save(Eigenenergies, Eigenvectors_Productbasis)
-	print(Eigenenergies)
-	print(Eigenvectors)#_Productbasis)
-	return None
-
-createTwoParticleData(6,None)
+	return [Eigenenergies, Q]
