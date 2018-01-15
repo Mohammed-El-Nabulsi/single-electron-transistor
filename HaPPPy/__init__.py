@@ -23,8 +23,6 @@ import datetime
 import socket
 import getpass
 
-from .ParameterHandler import ParameterHandler
-
 from HaPPPy.OneBody import OneBodySolver
 from HaPPPy.TwoBody import TwoBodySolver
 from HaPPPy.Transmission import TransmissionCalculator
@@ -84,8 +82,6 @@ def main(argv=None):
 
     print("###")
     print("################################################################################")
-
-    parameter = ParameterHandler()
 
     OBSolver = OneBodySolver()
     OBSolver.doCalculation()
