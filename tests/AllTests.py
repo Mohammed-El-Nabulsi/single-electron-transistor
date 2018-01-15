@@ -6,12 +6,13 @@ import unittest
 from tests.HaPPPyTest import HappyBasicTestSuite
 from tests.OneBodyTest import OneBodyTestSuite
 from tests.TwoBodyTest import TwoBodyTestSuite
-from tests.test_transmission import TransmissionTestSuite
+from tests.TransmissionTest import TransmissionTestSuite
 from tests.RatesTest import RatesTestSuite
 from tests.MasterEquationTest import MasterEquationTestSuite
+from tests.ParameterHandlerTest import ParameterHandlerTestSuite
 
 if __name__ == '__main__':
-    # happy_suite = unittest.TestLoader().loadTestsFromTestCase(HappyBasicTestSuite)
+    happy_suite = unittest.TestLoader().loadTestsFromTestCase(HappyBasicTestSuite)
     one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)
     two_body_suite = unittest.TestLoader().loadTestsFromTestCase(TwoBodyTestSuite)
     transmission_suite = unittest.TestLoader().loadTestsFromTestCase(TransmissionTestSuite)

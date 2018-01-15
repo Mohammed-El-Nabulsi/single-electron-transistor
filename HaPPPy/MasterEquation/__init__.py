@@ -3,8 +3,11 @@
    :platform: Unix, Windows
    :synopsis: Tackles the master equation.
 
-Here comes the general documentation for the MasterEquation module.
+A module to simulate the time development of propabilities P(t) for an ``n`` state system with transition rates Γ including the netto current.
+
+See documentation of MasterEquationSolver.doCalculation for details.
 
 """
 
 from .MasterEquationSolver import MasterEquationSolver
+from .MasterEquationSolver import Simulation
