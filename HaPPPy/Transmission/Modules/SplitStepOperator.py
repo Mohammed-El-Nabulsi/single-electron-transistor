@@ -1,7 +1,7 @@
 #TODO: docu, test(kommt nach Silvester, habe nun endlich Maple...)
-#In dieser Version ist berücksichtigt, dass im Algo idft und dft aufeinander folgen.
+#In dieser Version ist beruecksichtigt, dass im Algo idft und dft aufeinander folgen.
 #auf diese weise wird eine vielzahl an Operationen eingespart.
-#Ausfuehrliche Erklärungen folgen, docu hier unbrauchbar/zT falsch(Relikt aus Experimenten)
+#Ausfuehrliche Erklaerungen folgen, docu hier unbrauchbar/zT falsch(Relikt aus Experimenten)
 
 import numpy as np
 
