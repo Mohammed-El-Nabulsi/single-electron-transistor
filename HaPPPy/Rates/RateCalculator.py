@@ -1,4 +1,4 @@
-#alle folgende Einheiten werden benutzt: [Energie]=meV, [Länge]=nm, [Zeit]=ps
+#alle folgende Einheiten werden benutzt: [Energie]=meV, [Laenge]=nm, [Zeit]=ps
 
 import math
 import numpy as np
@@ -23,7 +23,7 @@ class RateCalculator:
     
    
 
-    #benötigte Konstanten 
+    #benoetigte Konstanten 
 
     kB=1 #Boltzmannkonstante in eV
     
@@ -47,7 +47,7 @@ class RateCalculator:
             return(0.1)
         NEcut= np.size(E2)
           
-        #Um Tunnelraten zu berechnen, die durch die linke Tunnerlbariere gehen, muss als Parameter mu das chemische Potential der linken Tunnelbariere eingesetzt werden. Umgekehrt symmetrisch für die rechte Tunnelbariere
+        #Um Tunnelraten zu berechnen, die durch die linke Tunnerlbariere gehen, muss als Parameter mu das chemische Potential der linken Tunnelbariere eingesetzt werden. Umgekehrt symmetrisch fuer die rechte Tunnelbariere
 
         def Gamma_12(Ea,Eb,mu,T): 
             summe=0
