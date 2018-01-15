@@ -1,6 +1,6 @@
 import numpy as np 
 from .MatrixElement import getMatrixElement, testFunction
-from .OneParticleLoader.py import SpectrumData
+from .OneParticleLoader import SpectrumData
 
 
 def createTwoParticleData(opData):
