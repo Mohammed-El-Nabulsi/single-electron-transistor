@@ -3,10 +3,11 @@
    :platform: Unix, Windows
    :synopsis: Tackles the master equation.
 
-A module to simulate the time development of propabilities P(t) for an ``n`` state system with transition rates Γ including the netto current.
+A module to simulate the time development of propabilities :math:`\\vec{P}(t)`
+for an :math:`n`-state system with transition rates :math:`\\Gamma`
+including the netto current :math:`I(t)`.
 
 See documentation of MasterEquationSolver.doCalculation for details.
-
 """
 
 from .MasterEquationSolver import MasterEquationSolver
