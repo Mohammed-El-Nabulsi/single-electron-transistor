@@ -32,7 +32,7 @@ class OneBodyTestSuite(unittest.TestCase):
         print("hi 2")
         OBSolver = HaPPPy.OneBody.OneBodySolver(100, 100)
         la, vabcd, i = OBSolver.calcualteHarmonocPotential(0)
-        self.assertEqual((la[0] - la[1]) - ( la[1] - la[2]) < 1e-5)
+        self.assertTrue((la[0] - la[1]) - ( la[1] - la[2]) < 1e-5)
 
 if __name__ == '__main__':
     # OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
