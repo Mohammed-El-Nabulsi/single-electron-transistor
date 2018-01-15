@@ -40,9 +40,7 @@ def createTwoParticleData(opData):
 	A=np.zeros((n,n))
 	for i in range (n):
 		for j in range(n):
-			# TODO I think this is wrong
-			A[i,j]=getMatrixElement(dx, X, SP_EV[i, :], SP_EV[i, :], SP_EV[j, :], SP_EV[j, :])
-			# A[i,j]=getMatrixElement(dx, X, SP_EV[:, i], SP_EV[:, i], SP_EV[:,j], SP_EV[:, j])
+			A[i,j]=getMatrixElement(dx, X, SP_EV[:, i], SP_EV[:, i], SP_EV[:,j], SP_EV[:, j])
 
 	# Matrix B und Matrix B transponiert 
 	L=int(1/2*n*(n-1))
@@ -52,9 +50,7 @@ def createTwoParticleData(opData):
 		for j in range(L):
 			a=int(I[j, 0])
 			b=int(I[j, 1])
-			# TODO I think this is wrong			
-			B[j, i]=np.sqrt(2)*getMatrixElement(dx, X, SP_EV[a, :], SP_EV[b,:],SP_EV[i, :], SP_EV[i, :] )
-			# B[j, i]=np.sqrt(2)*getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:,i], SP_EV[:,i] )
+			B[j, i]=np.sqrt(2)*getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:,i], SP_EV[:,i] )
 
 	# Matrix C und D: 
 	C=np.zeros((L, L))
@@ -67,12 +63,8 @@ def createTwoParticleData(opData):
 			b=int(I[i, 1])
 			c=int(I[j, 0])
 			d=int(I[j, 1])
-			# TODO I think this is wrong
-			PartA=getMatrixElement(dx, X, SP_EV[a, :], SP_EV[b, :],SP_EV[c, :], SP_EV[d, :])+getMatrixElement(dx, X, SP_EV[b,:], SP_EV[a,:],SP_EV[d,:], SP_EV[c,:])
-			PartB=getMatrixElement(dx, X, SP_EV[a,:], SP_EV[b,:],SP_EV[d,:], SP_EV[c,:])+getMatrixElement(dx, X, SP_EV[b, :], SP_EV[a,:],SP_EV[c,:], SP_EV[d,:])
-
-			# PartA=getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:, c], SP_EV[:,d])+getMatrixElement(dx, X, SP_EV[:,b], SP_EV[:,a],SP_EV[:,d], SP_EV[:,c])
-			# PartB=getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:,d], SP_EV[:,c])+getMatrixElement(dx, X, SP_EV[:,b], SP_EV[:,a],SP_EV[:,c], SP_EV[:,d])
+			PartA=getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:, c], SP_EV[:,d])+getMatrixElement(dx, X, SP_EV[:,b], SP_EV[:,a],SP_EV[:,d], SP_EV[:,c])
+			PartB=getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:,d], SP_EV[:,c])+getMatrixElement(dx, X, SP_EV[:,b], SP_EV[:,a],SP_EV[:,c], SP_EV[:,d])
 			C[i,j]=1/2*(PartA+PartB)
 			C[j,i]=C[i,j]
 			D[i,j]=1/2*(PartA-PartB)

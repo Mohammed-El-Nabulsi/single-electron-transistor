@@ -17,9 +17,8 @@ class TwoBodyTestSuite(unittest.TestCase):
     def test_TwoBody_doCalculation(self):
         """ Checks the dummy calculation
         """
-        # TODO: Here is an error 
-        # TBSolver = HaPPPy.TwoBody.TwoBodySolver()
-        # self.assertEqual(TBSolver.doCalculation(), 2.0)
+        TBSolver = HaPPPy.TwoBody.TwoBodySolver()
+        self.assertIsNotNone(TBSolver.doCalculation('data_group1'))
 
     def test_oneParticleLoader(self):
         """ Checks the OneParticleLoader for self consistency
