@@ -136,7 +136,7 @@ class OneBodySolver:
         
         # list of tuples for calculation information
         Info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)],["HarmonocPotential",str(True)], \
-        ["GaussPotential",str(False)],["BoxPotential",str(False)]])
+        ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
         return la, v_norm , Info
 			
@@ -158,7 +158,6 @@ class OneBodySolver:
             la, v_norm, Info
 
         """
-        print("Hallo Welt")
         
         # creating potential matrix with user input n elements
         pot_mat = np.zeros((self.n, self.n))
@@ -214,7 +213,6 @@ class OneBodySolver:
             norm += (v[i,0]*v[i,0]) * dx
 
         sqrt_norm = sqrt(norm)
-        print(sqrt_norm)
 
         v_norm = v / sqrt_norm # v is now norm matrix of eigenvectors
 
@@ -226,7 +224,7 @@ class OneBodySolver:
         
         # list of tuples for calculation information
         Info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)],["HarmonocPotential",str(True)], \
-        ["GaussPotential",str(False)],["BoxPotential",str(False)]])
+        ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
         return la, v_norm , Info
         
@@ -314,7 +312,7 @@ class OneBodySolver:
         
         # list of tuples for calculation information
         Info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)],["HarmonocPotential",str(False)], \
-        ["GaussPotential",str(True)],["BoxPotential",str(False)]])
+        ["GaussPotential",str(True)],["BoxPotential",str(False)]]).astype('S9')
         
         return la, v_norm, Info
 
@@ -326,8 +324,8 @@ class OneBodySolver:
     def exportData(self, la, v_norm, info):
         # export data as hdf5 file in three sets
         dataFile = h5py.File("data_group1.hdf5", "w")
-        dataSet_calcInfo = dataFile.create_dataset("Input Information", data=info)
-        dataSet_eigvalues = dataFile.create_dataset("eigenvalues_group1", data=la)  
-        dataSet_eigvectors = dataFile.create_dataset("eigenvectors_group1", data=v_norm)
+        dataSet_calcInfo = dataFile.create_dataset("settings", data=info)
+        dataSet_eigvalues = dataFile.create_dataset("eigenvalues", data=la)  
+        dataSet_eigvectors = dataFile.create_dataset("eigenvectors", data=v_norm)
         dataFile.close()
 

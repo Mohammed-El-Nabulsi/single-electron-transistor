@@ -28,15 +28,19 @@ class SpectrumData:
 		filename -- path to the file containing the data (without the '.hsf5' ending)
 		"""
 		self.file = h5py.File(filename + ".hdf5", "a")
+
 		self.energies = self.file[_EN_NAME]
 		self.waves = self.file[_EV_NAME]
 		par = self.file[_OPT_NAME]
-		self.x0 = par[0]
-		self.x1 = par[1]
+
 		self.n = len(self.waves[0,:])
 		self.m = len(self.energies)
-		self.dx = (self.x1 - self.x0) / (self.n - 1)
-	
+		self.l = int(par[1][1])
+
+		self.dx = self.l / self.n
+		self.x0 = -self.l/2.0
+		self.x1 = self.l/2.0 - self.dx
+		
 	def init(self, filename, m, n, x0=None, x1=None, dx=None, L=None):
 		"""Initialize with empty data and create the datasets for a new hdf5-file
 		
@@ -87,7 +91,7 @@ class SpectrumData:
 	def getNormalizedWaves(self):
 		""""Helper method to get the eigenvectors normalized (in case the data is potentially not nomalized yet)
 		
-		return a 2D numpy array containing all eigenvectors (v) spatially normalized: sum x in v of (|x|² * self.dx) = 1.0
+		return a 2D numpy array containing all eigenvectors (v) spatially normalized: sum x in v of (|x|^2 * self.dx) = 1.0
 		"""
 		waves = np.empty((self.m, self.n))
 		for i in range(self.m):
