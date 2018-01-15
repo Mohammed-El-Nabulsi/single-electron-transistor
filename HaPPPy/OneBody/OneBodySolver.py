@@ -25,7 +25,7 @@ class OneBodySolver:
                 --> exportData(la, v_norm, info)
 
         validating constants as class variables
-            --> hbar, planck´s constant
+            --> hbar, plancks constant
             --> me, mass electron
             --> e, charge of electron
     """
