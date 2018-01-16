@@ -1,5 +1,5 @@
 import numpy as np 
-from .MatrixElement import getMatrixElement, testFunction
+from .MatrixElement import getMatrixElement, testFunction, MatrixElement
 from .OneParticleLoader import SpectrumData
 
 _SQRT2 = np.sqrt(2)
@@ -17,6 +17,8 @@ def createTwoParticleData(opData):
 	n = opData.m
 	X = opData.n
 	dx = opData.dx
+	
+	matrixElement = MatrixElement(X, dx)
 
 	# Basis: 
 	#       Singuletts: n - terms: |1>|1>, ...|n>|n>
@@ -43,7 +45,7 @@ def createTwoParticleData(opData):
 		for j in range(n):
 			vi = SP_EV[:, i]
 			vj = SP_EV[:, j]
-			A[i, j] = getMatrixElement(dx, X, vi, vi, vj, vj)
+			A[i, j] = matrixElement.doCalculation(vi, vi, vj, vj)
 
 	# Matrix B und Matrix B transponiert 
 	L=int(1/2*n*(n-1))
@@ -54,7 +56,7 @@ def createTwoParticleData(opData):
 			va = SP_EV[:, int(I[j, 0])]
 			vb = SP_EV[:, int(I[j, 1])]
 			vi = SP_EV[:, i]
-			B[j, i] = _SQRT2 * getMatrixElement(dx, X, va, vb, vi, vi)
+			B[j, i] = _SQRT2 * matrixElement.doCalculation(va, vb, vi, vi)
 
 	# Matrix C und D: 
 	C=np.zeros((L, L))
@@ -67,8 +69,8 @@ def createTwoParticleData(opData):
 			vb = SP_EV[:, int(I[i, 1])]
 			vc = SP_EV[:, int(I[j, 0])]
 			vd = SP_EV[:, int(I[j, 1])]
-			PartA = getMatrixElement(dx, X, va, vb, vc, vd) + getMatrixElement(dx, X, vb, va, vd, vc)
-			PartB = getMatrixElement(dx, X, va, vb, vd, vc) + getMatrixElement(dx, X, vb, va, vc, vd)
+			PartA = matrixElement.doCalculation(va, vb, vc, vd) + matrixElement.doCalculation(vb, va, vd, vc)
+			PartB = matrixElement.doCalculation(va, vb, vd, vc) + matrixElement.doCalculation(vb, va, vc, vd)
 			C[i,j] = 1/2 * (PartA+PartB)
 			C[j,i] = C[i,j]
 			D[i,j] = 1/2 * (PartA-PartB)
