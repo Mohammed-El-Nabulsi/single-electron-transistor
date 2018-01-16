@@ -2,6 +2,7 @@ import numpy as np
 from .MatrixElement import getMatrixElement, testFunction
 from .OneParticleLoader import SpectrumData
 
+_SQRT2 = np.sqrt(2)
 
 def createTwoParticleData(opData):
 	""" Calculate and return the two-electron eigenvalues and eigenvectors from the single-electron eigenfunctions.
@@ -40,7 +41,9 @@ def createTwoParticleData(opData):
 	A=np.zeros((n,n))
 	for i in range (n):
 		for j in range(n):
-			A[i,j]=getMatrixElement(dx, X, SP_EV[:, i], SP_EV[:, i], SP_EV[:,j], SP_EV[:, j])
+			vi = SP_EV[:, i]
+			vj = SP_EV[:, j]
+			A[i, j] = getMatrixElement(dx, X, vi, vi, vj, vj)
 
 	# Matrix B und Matrix B transponiert 
 	L=int(1/2*n*(n-1))
@@ -48,9 +51,10 @@ def createTwoParticleData(opData):
 
 	for i in range(n):
 		for j in range(L):
-			a=int(I[j, 0])
-			b=int(I[j, 1])
-			B[j, i]=np.sqrt(2)*getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:,i], SP_EV[:,i] )
+			va = SP_EV[:, int(I[j, 0])]
+			vb = SP_EV[:, int(I[j, 1])]
+			vi = SP_EV[:, i]
+			B[j, i] = _SQRT2 * getMatrixElement(dx, X, va, vb, vi, vi)
 
 	# Matrix C und D: 
 	C=np.zeros((L, L))
@@ -59,21 +63,21 @@ def createTwoParticleData(opData):
 	for i in range(L):
 		print(i, "of", L)
 		for j in range(i+1):
-			a=int(I[i, 0])
-			b=int(I[i, 1])
-			c=int(I[j, 0])
-			d=int(I[j, 1])
-			PartA=getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:, c], SP_EV[:,d])+getMatrixElement(dx, X, SP_EV[:,b], SP_EV[:,a],SP_EV[:,d], SP_EV[:,c])
-			PartB=getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:,d], SP_EV[:,c])+getMatrixElement(dx, X, SP_EV[:,b], SP_EV[:,a],SP_EV[:,c], SP_EV[:,d])
-			C[i,j]=1/2*(PartA+PartB)
-			C[j,i]=C[i,j]
-			D[i,j]=1/2*(PartA-PartB)
-			D[j,i]=D[i,j]
+			va = SP_EV[:, int(I[i, 0])]
+			vb = SP_EV[:, int(I[i, 1])]
+			vc = SP_EV[:, int(I[j, 0])]
+			vd = SP_EV[:, int(I[j, 1])]
+			PartA = getMatrixElement(dx, X, va, vb, vc, vd) + getMatrixElement(dx, X, vb, va, vd, vc)
+			PartB = getMatrixElement(dx, X, va, vb, vd, vc) + getMatrixElement(dx, X, vb, va, vc, vd)
+			C[i,j] = 1/2 * (PartA+PartB)
+			C[j,i] = C[i,j]
+			D[i,j] = 1/2 * (PartA-PartB)
+			D[j,i] = D[i,j]
 
 	# Eigenenergien der Einteilchen kombiniert 
 
-	Energies=np.zeros( n**2)
-	for i in range(n): 
+	Energies=np.zeros(n**2)
+	for i in range(n):
 		Energies[ i]=2*SP_EE[i]
 	for i in range(L): 
 		a=int(I[i, 0])
@@ -107,11 +111,11 @@ def createTwoParticleData(opData):
 		if(i<n):
 			Z[i,i]=1
 		elif(i<n+L):
-			Z[i,i]=1/np.sqrt(2)
-			Z[i,i+L]=1/np.sqrt(2)
+			Z[i,i]=1/_SQRT2
+			Z[i,i+L]=1/_SQRT2
 		else:
-			Z[i,i]=(-1)/np.sqrt(2)
-			Z[i,i-L]=1/np.sqrt(2)
+			Z[i,i]=(-1)/_SQRT2
+			Z[i,i-L]=1/_SQRT2
 
 	#Eigenvectors are the eigenvectors in the singlet/triplet-basis, so the basis transformation Z gives the eigenvectors in the product basis.
 	Eigenvectors_Productbasis = np.dot(Eigenvectors, Z)
