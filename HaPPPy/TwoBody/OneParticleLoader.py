@@ -13,12 +13,11 @@ class SpectrumData:
 	Fields available after initializing with 'open()' or 'init()':
 	file -- reference to the hdf5 file handle
 	energies -- dataset containing the energy eigenvalues in [meV] as floating point numbers: energies[i] stores the i-th eigenvalue
-	waves -- dataset containing the wavefunctions as rasterized floating point arrays of probabilities in [nm^(-1/2)]: waves[i,j] stores the j-th grid entry of the i-th eigenvector
+	waves -- dataset containing the wavefunctions as rasterized floating point arrays of probabilities in [nm^(-1/2)]: waves[i,j] stores the i-th grid entry of the j-th eigenvector
 	m -- the number of eigenvalues/-functions
 	n -- the number of grid points used to represent the wavefunctions
 	dx -- the spacial distance between grid points in [nm]: (x1-x0) = dx * (n-1)
-	x0 -- the spacial location of the 0-th grid point in [nm]
-	x1 -- the spacial location of the (n-1)-th grid point in [nm]
+	l -- the spacial width of the grid in [nm]: l = dx * n
 	"""
 	
 	def open(self, filename):
@@ -33,52 +32,42 @@ class SpectrumData:
 		self.waves = self.file[_EV_NAME]
 		par = self.file[_OPT_NAME]
 
-		self.n = len(self.waves[0,:])
+		self.n = len(self.waves[:,0])
 		self.m = len(self.energies)
-		self.l = int(par[1][1])
+		self.l = float(par[1][1])
 
 		self.dx = self.l / self.n
-		self.x0 = -self.l/2.0
-		self.x1 = self.l/2.0 - self.dx
 		
-	def init(self, filename, m, n, x0=None, x1=None, dx=None, L=None):
+	def init(self, filename, m, n, dx=None, L=None, info=None):
 		"""Initialize with empty data and create the datasets for a new hdf5-file
 		
 		Arguments:
 		filename -- path to the file to store the data in (without the '.hsf5' ending)
 		m -- the number of eigenvalues/-functions
 		n -- the number of grid points used to represent the wavefunctions
-		x0 -- the spacial location of the 0-th grid point in [nm] (optional)
-		x1 -- the spacial location of the (n-1)-th grid point in [nm] (optional)
 		dx -- the spacial distance between grid points in [nm] (optional): (n-1) * dx = x1-x0
 		L -- the spacial width of the whole grid in [nm] (optional): L = n * dx
-		of the arguments x0, x1, dx and L either dx, L or both x0 and x1 must be given otherwise a ValueError is raised!
+		info -- a 2D string array containing arbitrary configuration data in the form info[i,0] = key, info[i,1] = value (optional): usually info[0,1] strores n and info[1,1] stores L
+		of the arguments dx and L only one must be given (alternatively L could also be given via info) otherwise a ValueError is raised!
 		"""
+		if info is not None:
+			L = float(info[1][1])
 		if L:
 			dx = L / n
-		if dx:
-			if x0:
-				x1 = x0 + (n-1) * dx
-			elif x1:
-				x0 = x1 - (n-1) * dx
-			else:
-				x1 = (n-1) * dx / 2.0
-				x0 = -x1
-		elif x0 and x1:
-			dx = (x1-x0) / (n-1)
+		elif dx:
+			L = dx * n
 		else:
 			raise ValueError("Insuficient grid parameters given!")
 		self.m = m
 		self.n = n
-		self.x0 = x0
-		self.x1 = x1
 		self.dx = dx
+		self.l = L
 		self.file = h5py.File(filename + ".hdf5", "w")
 		self.energies = self.file.create_dataset(_EN_NAME, (m,), dtype='d')
-		self.waves = self.file.create_dataset(_EV_NAME, (m, n), dtype='d')
-		par = self.file.create_dataset(_OPT_NAME, (2,), dtype='d')
-		par[0] = x0
-		par[1] = x1
+		self.waves = self.file.create_dataset(_EV_NAME, (n, m), dtype='d')
+		if info is None:
+			info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)]]).astype('S9')
+		self.file.create_dataset(_OPT_NAME, data=info)
 		self.file.flush()
 
 	def close(self):
@@ -93,9 +82,9 @@ class SpectrumData:
 		
 		return a 2D numpy array containing all eigenvectors (v) spatially normalized: sum x in v of (|x|^2 * self.dx) = 1.0
 		"""
-		waves = np.empty((self.m, self.n))
+		waves = np.empty((self.n, self.m))
 		for i in range(self.m):
-			vec = self.waves[i,:]
-			waves[i,:] = vec / math.sqrt(np.inner(vec, vec) * self.dx)
+			vec = self.waves[:,i]
+			waves[:,i] = vec / math.sqrt(np.inner(vec, vec) * self.dx)
 		return waves
 
