@@ -22,8 +22,8 @@ import sys
 import datetime
 import socket
 import getpass
-
-from .ParameterHandler import ParameterHandler
+import json
+import h5py
 
 from HaPPPy.OneBody import OneBodySolver
 from HaPPPy.TwoBody import TwoBodySolver
@@ -85,21 +85,69 @@ def main(argv=None):
     print("###")
     print("################################################################################")
 
-    parameter = ParameterHandler()
+    # Loading config from json file
+    configdata = json.load(open('config.json'))
 
-    OBSolver = OneBodySolver()
-    OBSolver.doCalculation()
+    L = configdata["L"]
+    N = configdata["N"]
+    E0 = configdata["E0"]
 
-    TBSolver = TwoBodySolver()
-    TBSolver.doCalculation()
+    # Do the one body calculation
+    OneBody = OneBodySolver(L,N)
+    OneBodyEigenvalues, OneBodyEigenVectors, Info = OneBody.calcualteHarmonicPotential(E0)
 
-    TMCal = TransmissionCalculator()
-    TMCal.doCalculation()
+    # Save file to hdf5 file
+    # TODO allow to choose the path
+    OneBody.exportData(OneBodyEigenvalues, OneBodyEigenVectors, Info)
+
+    # TODO put all this into a class 
+    from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
+    onebodydatapath = 'data_group1'
+    obData = SpectrumData()
+    obData.open(onebodydatapath)
+    TwoBodyEigenvalues, TwoBodyEigenvectors = createTwoParticleData(obData)
+
+    # Save the two body result
+    # TODO put this into a function
+    twobodydatapath = 'data_group2.hdf5'
+    dataFile = h5py.File(twobodydatapath, "w")
+    dataSet_calcInfo = dataFile.create_dataset("TwoBodyEigenvalues", data=TwoBodyEigenvalues)
+    dataSet_eigvalues = dataFile.create_dataset("TwoBodyEigenvectors", data=TwoBodyEigenvectors)  
+    
+    
+    dataFile.close()
+
+    file = h5py.File('data_group2.hdf5', "a")
+    TwoBodyEigenvalues = file["TwoBodyEigenvalues"][:]
+    TwoBodyEigenvectors = file["TwoBodyEigenvectors"][:]
+    file.close()
+
+
+    Transmission = TransmissionCalculator()
 
     RateCal = RateCalculator()
     RateCal.doCalculation()
 
+    muL = configdata["muL"]
+    muR = configdata["muL"]
+    T = 1.0 # TODO How do we get Trannsmission in here
+    V = 1.0 # What is V actually?
+
+    Gamma_01L,Gamma_01R,Gamma_10L,Gamma_10R,\
+    Gamma_12L,Gamma_12R,Gamma_21L,Gamma_21R = Rates.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
+                                                                  muL, muR, T, V, TwoBodyEigenvectors)
+
+    TMax = configdata["Tmax"]
+    DT = configdata["DT"]
+
     MSolver = MasterEquationSolver()
-    MSolver.doCalculation()
+    # TODO How to get the rates in here
+    sim_time_dev_prop, sim_current = mes.doCalculation(DT, TMax, P_0, Gamma_01L, Gamma_01R)
+
+    # Plot the stuff
+    # 1st plot: time development of propabilities
+    sim_time_dev_prop.quickPlot(xlabel="t", ylabel="P")
+    # 2nd plot: time development of netto current
+    sim_current.quickPlot(xlabel="t", ylabel="I")
 
     return 0
