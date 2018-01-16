@@ -15,7 +15,7 @@ class TwoBodySolver:
 
         print("Hello from the TwoBodySolver, what can I do for you?")
 
-    def doCalculation(self, obDataFile='HaPPPy/OneBody/data_group1', saveOutput=false):
+    def doCalculation(self, obDataFile='HaPPPy/OneBody/data_group1', tbDataFile='HaPPPy/TwoBody/data_group2', saveOutput=true):
         """ Calculate and return the two-electron eigenvalues and eigenvectors from the single-electron eigenfunctions.
         
         Arguments:
@@ -25,12 +25,19 @@ class TwoBodySolver:
         """
         obData = SpectrumData()
         obData.open(obDataFile)
-		if saveOutput:
-			#TODO
-		
-        return createTwoParticleData(obData)
+        result = createTwoParticleData(obData)
+        if saveOutput:
+            ev = result[0]
+            Q = result[1]
+            data = TwoBodySpectrumData()
+            data.init(tbDataFile, len(ev), len(Q[0,0,:]))
+            data.energies[:] = ev
+            data.coeficients[:,:,:] = Q
+            data.close()
+        
+        return result
 
-	def getSavedData(self):
-		""" Returns the same as the last doCalculation(...,saveOutput=true) call without all of the time consuming calculation """
-		#TODO
-		return [[1,2,2,1],[[[1,1],[1,1]],[[2,2],[2,2]],[[1,2],[1,2]],[[2,1],[2,1]]]]
+    def getSavedData(self):
+        """ Returns the same as the last doCalculation(...,saveOutput=true) call without all of the time consuming calculation """
+        #TODO
+        return [[1,2,2,1],[[[1,1],[1,1]],[[2,2],[2,2]],[[1,2],[1,2]],[[2,1],[2,1]]]]
