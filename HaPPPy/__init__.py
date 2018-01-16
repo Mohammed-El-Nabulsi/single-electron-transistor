@@ -103,8 +103,8 @@ def main(argv=None):
     OneBody.exportData(OneBodyEigenvalues, OneBodyEigenVectors, Info)
 
     # TODO Group 2: Put all this into a class, say "TwoBodySolver"
-    # TODO Group 2: Fix the interace with Group 1 in an elegant way
-    # TODO Group 2: Make sure the module works as expected
+    # TODO Group 2: Fix the interface with Group 1 in an elegant way
+    # TODO Group 2: Make sure the module works as expected with the interface provided
     # TODO Group 2: Try to enhance performance by using BLAS routines
     from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
     onebodydatapath = 'data_group1'
