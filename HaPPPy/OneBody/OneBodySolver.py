@@ -116,8 +116,8 @@ class OneBodySolver:
 
         # printing eingenvalues and eigenvectors
         # as option for debugging
-        for i in range(10):
-            print("Eigenvalue:\t\t ", la[i])
+        #for i in range(10):
+        #    print("Eigenvalue:\t\t ", la[i])
         
         # create norm of the eigenvectors
         norm = 0.0
@@ -320,7 +320,7 @@ class OneBodySolver:
 
     def exportData(self, la, v_norm, info, path="data_group1"):
         Data = SpectrumData()
-        Data.init(path, len(la), len(la), info)
+        Data.init(path, len(la), len(la), info=info)
         Data.energies[:] = la
         Data.waves[:,:] = v_norm
         Data.close()
