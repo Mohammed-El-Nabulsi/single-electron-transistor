@@ -25,12 +25,12 @@ class RateCalculator:
 
     #benoetigte Konstanten 
 
-    kB=1 #Boltzmannkonstante in eV
+    
     
 
     #definiere Fermifunktion
     def doCalculation(self, E1, E2, muL, muR, T, V, C):
-        kB=1
+        kB=0.08629 #Boltzmannkonstante in meV/K
         def fermi(E,mu,T):
             f=1/(math.exp((E-mu)/(kB*T) )+1)
             return(f)
@@ -47,7 +47,7 @@ class RateCalculator:
             return(0.1)
         NEcut= np.size(E2)
           
-        #Um Tunnelraten zu berechnen, die durch die linke Tunnerlbariere gehen, muss als Parameter mu das chemische Potential der linken Tunnelbariere eingesetzt werden. Umgekehrt symmetrisch fuer die rechte Tunnelbariere
+        #Um Tunnelraten zu berechnen, die durch die linke Tunnelbarriere gehen, muss als Parameter mu das chemische Potential der linken Tunnelbariere eingesetzt werden. Umgekehrt symmetrisch fuer die rechte Tunnelbariere
 
         def Gamma_12(Ea,Eb,mu,T): 
             summe=0
