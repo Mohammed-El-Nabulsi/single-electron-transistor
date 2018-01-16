@@ -140,9 +140,8 @@ def main(argv=None):
     # TODO Group 4 and Group 5: Fix the interface between both modules
     #                           There is no common way to transfer the rates 
     RateCal = RateCalculator()
-    Gamma_01L,Gamma_01R,Gamma_10L,Gamma_10R,\
-    Gamma_12L,Gamma_12R,Gamma_21L,Gamma_21R = Rates.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
-                                                                  muL, muR, T, V, TwoBodyEigenvectors)
+    Gamma_L, Gamma_R = Rates.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
+                                                                  muL, muR, T, V, TwoBodyEigenvectors, Transmission)
 
     # Getting some parameters
     TMax = configdata["Tmax"]
