@@ -9,9 +9,12 @@ __docformat__ = 'reStructuredText'
 
 class MasterEquationSolver:
     """
-    Simulates the time development of propabilities :math:`\\vec{P}(t)` for an :math:`n`-state system with transition rates :math:`\\Gamma` including the netto current :math:`I(t)`.
+    Simulates the time development of propabilities :math:`\\vec{P}(t)` for an
+    :math:`n`-state system with transition rates :math:`\\Gamma` including the
+    netto current :math:`I(t)`.
 
-    This method returns numerical approximations of the solutions to the following problems.
+    This method returns numerical approximations of the solutions to the
+    following problems.
 
     **1st Problem: Time Development of Propabilities**
 
@@ -19,13 +22,21 @@ class MasterEquationSolver:
 
     .. math::
 
-        n \in \mathbb{N}, t_{max} \in \mathbb{R}^+_0, \Delta t \in \mathbb{R}^+ \\\\ \Gamma = \Gamma^L + \Gamma^R \in Mat(n, n, \mathbb{R}^+_0), \\vec{P} : [0, t_{max}] \\to { \left ( \mathbb{R}^+_0 \\right ) }^n, t \mapsto \\vec{P}(t)
+        n \in \mathbb{N},
+        t_{max} \in \mathbb{R}^+_0,
+        \Delta t \in \mathbb{R}^+ \\\\
+        \Gamma = \Gamma^L + \Gamma^R \in Mat(n, n, \mathbb{R}^+_0),
+        \\vec{P} : [0, t_{max}] \\to { \left ( \mathbb{R}^+_0 \\right ) }^n,
+        t \mapsto \\vec{P}(t)
 
-    The differential equation of first order with constant coefficients to be solved is stated as
+    The differential equation of first order with constant coefficients to be
+    solved is stated as
 
     .. math::
 
-        \\frac{d P_{\\alpha}}{d t} = \sum_{\\beta} \Gamma_{\\beta \\rightarrow \\alpha} P_{\\beta} - \sum_{\\beta} \Gamma_{\\alpha \\rightarrow \\beta} P_{\\alpha}
+        \\frac{d P_{\\alpha}}{d t}
+        = \sum_{\\beta} \Gamma_{\\beta \\rightarrow \\alpha} P_{\\beta}
+        - \sum_{\\beta} \Gamma_{\\alpha \\rightarrow \\beta} P_{\\alpha}
 
     where
 
@@ -41,7 +52,8 @@ class MasterEquationSolver:
 
     is the boundary condition..
 
-    The solution of this problem is returned as a discrete simulation of :math:`\\vec{P}`. (See HaPPPy.MasterEquation.Simulation for more details.)
+    The solution of this problem is returned as a discrete simulation of
+    :math:`\\vec{P}`. (See HaPPPy.MasterEquation.Simulation for more details.)
 
     **2nd Problem: Netto Current**
 
@@ -51,16 +63,26 @@ class MasterEquationSolver:
 
     .. math::
 
-        I : [0, t_{max}] \\to \mathbb{R}, t \mapsto I(t) \\\\
-        I^k : [0, t_{max}] \\to \mathbb{R}, t \mapsto I^k(t), k \in \\{ L, R \\} \\\\
-        I^k = q \sum_{\\alpha, \\beta} \Gamma^k_{\\alpha \\rightarrow \\beta} P_{\\alpha} \\\\
-        I = I^L - I^R = q \sum_{\\alpha, \\beta} \\left ( \Gamma^L_{\\alpha \\rightarrow \\beta} - \Gamma^R_{\\alpha \\rightarrow \\beta} \\right ) P_{\\alpha}
+        I : [0, t_{max}] \\to \mathbb{R},
+        t \mapsto I(t) \\\\
+        I^k : [0, t_{max}] \\to \mathbb{R},
+        t \mapsto I^k(t), k \in \\{ L, R \\} \\\\
+        I^k = q \sum_{\\alpha, \\beta}
+            \Gamma^k_{\\alpha \\rightarrow \\beta} P_{\\alpha} \\\\
+        I = I^L - I^R
+        = q \sum_{\\alpha, \\beta}
+            \\left (
+                \Gamma^L_{\\alpha \\rightarrow \\beta}
+                - \Gamma^R_{\\alpha \\rightarrow \\beta}
+            \\right ) P_{\\alpha}
 
-    It is assumed that the charge per particle :math:`q = 1`.
+    It is assumed that the charge per particle is :math:`q = 1`.
 
-    :math:`I^L,I^R` descibe the current through the *left* resp. *right* barrier, hence :math:`I` describes the netto flow from left to right.
+    :math:`I^L,I^R` descibe the current through the *left* resp. *right*
+    barrier, hence :math:`I` describes the netto flow from left to right.
 
-    The solution of this problem is returned as a discrete simulation as well. (See HaPPPy.MasterEquation.Simulation for more details.)
+    The solution of this problem is returned as a discrete simulation as well.
+    (See HaPPPy.MasterEquation.Simulation for more details.)
 
     :example: .. code-block:: Python
             :emphasize-lines: 1-2,7-8,10, 12-13
@@ -86,7 +108,9 @@ class MasterEquationSolver:
             sim_current.quickPlot(xlabel="t", ylabel="I")
 
 
-        The relevant lines of code for the simulation to work are highlighted. To give a real live example and to demonstarte the usage of the result some code to plot the result is added.
+        The relevant lines of code for the simulation to work are highlighted.
+        To give a real live example and to demonstarte the usage of the result
+        some code to plot the result is added.
 
     """
     # Don't remove the last dot/paragrph since it is a workaround to shpinx's
@@ -94,7 +118,9 @@ class MasterEquationSolver:
 
     def __init__(self, ε=None):
         """
-        :param ε: Tolerance value. Sum of all probabilities must be equals to 1 within this tolerance. If :code:`ε == None` the fedault value is used (see getDefaultε()).
+        :param ε: Tolerance value. Sum of all probabilities must be equals to 1
+                  within this tolerance. If :code:`ε == None` the default value
+                  is used (see getDefaultε()).
         :type ε: float
         """
         if ε == None:
@@ -104,14 +130,16 @@ class MasterEquationSolver:
 
     def getε(self):
         """
-        :return: Returns ε - a tolerance value: The sum of all probabilities must be equals to 1 within this tolerance.
+        :return: Returns ε - a tolerance value: The sum of all probabilities
+                 must be equals to 1 within this tolerance.
         :rtype: float
         """
         return self.ε
 
     def setε(self, ε):
         """
-        :param ε: Tolerance value: The sum of all probabilities must be equals to 1 within this tolerance.
+        :param ε: Tolerance value: The sum of all probabilities must be equals
+                  to 1 within this tolerance.
         :type ε: float
         """
         self.ε = ε
@@ -119,89 +147,146 @@ class MasterEquationSolver:
     @staticmethod
     def getDefaultε():
         """
-        :return: Returns the default value of ε - a tolerance value: The sum of all probabilities must be equals to 1 within this tolerance.
+        :return: Returns the default value of ε - a tolerance value: The sum of
+                 all probabilities must be equals to 1 within this tolerance.
         :rtype: float
         """
         return 1E-10
 
     def doCalculation(self, Δt, t_max, P_0, Γ_L, Γ_R, check_tolerance=True):
         """
-        See class description of Happy.MasterEquationSolver for details.
+        Raises exception of the type RuntimeError when the calculation must be
+        abored due to bad unreasonable parameters. If the simulation is aborded
+        during the calculation process later on an incomplete answer is still
+        returned and can be check via the method :code:`valid() (see
+        HaPPPy.MasterEquation.Simulation.valid()). The invalid simulation
+        contains all calculated datapoints up to the point in time where the
+        calculation failed.
 
-        :param P_0: Start value of propabilities where :code:`P_0` ≣ :math:`\\vec{P_0}`. Must be either a list or a ``nx1`` matrix.
+        For more details see class description of Happy.MasterEquationSolver.
+
+        :param P_0: Start value of propabilities where
+                    :code:`P_0` ≣ :math:`\\vec{P_0}`.
+                    Must be either a list or a ``nx1`` matrix.
         :type P_0: numpy.array or numpy.ndarray
-        :param Γ_L: Matrix containing the transition rates regarding electrons tunneling trough the *left* barrier where :code:`Γ_L[i][j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
+        :param Γ_L: Matrix containing the transition rates regarding electrons
+                    tunneling trough the *left* barrier where
+                    :code:`Γ_L[i][j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
+                    Must be a ``nxn`` matrix.
         :type Γ_L: numpy.ndarray
-        :param Γ_R: Matrix containing the transition rates regarding electrons tunneling trough the *right* barrier where :code:`Γ_R[i][j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`. Must be a ``nxn`` matrix.
+        :param Γ_R: Matrix containing the transition rates regarding electrons
+                    tunneling trough the *right* barrier where
+                    :code:`Γ_R[i][j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
+                    Must be a ``nxn`` matrix.
         :type Γ_R: numpy.ndarray
-        :param t_max: Last point in time to be simulated. Must fulfil :code:`t_max >= 0`.
+        :param t_max: Last point in time to be simulated. Must fulfil
+                      :code:`t_max >= 0`.
         :type t_max: float
-        :param Δt: Length of the time tintervall between two simulated events. Must fulfil :code:`Δt > 0`.
+        :param Δt: Length of the time tintervall between two simulated events.
+                   Must fulfil :code:`Δt > 0`.
         :type Δt: float
 
-        :return: Returns :code:`sim_time_dev_prop, sim_current` where both values are a HaPPPy.MasterEquation.Simulation of :math:`\\vec{P}` rep. :math:`I`.
-        :rtype: (HaPPPy.MasterEquation.Simulation, HaPPPy.MasterEquation.Simulation)
+        :return: Returns :code:`sim_time_dev_prop, sim_current` where both
+                 values are a HaPPPy.MasterEquation.Simulation of
+                 :math:`\\vec{P}` rep. :math:`I`.
+        :rtype: (HaPPPy.MasterEquation.Simulation,
+                 HaPPPy.MasterEquation.Simulation)
         """
 
-        ## type conversions
-        # if necessary: reformat P_0 as nx1 matrix (otherwise P_0 could not be multiplicated with matricies)
+        ## STEP 1: TYPE CONVERSION OF PARAMETERS
+        # In this step parameters are manipulated to match the desired type.
+
+        # P_0 can be passed as either a vector with n components or as a nx1
+        # matrix - both are a numpy.ndarray but of different shapes. Since any
+        # vector - one-dimensional numpy.ndarray - can not be transposed, the
+        # matrix representation is used from now on. Hence a vector is
+        # transformed to a nx1 matrix.
         if P_0.ndim == 1:
             P_0 = np.array([P_0]).transpose()
 
-        ## input checks
-        # get dimension
+        ## STEP 2: PARAMETER CHECKS
+        # In this step some general checks are applied to the input parameters
+        # to warn the user if the passed parameters are unreasonable and raise
+        # an RuntimeError exception if so.
+
+        # The dimension n is extracted from the P_0 vector.
         n = P_0.shape[0]
-        # warn if tolerance value is unreasonable
+        # Check and warn if tolerance ε value is unreasonable.
         if check_tolerance and self.ε <= 0:
-            raise RuntimeError("ε must be a positive number > 0. \nε = " + str(self.ε))
-        # P_0 must be a nx1 matrix (with n matching Λ)
+            raise RuntimeError("ε must be a positive number > 0."
+                               + "\nε = " + str(self.ε)
+                              )
+        # Check and warn if P_0 is not a nx1 matrix.
         if P_0.ndim != 2 or P_0.shape[1] != 1:
             raise RuntimeError("P_0 must be a "
                                + str(n)
-                               + "x1 matrix (aka. a 'dotable vector')! \nP_0 = \n"
+                               + "x1 matrix (aka. a 'dotable vector')!\nP_0 =\n"
                                + str(P_0)
                               )
-        # Γ_L must be a nxn matrix
-        if Γ_L.ndim != 2 or Γ_L.shape[0] != P_0.shape[0] or Γ_L.shape[1] != P_0.shape[0] or not (Γ_L >= 0).all():
+        # Check and warn if Γ_L is not a nxn matrix with positive coeffiecents.
+        if (Γ_L.ndim != 2
+            or Γ_L.shape[0] != P_0.shape[0]
+            or Γ_L.shape[1] != P_0.shape[0]
+            or not (Γ_L >= 0).all()
+           ):
             raise RuntimeError("Γ_L must be a "
                                + str(n) + "x" + str(n)
                                + " matrix with coefficients >= 0."
                                + "\nΓ_L = \n" + str(Γ_L)
                               )
-        # Γ_R must be a nxn matrix
-        if Γ_R.ndim != 2 or Γ_R.shape[0] != P_0.shape[0] or Γ_R.shape[1] != P_0.shape[0] or not (Γ_R >= 0).all():
+        # Check and warn if Γ_R is not a nxn matrix with positive coeffiecents.
+        if (Γ_R.ndim != 2
+            or Γ_R.shape[0] != P_0.shape[0]
+            or Γ_R.shape[1] != P_0.shape[0]
+            or not (Γ_R >= 0).all()
+           ):
             raise RuntimeError("Γ_R must be a "
                                + str(n) + "x" + str(n) +
                                " matrix with coefficients >= 0."
                                + "\nΓ_R = \n" + str(Γ_R)
                               )
-        # P_0 must have coefficients >= 0
+        # Check and warn if coefficients of P_0 are not positive.
         if not (P_0 >= 0).all():
-            raise RuntimeError("P_0 must have coefficients >= 0. \nP_0 = \n" + str(P_0))
-        # coefficients of P_0 must add up to 1
+            raise RuntimeError("P_0 must have coefficients >= 0.\nP_0 ="
+                               + "\n" + str(P_0)
+                              )
+        # Check and warn if coefficients of P_0 do not add up to 1.
         P_sum = sum(P_0)
         if check_tolerance and (P_sum < 1 - self.ε or P_sum > 1 + self.ε):
-            raise RuntimeError("Coefficients of P_0 must add up to 1 (within tolerance ε = "
-                               + str(self.ε)
-                               + "). \nP_0 = \n"
-                               + str(P_0)
-                               + "\n Σ = "
-                               + str(P_sum)
+            raise RuntimeError("Coefficients of P_0 must add up to 1 "
+                               + "(within tolerance ε = " + str(self.ε) + ")."
+                               + "\nP_0 =\n" + str(P_0)
+                               + "\n Σ = " + str(P_sum)
                               )
-        # simulated time intervals must be positive or negative
-        if t_max < 0 or Δt <= 0:
-            raise RuntimeError("Simulated time intervals must be finite and positive ("
-                               + "t_max >= 0 and Δt > 0).\n"
+        # Check and warn if t_max is negative.
+        if t_max < 0:
+            raise RuntimeError("Simulated time must be positive or zero "
+                               + "(t_max >= 0) but passed value is "
                                + "t_max = " + str(t_max)
-                               + ", Δt = " + str(Δt)
                               )
+        # Check and warn if Δt is negative or zero.
+        if Δt <= 0:
+          raise RuntimeError("Simulated time intervals must be positive "
+                             + "(Δt > 0) but passed value is "
+                             + "Δt = " + str(Δt)
+                            )
 
-        ## calculation
+        ## STEP 3: SIMULATION
+        # In this step the actual simulation happens.
+
+        # Γ stores the total rates - in a non-directional manner.
         Γ = Γ_L + Γ_R
-        sim_tdp_successful, sim_tdp = self.__simulateTimeDevelopmentOfPropabilities(Δt, t_max, P_0, Γ, check_tolerance)
-        if sim_tdp_successful:
-            sim_cur = self.__simulateCurrent(Γ_L, Γ_R, sim_tdp)
+        # Calls the simulation method of the propabilities.
+        sim_tdp = self.__simulateTimeDevelopmentOfPropabilities(Δt, t_max,
+                                                                P_0, Γ,
+                                                                check_tolerance
+                                                                )
+        # Calls the simulation method of the netto current.
+        # Γ_L and Γ_R are passed seperatly to preserve the information of
+        # direction.
+        sim_cur = self.__simulateCurrent(Γ_L, Γ_R, sim_tdp)
 
+        # Both simulations are returnd - mind the order!
         return sim_tdp, sim_cur
 
     def __simulateTimeDevelopmentOfPropabilities(self,
@@ -213,86 +298,145 @@ class MasterEquationSolver:
                                                  verbose=False
                                                 ):
         """
-        Simulates the time development of propabilities P(t) for an :math:`n`-state system with transition rates Γ.
+        Simulates the time development of propabilities P(t) for an
+        :math:`n`-state system with transition rates Γ.
 
         .. todo::
 
             Create extra return type for simulation.
 
-        This is a private function and should not be called from outside the MasterEquationSolver class! (Hence it does not perform further tests than MasterEquationSolver.)
+        This is a private function and should not be called from outside the
+        MasterEquationSolver class! (Hence it does not perform further tests
+        than MasterEquationSolver.)
 
-        :return: Returns :code:`sim_sucessfull, sim_time_dev_prop`. Iff :code:`sim_sucessfull==True` than :code:`sim_time_dev_prop` has values like describet in MasterEquationSolver.doCalculation (see return) otherwise sim_time_dev_prop is undefined.
+        :return: Returns :code:`sim_sucessfull, sim_time_dev_prop`. Iff
+                 :code:`sim_sucessfull==True` than :code:`sim_time_dev_prop`
+                 has values like describet in MasterEquationSolver.doCalculation
+                 (see return) otherwise sim_time_dev_prop is undefined.
         :rtype: (bool, list)
 
-        See documentation of MasterEquationSolver.doCalculation (1st problem) for more details.
+        See documentation of MasterEquationSolver.doCalculation (1st problem)
+        for more details.
 
         """
 
-        # print input values (if verbose)
+        ## Disclaimer: The usage of `verbose` is for debugging only. If set to
+        #              `True` most parts of the calculation are printed to the
+        #              console. All expressions of code realting to this process
+        #              begin  with `if verbose: ...`. Removing those expressions
+        #              does not alter the behaviour of this method if verbose is
+        #              set to `False`.
+
+        # verbose only: Print P_0 and Γ (and ε if tolerence checks are enabled).
         if verbose:
             print("P(t=0) = \n", P_0)
             print("Γ = \n", Γ)
             if check_tolerance:
                 print("ε = ", self.ε)
 
-        ## simulation
-        # track if simulation had any issues
-        sim_successful = True
+        ## STEP 1: CALCULATION OF THE COEFFICIENTS OF THE DIFFERENTIAL EQUAITON
+        #          (MASTER EQUATION) IN EIGENVEVTORBASIS
 
-        # set-up Λ-matrix
-        # positive coefficients in master equation
+        ## STEP 1.a: CALCULATION OF THE COEFFICIENTS OF THE MASTER EQUAITON
+        # Clalculate the coefficients of the master equation in the given basis.
+        # Λ_in holds all positive coefficients in master equation - the inflow.
+        # (Λ_in is effectivly the left sum in master equation in the
+        # documentation)
         Λ_in = Γ
-        # negative coefficients in master equation
-        Λ_out = np.diag([sum([Γ[i][j] for j in range(Γ.shape[0])]) for i in range(Γ.shape[0])])
+        # And Λ_in holds all negative coefficients in master equation - the
+        # outflow. (Λ_out is effectivly the right sum in master equation in the
+        # documentation)
+        Λ_out = np.diag([sum([Γ[i][j]
+                        for j in range(Γ.shape[0])])
+                        for i in range(Γ.shape[0])]
+                       )
+        # Combine both in to one matrix - the netto flow.
         Λ = Λ_in - Λ_out
+        # verbose only: Prints all newly calculated quantities.
         if verbose: print("Λ_in = \n", Λ_in)
         if verbose: print("Λ_out = \n", Λ_out)
         if verbose: print("Λ = \n", Λ)
 
-        # find eigenvector basis of Λ (Λ_evecs_T transforms to eigenvevtor basis of Λ)
+        ## STEP 1.b: RESTATE THE MASTEREQUATION IN EIGENVECTORBASIS
+        # Find an eigenvector basis of Λ and their eigenvalues. (Λ_evecs_T
+        # transforms from the given basis to an eigenvevtor basis of Λ.)
+        # Convention: Let v be an eigenvector of Λ with eigen value λ: Λv = λv
+        #             Then: Λ_evals = (λ_1, λ_2, ..., λ_n)
+        #             and   Λ_evecs = (v_1, v_2, ..., v_n)
+        # Convention: The calculated eigenvetorbasis of Λ by this step is called
+        #             `the` eigenvector basis from now on.
         (Λ_evals, Λ_evecs) = lin.eig(Λ)
         Λ_evecs_T = Λ_evecs.transpose()
+        # verbose only: Print the eigenvector basis and the eigenvalues.
         if verbose: print("Λ.eigenvalues = \n", Λ_evals)
         if verbose: print("Λ.eigenvectors = \n", Λ_evecs_T)
-
-        # get P_0 in eigenvector basis of Λ
-        P_evb = Λ_evecs_T.dot(P_0)
-        if verbose: print("P(t=0) in Λ.eigenvectorbase = \n", P_evb)
-
-        # get Λ eigenvector basis of Λ
+        # Claculate P_0 in this eigenvectorbasis
+        P_evb_0 = Λ_evecs_T.dot(P_0)
+        # verbose only: Print P_0 in eigenvector basis.
+        if verbose: print("P(t=0) in Λ.eigenvectorbase = \n", P_evb_0)
+        # Calcualte Λ in this eigenvector basis. (Since it was constructed with
+        # respect to Λ it is a diagonal matrix.)
         Λ_evb = np.diag(Λ_evals)
+        # verbose only: Print Λ in eigenvectorbasis.
         if verbose: print("Λ in Λ.eigenvectorbase = \n", Λ_evb)
 
-        # get inverse of Λ_evecs_T (transforms back from eigenvevtor basis of Λ)
+        ## STEP 1.c: PLAUSIBILITY CHECK (Λ SHOULD BE INERVIBLE)
+        # Claulate the inverse of Λ.
         Λ_evecs_T_inv = np.linalg.inv(Λ_evecs_T)
+        # verbose only: Print the inverse of Λ.
         if verbose: print("Λ.eingenvectors^-1 = \n", Λ_evecs_T_inv)
-
-        # check if creation inversion was successful
+        # Check an warn if this matric does not truly invert Λ.
         if (np.dot(Λ_evecs_T_inv, Λ_evecs_T) != np.identity(Λ.shape[0])).all():
-            raise RuntimeError("Can not invert Λ = \n" + str(Λ))
+            raise RuntimeError("Could not invert Λ = \n" + str(Λ))
 
-        # simulate time development discretly
+        ## STEP 2: SIMULATION -
+        #         SOLVING THE MASTERQUATION IN EIGENVECTORBASIS DISCRETLY &
+        #         TRANSFORMATION BACK TO ORIGINAL BASIS
+        # In this step the probelm is solved for discrete ts in the
+        # eigenvectorbasis and then trnsformed back to the original basis.
+
+        # Stores whether the simulation was completed witout anny issue.
         valid = True
+        # Stores the resulting simulation.
         sim = Simulation(Δt, t_max)
-        P_0_evb = np.dot(Λ_evecs_T, P_0)
-        for t in np.arange(0, t_max + Δt, Δt):
+        # For each desired point in time the solution is calculated discretly.
+        for t in sim.getTimeBins():
+            # verbose only: Print the current point in time.
             if verbose: print("\nt = ", t)
 
-            # calculate time development in eigenvector base
-            #exp_tΛ_evb = np.diag(np.power(Λ_evals, t)) # Does not behave well due to numerical issues!
+            # In this eigenvector basis Λ is diagonal and the master equation
+            # becomes: d/dt v_i = Λ_ii v_i = λ_i v_i  (where i = 1,2,...,n)
+            # These differential equations are decoulped and therefore can be
+            # solved independently.
+            # The solutions are: v_i(t) = v_i(t=0) exp(λ_i t)
+            # Which can be restated as: v(t) = exp(Λt) v(t=0)
+            # where v is P in the eigenvectorbasis
+            # and exp(Λt) = diag(exp(λ_1 t), exp(λ_2 t), ..., exp(λ_n t))
+            # Calcualte exp(Λt) in the eigenvectorbasis.
             exp_tΛ_evb = np.diag(np.exp(t * Λ_evals))
-            if verbose: print("exp(" + str(t) + " * Λ) in Λ.eigenvectorbase = \n", exp_tΛ_evb)
-            P_evb_t = np.dot(exp_tΛ_evb, P_0_evb)
-            if verbose: print("P(t=" + str(t) + ") in Λ.eigenvectorbase = \n", P_evb_t)
+            # verbose only: Print P(t) in the eigenvectorbasis.
+            if verbose:
+                print("exp(" + str(t) + " * Λ) "
+                      + "in Λ.eigenvectorbase = \n", exp_tΛ_evb
+                     )
+            # Calculate P(t) in the eigenvectorbasis - which is v(t).
+            P_evb_t = np.dot(exp_tΛ_evb, P_evb_0)
+            # verbose only: Print P(t) in the eigenvectorbasis.
+            if verbose:
+                print("P(t=" + str(t) + ") in "
+                      + "Λ.eigenvectorbase = \n", P_evb_t
+                     )
 
-            # change to original base
+            # Calculate P(t) in the origianl basis.
             P_t = np.dot(Λ_evecs_T_inv, P_evb_t)
+            # verbose only: Print P(t) in the origianl basis.
             if verbose: print("P(t=" + str(t) + ") = \n", P_t)
 
-            # append new values to simulation
+            # Extend the simualtion by appending the new P(t).
             sim.append(np.array([P_t[i][0] for i in range(P_t.shape[0])]))
 
-            # check if sum of coefficients of P_t is still 1
+            # Ceck and warn if the sum of all P_i do not add up to 1 within a
+            # tolerance of ε (if requested).
             P_sum = sum(P_t)
             if check_tolerance and (P_sum < 1 - self.ε or P_sum > 1 + self.ε):
                 print("Warning! Calculation aborted Coefficients of P_(t="
@@ -306,19 +450,20 @@ class MasterEquationSolver:
                       + "\n Σ = "
                       + str(P_sum[0])
                      )
+                # If the sum of all P_i is outside the tolerance range abort
+                # the simulation. (This also prevents costly and unrasonable
+                # blow-ups of any P_i.) The simulation is from now on considered
+                # as inavlid.
                 valid = False
                 break
 
+        # Simlations are by default invalid and hece the this simulation is
+        # validated iff the simulation had no issues.
         if valid:
             sim.validate()
 
-        # Use either:
-        #   return sim_successful ? sim : None
-        # or
-        #   return sim_successful, sim
-        # to return the simulated data. The last option allowes to analyse the
-        # simulation up to the point of failure but must be analysed more carefully.
-        return sim_successful, sim
+        # Return the (valid or invalid) simulation.
+        return sim
 
     def __simulateCurrent(self,
                            Γ_L,
@@ -327,51 +472,73 @@ class MasterEquationSolver:
                            verbose=False
                           ):
         """
-        Simulates the time current I(t) for an :math:`n`-state system with transition rates Γ.
+        Simulates the time current I(t) for an :math:`n`-state system with
+        transition rates :math:`\\Gamma`.
 
         .. todo::
 
             Create extra return type for simulation.
 
-        This is a private function and should not be called from outside the MasterEquationSolver class! (Hence it does not perform further tests than MasterEquationSolver.)
+        This is a private function and should not be called from outside the
+        MasterEquationSolver class! (Hence it does not perform further tests
+        than MasterEquationSolver.)
 
-        :return: Returns :code:`sim_current`. :code:`sim_time_dev_prop` needs to be valid for :code:`sim_current` to be valid!
+        :return: Returns :code:`sim_current`. :code:`sim_time_dev_prop`
+                 needs to be valid for :code:`sim_current` to be valid!
         :rtype: (bool, list)
 
-        See documentation of MasterEquationSolver.doCalculation (2nd problem) for more details.
-
+        See documentation of MasterEquationSolver.doCalculation (2nd problem)
+        for more details.
         """
 
+        # The validity is inherited from the propabilities simulation.
         valid = sim_time_dev_prop.valid()
+        # Copy all parameters from the propabilities simulation.
         sim = Simulation(sim_time_dev_prop.getΔt(), sim_time_dev_prop.getT_max())
 
-        # calculate ΔΓ (direction sensivtive form)
+        # Calculate ΔΓ - a direction sensivtive form of the rates matrix and
+        # usefull shortcut.
         ΔΓ = Γ_L - Γ_R
+        # verbose only: Print ΔΓ.
         if verbose: print("ΔΓ: \n", ΔΓ)
 
-        # simulate the current discretly
+        # For each existing discrete solution of P(t) calculate I(t).
+        # (See the documentation of this module for more deails about this
+        # calculation.)
         for i in range(len(sim_time_dev_prop)):
+            # Calculate I(t) like in the formula in the documentation.
             I_i = sum(sum(np.dot(ΔΓ, sim_time_dev_prop[i][1])))
-            sim.append(I_i)
+            # verbose only: Print I(t).
             if verbose: print("I_t[" + str(i) + "= \n", I_i)
+            # Extend the simulation of I(t) by this new discrete value.
+            sim.append(I_i)
 
+        # Make the simulation valid - iff no issues occurred.
         if valid:
             sim.validate()
 
+        # Return the (valid or invaid) simulation.
         return sim
 
 class Simulation():
     """
-    This class represents a simulation crated by HaPPPy.MasterEquation.MasterEquationSolver.doCalculation().
-    A function :math:`f : [0, t_{max}] \\to X, t \mapsto f(t)` is approximated by calculating its discrete values :math:`f(n \\cdot \\Delta t)` where :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}`.
+    This class represents a simulation crated by
+    HaPPPy.MasterEquation.MasterEquationSolver.doCalculation().
+    A function :math:`f : [0, t_{max}] \\to X, t \mapsto f(t)` is approximated
+    by calculating its discrete values
+    :math:`f(n \\cdot \\Delta t)`
+    where
+    :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}`.
 
     If :code:`sim` is a valid HaPPPy.MasterEquation.Simulation then:
 
-    :code:`sim.getTimeBins()` ≣ :math:`\\{n \\cdot \\Delta t | n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \\}`
+    :code:`sim.getTimeBins()` ≣ :math:`\\{n \\cdot \\Delta t | n \in
+    \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \\}`
 
     and
 
-    :code:`sim.getValues()` ≣ :math:`\\{f(n \\cdot \\Delta t) | n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \\}`.
+    :code:`sim.getValues()` ≣ :math:`\\{f(n \\cdot \\Delta t) | n \in
+    \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max} \\}`.
 
     Both in increasing order of :math:`n`.
     """
@@ -404,17 +571,30 @@ class Simulation():
 
     def getTimeBins(self):
         """
-        :return: All values :math:`n \\cdot \\Delta t` where :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}` with increasing :math:`n`.
+        :return: All values :math:`n \\cdot \\Delta t` where
+                 :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}`
+                 with increasing :math:`n`.
         :rtype: numpy.ndarray
         """
         return np.arange(0, self.t_max + self.Δt, self.Δt)
 
     def getValues(self):
         """
-        :return: All values :math:`f(n \\cdot \\Delta t)` where :math:`f` is the simulated function and :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}` with increasing :math:`n`.
+        :return: All values :math:`f(n \\cdot \\Delta t)` where :math:`f` is the
+                 simulated function and :math:`n \in \mathbb{N}_0 \land n \cdot
+                 \Delta t \leq t_{max}` with increasing :math:`n`.
         :rtype: numpy.ndarray
         """
-        return np.array(self.__values)
+        vs = self.__values
+        # iF the simulation is invalid fill values up with None values.
+        if not self.valid():
+            n = 1
+            if len(vs) > 0:
+                n = len(vs[0])
+            Ts =  self.t_max / self.Δt + 1  # = len(self.getTimeBins())
+            while len(vs) < Ts:
+                vs.append([None] * n)
+        return np.array(vs)
 
     def append(self, value):
         # for internal use only
@@ -454,7 +634,11 @@ class Simulation():
     def __str__(self):
         return repr(self)
 
-    def quickPlot(self, title=None, xlabel=None, ylabel=None, xunit=None, yunit=None):
+    def quickPlot(self,
+                  title=None,
+                  xlabel=None, ylabel=None,
+                  xunit=None, yunit=None
+                 ):
         """
         Simple plotting method to quickly get an overview on the simulation.
 
@@ -463,32 +647,36 @@ class Simulation():
         :param xlabel: The symbol to retresent the parameter. (optional)
         :type xlabel: string
         :param ylabel: The symbol to retresent the function values. (optional)
+                       If the function values are vetors ylabel is treated as a
+                       LATEX expression representing a symbol and automatic
+                       indicies are added.
         :type ylabel: string
         :param xunit: The unit the paramter is meassured in. (optional)
         :type xunit: string
         :param yunit: The unit the function valuesare meassured in. (optional)
         :type yunit: string
 
-        :example: See the example given at the documentation of HaPPPy.MasterEquation.MasterEquationSolver.
+        :example: See the example given at the documentation of
+                  HaPPPy.MasterEquation.MasterEquationSolver.
         """
-        # auquire values
+        # Aquire all values related to the discrete representation of the
+        # function.
         ts = self.getTimeBins()
         vs = self.getValues()
-        if (not self.valid())and len(vs) < len(ts):
-            ts = ts[:len(vs)]
 
-        # plot
+        # Plot the function.
         plt.plot(ts, vs)
-        # validity
+        # Add a validity mark to the title if necessary.
         if not self.valid():
             if title == None:
                 title = " (not valid)"
             else:
                 title = str(title) + " (not valid)"
-        # title
+        # Add a title if requested.
         if title != None:
             plt.title(str(title))
-        # labels
+        # Add labels to one or both axes if requested.
+        # It is possible to add an optional unit to each axis.
         if xlabel != None:
             if xunit != None:
                 plt.xlabel(str(xlabel) + "/" + str(xunit))
@@ -499,12 +687,17 @@ class Simulation():
                 plt.ylabel(str(ylabel) + "/" + str(yunit))
             else:
                 plt.ylabel(str(ylabel))
-        # legend
-        if ylabel != None and (type(vs[0]) == list or type(vs[0]) == np.ndarray) and len(vs[0]) > 1:
+        # Add a legend if requested.
+        # If the function values are vetors ylabel is treated as a LATEX
+        # expression representing a symbol and automatic indicies are added.
+        if (ylabel != None
+            and (type(vs[0]) == list or type(vs[0]) == np.ndarray)
+            and len(vs[0]) > 1
+           ):
             n = len(vs[0]) # dimension of v
-            legend = ["$" + str(ylabel) + "_" + str(i) + "$" for i in range(n)]
+            legend = ["${" + str(ylabel) + "}_" + str(i) + "$" for i in range(n)]
             plt.legend(legend)
-        # grid
+        # Add a grid.
         plt.grid()
-        # show
+        # Draw the figure.
         plt.show()
