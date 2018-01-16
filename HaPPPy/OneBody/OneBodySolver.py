@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import h5py
 from math import sqrt
+from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
 
 class OneBodySolver:
     """ Solves the one body problem
@@ -317,15 +318,20 @@ class OneBodySolver:
         return la, v_norm, Info
 
 
- 
+    def exportData(self, la, v_norm, info, path="data_group1"):
+        Data = SpectrumData()
+        Data.init(path, len(la), len(la), info)
+        Data.energies[:] = la
+        Data.waves[:,:] = v_norm
+        Data.close()
+
+#    def exportData(self, la, v_norm, info):
+#        export data as hdf5 file in three sets
+#        dataFile = h5py.File("data_group1.hdf5", "w")
+#        dataSet_calcInfo = dataFile.create_dataset("Input Information", data=info)
+#        dataSet_eigvalues = dataFile.create_dataset("eigenvalues_group1", data=la)  
+#        dataSet_eigvectors = dataFile.create_dataset("eigenvectors_group1", data=v_norm)
+#        dataFile.close()
 
 
-    
-    def exportData(self, la, v_norm, info):
-        # export data as hdf5 file in three sets
-        dataFile = h5py.File("data_group1.hdf5", "w")
-        dataSet_calcInfo = dataFile.create_dataset("settings", data=info)
-        dataSet_eigvalues = dataFile.create_dataset("eigenvalues", data=la)  
-        dataSet_eigvectors = dataFile.create_dataset("eigenvectors", data=v_norm)
-        dataFile.close()
 
