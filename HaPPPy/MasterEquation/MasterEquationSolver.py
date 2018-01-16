@@ -277,17 +277,17 @@ class MasterEquationSolver:
         # Γ stores the total rates - in a non-directional manner.
         Γ = Γ_L + Γ_R
         # Calls the simulation method of the propabilities.
-        sim_tdp = self.__simulateTimeDevelopmentOfPropabilities(Δt, t_max,
+        sim_tdp, P_stat = self.__simulateTimeDevelopmentOfPropabilities(Δt, t_max,
                                                                 P_0, Γ,
                                                                 check_tolerance
                                                                 )
         # Calls the simulation method of the netto current.
         # Γ_L and Γ_R are passed seperatly to preserve the information of
         # direction.
-        sim_cur = self.__simulateCurrent(Γ_L, Γ_R, sim_tdp)
+        sim_cur, cur_stat = self.__simulateCurrent(Γ_L, Γ_R, sim_tdp, P_stat)
 
         # Both simulations are returnd - mind the order!
-        return sim_tdp, sim_cur
+        return sim_tdp, sim_cur, P_stat, cur_stat
 
     def __simulateTimeDevelopmentOfPropabilities(self,
                                                  Δt,
@@ -395,6 +395,11 @@ class MasterEquationSolver:
         # In this step the probelm is solved for discrete ts in the
         # eigenvectorbasis and then trnsformed back to the original basis.
 
+        ## FIND STATIONARY SOLUTION
+        #  Find the stationary solution, by extracting the eigenvector corresponding to the eigenvalue 0.
+        P_stat = np.compress((abs(Λ_evals) < self.ε), Λ_evecs, axis=1)
+        if verbose: print("P_stat = \n",P_stat)
+
         # Stores whether the simulation was completed witout anny issue.
         valid = True
         # Stores the resulting simulation.
@@ -461,14 +466,15 @@ class MasterEquationSolver:
         # validated iff the simulation had no issues.
         if valid:
             sim.validate()
-
+        
         # Return the (valid or invalid) simulation.
-        return sim
+        return sim, P_stat
 
     def __simulateCurrent(self,
                            Γ_L,
                            Γ_R,
                            sim_time_dev_prop,
+                           P_stat,
                            verbose=False
                           ):
         """
@@ -517,8 +523,11 @@ class MasterEquationSolver:
         if valid:
             sim.validate()
 
+        # Calculate the stationary current
+        cur_stat = sum(sum(np.dot(ΔΓ, P_stat)))
+        
         # Return the (valid or invaid) simulation.
-        return sim
+        return sim, cur_stat
 
 class Simulation():
     """
@@ -701,3 +710,4 @@ class Simulation():
         plt.grid()
         # Draw the figure.
         plt.show()
+        
