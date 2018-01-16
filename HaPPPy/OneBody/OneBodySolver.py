@@ -292,8 +292,8 @@ class OneBodySolver:
 
         # printing eingenvalues and eigenvectors
         # as option for debugging
-        for i in range(10):
-            print("Eigenvalue:\t\t ", la[i])
+        #for i in range(10):
+        #    print("Eigenvalue:\t\t ", la[i])
         
         # creat norm of the eigenvectors
         norm = 0.0
