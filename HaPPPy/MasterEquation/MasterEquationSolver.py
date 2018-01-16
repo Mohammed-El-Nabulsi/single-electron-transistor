@@ -695,7 +695,7 @@ class Simulation():
             and len(vs[0]) > 1
            ):
             n = len(vs[0]) # dimension of v
-            legend = ["${" + str(ylabel) + "}_" + str(i) + "$" for i in range(n)]
+            legend = ["${" + str(ylabel) + "}_{" + str(i) + "}$" for i in range(n)]
             plt.legend(legend)
         # Add a grid.
         plt.grid()
