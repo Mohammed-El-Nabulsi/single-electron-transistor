@@ -613,8 +613,6 @@ class MasterEquationSolver:
         stat_ps = np.compress((abs(Λ_evals) < self.ε), Λ_evecs, axis=1)
         # Renormalize all sationary Ps such that their components add up to 1.
         N = np.diag(np.power(np.sum(stat_ps, axis=0), -1))
-        print(stat_ps)
-        print(N)
         stat_ps = np.dot(stat_ps, N)
 
         return stat_ps
