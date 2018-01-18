@@ -1,6 +1,3 @@
-#WillkÃ¼rliche Festlegung: Gausspaket soll Breite der Barriere/5 breit sein
-
-
 import numpy as np
 
 class Potential():
@@ -13,8 +10,6 @@ class Potential():
         
         Calculates the position to be used for the gaussian wave symmetry point.
         
-        NOTICE: barrier.size should be 20 or greater to provide an satisfying resoluion for the gauss-package
-    
     Parameters
     ----------
     barrier : Array
@@ -45,14 +40,14 @@ class Potential():
            
         def create_gauss_index_width(self):
             barrier_index_width = self.barrier.size
-            return int(barrier_index_width/5)
+            return int(barrier_index_width)
         
         self.gauss_index_width = create_gauss_index_width(self)
         self.gauss_width = self.gauss_index_width*self.dx
         
         def create_potential(self):
-            praefix = np.zeros(int(50*self.gauss_index_width+1))
-            suffix = np.zeros(100*self.gauss_index_width)
+            praefix = np.zeros(int(25*self.gauss_index_width+1))
+            suffix = np.zeros(25*self.gauss_index_width)
             
             pot = np.append(praefix,self.barrier)
             return np.append(pot, suffix)
@@ -71,7 +66,7 @@ class Potential():
         self.pos_grid_width = create_posistion_grid_width(self)
         
         def create_gauss_symmetry_index(self):
-            return 3*self.gauss_index_width
+            return 22*self.gauss_index_width
         
         self.gauss_symmetry_index = create_gauss_symmetry_index(self)
         self.gauss_symmerey_point = self.position_grid[self.gauss_symmetry_index]
