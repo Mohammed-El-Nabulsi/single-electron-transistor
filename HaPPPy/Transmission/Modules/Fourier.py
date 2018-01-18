@@ -1,66 +1,75 @@
 import numpy as np
-from scipy.fftpack import fft, fftfreq, fftshift
 import matplotlib.pyplot as plt
+from scipy.fftpack import fft, fftfreq, fftshift, ifft
 
 class Fourier:
-    
-    def __init__(self, N, dx):
+    def __init__(self,x):
         """
+        Performs the Transformation between position- and wavenumberspace.
+        
         Parameters
         ----------
-        N : Integer
-            len(x_grid), number of position sample points
-        dx : float
-            distance between two neighbouring samplepoints in position space grid
+        x : Array
+            Grid in positionspace
         """
-        
-        self.N = N
-        self.dx = dx
-        self.k = self.get_wavenumbers()
-        
-    def get_wavenumbers(self):
-        xf = fftfreq(self.N, self.dx)
-        return fftshift(xf)
 
-    def dft(self, x_func):
-        k_func = fft(x_func)
-        return fftshift(k_func)*1/self.N
+        self.N = x.size
+        self.dx = x[1]-x[0]
+        self.x = x
+        self.k_stand = 2 * np.pi * np.fft.fftfreq(self.N, self.dx)
+        self.k = fftshift(self.k_stand)
+            
+    def dft(self,f):
+        """
+        Parameter
+        ---------
+        f : Array
+        Wavefunction in positionspace
         
-    def plot_dft(self, x_func):
-        dft = self.dft(x_func)
-        plt.plot(self.k,np.multiply(dft,dft.conj()).real)
+        Returns
+        -------
+        F : Array (dtype=complex_), len(f)
+        Wavefunction in wavenumberspace
+        """
+        yf = np.fft.fft(f,norm='ortho')#, norm='ortho')# * 1/self.N #self.dx/np.sqrt(2*np.pi)
+        F = fftshift(yf) #* self.dx/np.sqrt(2*np.pi) #1/self.N
+#        F[0] = 0
+#        F[-1] = 0
+        #print(self.dx*np.sum(np.abs(F)))
+        return F
+
+    def plot_dft(self,f):
+#        yf = np.fft.fft(f)#, norm='ortho')
+#        Fplot = fftshift(yf)
+        Fplot = self.dft(f)
+        plt.plot(self.k,np.abs(Fplot))
         plt.grid()
         plt.show()
+       # print(max(abs(Fplot)))
+       
+    def idft(self,F):
+        yf = np.fft.ifft(F,norm='ortho')
+        #f = fftshift(yf)#*self.N
+#        yf[0]=0
+#        yf[-1]=0
+        return yf
+    
+    def plot_idft(self,F):
+#        yf = np.fft.fft(f)#, norm='ortho')
+#        Fplot = fftshift(yf)
+        fplot = self.idft(F)
+        plt.plot(self.x,np.abs(fplot))
+        plt.grid()
+        plt.show()
+       # print(max(abs(Fplot)))
+       
+#x = np.arange(0,15,0.1)   
+#f = 0.5*np.sin(1*2*np.pi  *x) #+ np.exp(1j*20*x) #np.exp(2*1j*2*np.pi*x-x**2)#
+#
+#fourier = Fourier(x)
+#a=fourier.dft(f)
+#fourier.plot_idft(a)
 
+#a = fourier.dft(f)
 
-#for Testing: (works!)
-#fourier = Fourier(500,1/500)
-#
-#x = np.linspace(0, 1, 500)
-#y = np.exp(50.0 * 1.j * 2.0*np.pi*x) + 0.6*np.exp(-25.0 * 1.j * 2.0*np.pi*x)
-#
-#fourier.plot_dft(y)
-#
-### number of signal points
-##N = 200
-##L = 1
-### sample spacing
-##dx = L / (N)
-##
-##x = np.linspace(0.0, N*dx, N)
-##
-##print(N*dx)
-##
-##
-##y = np.exp(50.0 * 1.j * 2.0*np.pi*x) + 0.6*np.exp(-25.0 * 1.j * 2.0*np.pi*x)
-##
-##yf = fft(y)
-##xf = fftfreq(N, dx)
-##xf = fftshift(xf)
-##yplot = fftshift(yf)
-##import matplotlib.pyplot as plt
-###plt.plot(x,np.abs(y))
-##plt.show()
-##plt.plot(xf, 1.0/(N) * np.abs(yplot))
-##plt.grid()
-##plt.show()
+#fourier.plot_idft(a)
