@@ -59,7 +59,7 @@ class MasterEquationSolver:
     in propability whereas the right sum describes the total *loss*. If a state
     :math:`\\beta` has some propability and a transition rate
     :math:`\Gamma_{\\beta \\rightarrow \\alpha}` other than :math:`0`, state
-    :math:`\\alpha` gains some propability proportional to to this rate. All
+    :math:`\\alpha` gains some propability proportional to this rate. All
     these gains add up. Likewise sate :math:`\\alpha` loses propability to
     any other state :math:`\\beta` proporitional to
     :math:`\Gamma_{\\alpha \\rightarrow \\beta}` (hence the minus sign).
@@ -123,42 +123,58 @@ class MasterEquationSolver:
 
     **2nd Problem: Netto Current**
 
-    For each point in time the netto current flowing trough the quantum dot can
-    be calculated. This does not depend on the type of solution (stationary or
-    dynamic).
+    For each point in time the netto current :math:`I^k(t)` flowing trough each
+    barrier of the quantum dot can be calculated. This does not depend on the
+    type of solution (stationary or dynamic).
 
-    In addition to the 1st problem let :math:`I` denote the total current.
     For each barrier between the quantum dot and a reservoir a current
-    :math:`I^i` results from the tunneling processes of charged perticles
+    :math:`I^k` results from the tunneling processes of charged perticles
     through them. Each particle carries as charge :math:`q`. The flow from the
     left to the right is considered to be positive (if :math:`q` > 0).
 
-    The netto current is the sum of both currents with respect to their
-    direction :math:`I = I^L - I^R`. Since
+    The netto current for both barriers are:
 
     .. math::
-        I^i = q \sum_{\\alpha, \\beta}
-                   \Gamma^i_{\\alpha \\rightarrow \\beta}  P_{\\alpha}
+        I^L = q \\sum_{\\alpha, \\beta}
+                   \\sigma_{\\alpha \\rightarrow \\beta}
+                   \\Gamma^L_{\\alpha \\rightarrow \\beta}
+                   P_{\\alpha}
 
-    one derives
+    and
 
     .. math::
-        I = q \sum_{\\alpha, \\beta}
-            \\left (
-                \Gamma^L_{\\alpha \\rightarrow \\beta}
-                - \Gamma^R_{\\alpha \\rightarrow \\beta}
-            \\right ) P_{\\alpha}
+        I^R = -q \\sum_{\\alpha, \\beta}
+                    \\sigma_{\\alpha \\rightarrow \\beta}
+                    \\Gamma^R_{\\alpha \\rightarrow \\beta}
+                    P_{\\alpha}
+
+
+    where
+
+    .. math::
+        \\sigma_{\\alpha \\rightarrow \\beta}
+        =   \\begin{cases}
+                -1 & | \\text{ if the transition }
+                       \\alpha \\rightarrow \\beta
+                       \\text{ adds a particle}\\\\
+                 0 & | \\text{ if the transition }
+                       \\alpha \\rightarrow \\beta
+                       \\text{ adds or removes no particle}\\\\
+                +1 & | \\text{ if the transition }
+                       \\alpha \\rightarrow \\beta
+                       \\text{ removes a particle}
+            \\end{cases}
 
     During the calculation it is assumed that the charge per particle is
     :math:`q = 1` which is equal to divide the given formulae by :math:`q`.
 
-    **Stationary** solutions contain the total current for each basis vector of
-    the stationary solution from the first problem (in the same order).
+    **Stationary** solutions contains both total currents for each basis vector
+    of the stationary solution from the first problem (in the same order).
 
     These solutions are returned as a list.
 
     **Dynamic** simulations are calculated in the same manner as in the
-    simulation of problem one.
+    simulation of problem one. Both currents are returned.
 
     The solution of the simulation is returned as a Simulation as well.
     (See HaPPPy.MasterEquation.Simulation for more details.)
@@ -186,7 +202,7 @@ class MasterEquationSolver:
             sim_tdp.quickPlot(xlabel="t", ylabel="P")
             print("static solutions (P_ij) =\\n", stat_ps)
             # 2nd plot: time development of netto current
-            sim_cur.quickPlot(xlabel="t", ylabel="I")
+            sim_cur.quickPlot(xlabel="t", ylabel="I",legend=["$I^L$","$I^R$")
             print("static solutions (I_i) = \\n", stat_curs)
 
 
@@ -203,9 +219,9 @@ class MasterEquationSolver:
 
     def __init__(self, ε=None):
         """
-        :param ε: A tolerance value. Sum of all probabilities must be equals to 1
-                  within this tolerance. If :code:`ε == None` the default value
-                  is used (see getDefaultε()).
+        :param ε: A tolerance value. Sum of all probabilities must be equals to
+                  1 within this tolerance. If :code:`ε == None` the default
+                  value is used (see getDefaultε()).
         :type ε: float
         """
         if ε == None:
@@ -270,9 +286,10 @@ class MasterEquationSolver:
                     Must be a ``nxn`` matrix.
         :type Γ_R: numpy.ndarray
 
-        :return: Returns :code:`Π` ≣ :math:`\\Pi` where
-                 :code:`Π[i][j]` ≣ :math:`\\Pi_{ij}`.
-        :rtype: numpy.ndarray(float)
+        :return: Returns stat_ps, stat_curs where
+                 :code:`stat_ps[i][j]` ≣ :math:`P_{stat,ij}` and
+                 :code:`stat_curs[i][k]` ≣ :math:`I^k_{stat,i}`.
+        :rtype: numpy.ndarray(float), numpy.ndarray(float)
         """
 
         ## STEP 1: PARAMETER CHECKS
@@ -309,20 +326,26 @@ class MasterEquationSolver:
         # In this step the actual calculation happens.
 
         # Calculate the eigenvectors and eigenvalues of Λ.
-        Λ_evals, Λ_evecs = self.__calculateLambda(Γ_L, Γ_R, check_tolerance, verbose)
+        Λ_evals, Λ_evecs = self.__calculateLambda(Γ_L, Γ_R,
+                                                  check_tolerance,
+                                                  verbose,
+                                                 )
 
         # Calls the simulation method of the propabilities.
         stat_ps = self.__calculateStationaryPossibilitySolutions(Λ_evals,
-                                                                 Λ_evecs,
-                                                                 check_tolerance,
-                                                                 verbose,
-                                                                 )
+                                                                Λ_evecs,
+                                                                check_tolerance,
+                                                                verbose,
+                                                                )
         if verbose: print("stat_ps =\n" + str(stat_ps))
 
         # Calls the simulation method of the netto current.
         # Γ_L and Γ_R are passed seperatly to preserve the information of
         # direction.
-        stat_curs = self.__calculateStationaryCurrents(Γ_L, Γ_R, stat_ps, verbose)
+        stat_curs = self.__calculateStationaryCurrents(Γ_L, Γ_R,
+                                                       stat_ps,
+                                                       verbose,
+                                                      )
         if verbose: print("stat_curs =\n" + str(stat_curs))
 
         # Return stationary solutions.
@@ -756,22 +779,41 @@ class MasterEquationSolver:
         MasterEquationSolver class! (Hence it does not perform further tests
         than MasterEquationSolver.)
 
-        :return: :code:`stat_curs` ≣ :math:`(I_{stat,1}, I_{stat,2},
-                 \\dots, I_{stat,n})`
+        :return: :code:`stat_curs` where :code:`stat_curs[i][k]` ≣
+                 :math:`I^k_{stat,i}`
         :rtype: numpy.ndarray(float)
 
         See documentation of MasterEquationSolver.doCalculation (2nd problem)
         for more details.
         """
 
-        # Calculate ΔΓ - a direction sensivtive form of the rates matrix and
-        # usefull shortcut.
-        ΔΓ = Γ_L - Γ_R
-        # verbose only: Print ΔΓ.
-        if verbose: print("ΔΓ: \n", ΔΓ)
+        # TODO: The relaxation/stimulation rates (σ_αβ) need to be zero!
+        # Construct a Matrix σ containing the signs representing the direction
+        # of current for each rate. If the total numer of particles in the
+        # channel increases - e.g. with rate Γ_αβ - its contribution has an
+        # oppsite sign that the reverse process - e.g. with rate Γ_βα.
+        #     ⎧ 0  1  1 ⋯   1  1⎫
+        #     ⎪-1  0  1 ⋯   1  1⎪
+        # σ = ⎪ ⋮  ⋮  ⋮  ⋱   ⋮  ⋮⎪
+        #     ⎪-1 -1 -1 ⋯   0  1⎪
+        #     ⎩-1 -1 -1 ⋯  -1  0⎭
+        n = Γ_L.shape[0]
+        σ = np.tri(n).transpose() - np.tri(n)
+        # Calculate σΓ_k - a direction sensivtive form of the rates matricies.
+        σΓ_L =  np.multiply(σ,Γ_L)
+        σΓ_R = -np.multiply(σ,Γ_R)
+        # verbose only: Print all σΓ.
+        if verbose: print("σΓ_L: \n", σΓ_L)
+        if verbose: print("σΓ_R: \n", σΓ_R)
 
         # Calculate the stationary current(s).
-        stat_curs = np.sum(np.dot(ΔΓ, stat_ps), axis=0)
+        # If no stationary solutions could be calculated there are no currents
+        # to calculate.
+        if stat_ps.shape[1] > 0:
+            stat_curs = (np.sum(np.dot(σΓ_L, stat_ps), axis=0)[0],
+                         np.sum(np.dot(σΓ_R, stat_ps), axis=0)[0])
+        else:
+            stat_curs = []
 
         return stat_curs
 
@@ -800,24 +842,43 @@ class MasterEquationSolver:
         # The validity is inherited from the propabilities simulation.
         valid = sim_time_dev_prop.valid()
         # Copy all parameters from the propabilities simulation.
-        sim = Simulation(sim_time_dev_prop.getΔt(), sim_time_dev_prop.getT_max())
+        sim = Simulation(sim_time_dev_prop.getΔt(),sim_time_dev_prop.getT_max())
 
-        # Calculate ΔΓ - a direction sensivtive form of the rates matrix and
-        # usefull shortcut.
-        ΔΓ = Γ_L - Γ_R
-        # verbose only: Print ΔΓ.
-        if verbose: print("ΔΓ: \n", ΔΓ)
+        # TODO: The relaxation/stimulation rates (σ_αβ) need to be zero!
+        # Construct a Matrix σ containing the signs representing the direction
+        # of current for each rate. If the total numer of particles in the
+        # channel increases - e.g. with rate Γ_αβ - its contribution has an
+        # oppsite sign that the reverse process - e.g. with rate Γ_βα.
+        #     ⎧ 0  1  1 ⋯   1  1⎫
+        #     ⎪-1  0  1 ⋯   1  1⎪
+        # σ = ⎪ ⋮  ⋮  ⋮  ⋱   ⋮  ⋮⎪
+        #     ⎪-1 -1 -1 ⋯   0  1⎪
+        #     ⎩-1 -1 -1 ⋯  -1  0⎭
+        n = Γ_L.shape[0]
+        σ = np.tri(n).transpose() - np.tri(n)
+        # Calculate σΓ_k - a direction sensivtive form of the rates matricies.
+        σΓ_L =  np.multiply(σ,Γ_L)
+        σΓ_R = -np.multiply(σ,Γ_R)
+        # verbose only: Print all σΓ.
+        if verbose: print("σΓ_L: \n", σΓ_L)
+        if verbose: print("σΓ_R: \n", σΓ_R)
 
-        # For each existing discrete solution of P(t) calculate I(t).
+        # For each existing discrete solution of P(t) calculate I_k(t).
         # (See the documentation of this module for more deails about this
         # calculation.)
         for i in range(len(sim_time_dev_prop)):
-            # Calculate I(t) like in the formula in the documentation.
-            I_i = sum(sum(np.dot(ΔΓ, sim_time_dev_prop[i][1])))
-            # verbose only: Print I(t).
-            if verbose: print("I_t[" + str(i) + "= \n", I_i)
-            # Extend the simulation of I(t) by this new discrete value.
-            sim.append(I_i)
+            # Get the current propability distribution as dotable vector.
+            P_i = np.matrix(sim_time_dev_prop[i]).transpose()
+            # verbose only: Print P(t).
+            if verbose: print("P[" + str(i) + "] =\n = ", P_i)
+            # Calculate all I(t) like in the formula in the documentation.
+            I_L_i = (sum(np.dot(σΓ_L, P_i))).item(0,0)
+            I_R_i = (sum(np.dot(σΓ_R, P_i))).item(0,0)
+            # verbose only: Print all I_k(t).
+            if verbose: print("I_L_t[" + str(i) + "]= \n", I_L_i)
+            if verbose: print("I_R_t[" + str(i) + "]= \n", I_R_i)
+            # Extend the simulation of I_k(t) by this new discrete values.
+            sim.append(np.array([I_L_i, I_R_i]))
 
         # Make the simulation valid - iff no issues occurred.
         if valid:
@@ -902,7 +963,9 @@ class Simulation():
             v = None
             # If the values are vectors a vector with Nones of the same
             # dimension is needed.
-            if len(vs) > 0 and (type(vs[0]) == list or type(vs[0]) == np.ndarray):
+            if (len(vs) > 0
+                and (type(vs[0]) == list or type(vs[0]) == np.ndarray)
+               ):
                 n = len(vs[0])
                 v = [None] * n
             # Append None vaules until there are as many values as time bins.
@@ -1015,7 +1078,9 @@ class Simulation():
             and len(vs[0]) > 1
            ):
             n = len(vs[0]) # dimension of v
-            legend = ["${" + str(ylabel) + "}_{" + str(i) + "}$" for i in range(n)]
+            legend = ["${" + str(ylabel) + "}_{" + str(i) + "}$"
+                      for i in range(n)
+                     ]
         if legend != None:
             plt.legend(legend)
         # Add a grid.
