@@ -141,7 +141,7 @@ def main(argv=None):
     #                           There is no common way to transfer the rates 
     RateCal = RateCalculator()
     Gamma_L, Gamma_R = Rates.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
-                                                                  muL, muR, T, V, TwoBodyEigenvectors, Transmission)
+                                                                  muL, muR, T, V, TwoBodyEigenvectors, Transmission, DensityofStates)
 
     # Getting some parameters
     TMax = configdata["Tmax"]
