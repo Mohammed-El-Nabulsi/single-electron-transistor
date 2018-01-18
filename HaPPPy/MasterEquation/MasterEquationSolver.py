@@ -1007,7 +1007,8 @@ class Simulation():
     def quickPlot(self,
                   title=None,
                   xlabel=None, ylabel=None,
-                  xunit=None, yunit=None,
+                  xunit=1, yunit=1,
+                  xunit_symbol=None, yunit_symbol=None,
                   legend=None
                  ):
         """
@@ -1022,10 +1023,16 @@ class Simulation():
                        LATEX expression representing a symbol and automatic
                        indicies are added.
         :type ylabel: string
-        :param xunit: The unit the paramter is meassured in. (optional)
-        :type xunit: string
-        :param yunit: The unit the function valuesare meassured in. (optional)
-        :type yunit: string
+        :param xunit: The unit the paramter is meassured in. All x-values are
+                      divided by this value before plotting. (optional)
+        :type xunit: float
+        :param yunit: The unit the function valuesare meassured in. All y-values
+                      are divided by this value before plotting. (optional)
+        :type yunit: float
+        :param xunit_symbol: The unit the paramter is meassured in. (optional)
+        :type xunit_symbol: string
+        :param yunit_symbol: The unit the function valuesare meassured in. (optional)
+        :type yunit_symbol: string
         :param legend: A list of strings representing the symbols of each graph.
                        Vectorial graphs are ploted component-wise and labeled in
                        increasing order of their index. (optional)
@@ -1036,12 +1043,11 @@ class Simulation():
         """
         # Aquire all values related to the discrete representation of the
         # function.
-        ts = self.getTimeBins()
         ts = self.getParameters()
         vs = self.getValues()
 
         # Plot the function.
-        plt.plot(ts, vs)
+        plt.plot(ts / xunit, vs / yunit)
         # Add a validity mark to the title if necessary.
         if not self.valid():
             if title == None:
@@ -1054,13 +1060,13 @@ class Simulation():
         # Add labels to one or both axes if requested.
         # It is possible to add an optional unit to each axis.
         if xlabel != None:
-            if xunit != None:
-                plt.xlabel(str(xlabel) + "/" + str(xunit))
+            if xunit_symbol != None:
+                plt.xlabel(str(xlabel) + "/" + str(xunit_symbol))
             else:
                 plt.xlabel(str(xlabel))
         if ylabel != None:
-            if yunit != None:
-                plt.ylabel(str(ylabel) + "/" + str(yunit))
+            if yunit_symbol != None:
+                plt.ylabel(str(ylabel) + "/" + str(yunit_symbol))
             else:
                 plt.ylabel(str(ylabel))
         # Add a legend if requested.
