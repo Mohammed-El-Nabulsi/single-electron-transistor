@@ -317,11 +317,13 @@ class MasterEquationSolver:
                                                                  check_tolerance,
                                                                  verbose,
                                                                  )
+        if verbose: print("stat_ps =\n" + str(stat_ps))
 
         # Calls the simulation method of the netto current.
         # Γ_L and Γ_R are passed seperatly to preserve the information of
         # direction.
-        stat_curs = self.__calculateStationaryCurrents(Γ_L, Γ_R, stat_ps)
+        stat_curs = self.__calculateStationaryCurrents(Γ_L, Γ_R, stat_ps, verbose)
+        if verbose: print("stat_curs =\n" + str(stat_curs))
 
         # Return stationary solutions.
         return stat_ps, stat_curs
@@ -463,6 +465,8 @@ class MasterEquationSolver:
                                                   check_tolerance,
                                                   verbose,
                                                  )
+        if verbose: print("Λ_evals =\n" + str(Λ_evals))
+        if verbose: print("Λ_evecs =\n" + str(Λ_evecs))
 
         # Calls the simulation method of the propabilities.
         sim_tdp = self.__simulateDynamicPossiblitySolution(Δt,
@@ -472,11 +476,13 @@ class MasterEquationSolver:
                                                  check_tolerance,
                                                  verbose,
                                                 )
+        if verbose: print("sim_tdp =\n" + str(sim_tdp))
 
         # Calls the simulation method of the netto current.
         # Γ_L and Γ_R are passed seperatly to preserve the information of
         # direction.
-        sim_cur = self.__simulateDynamicCurrent(Γ_L, Γ_R, sim_tdp)
+        sim_cur = self.__simulateDynamicCurrent(Γ_L, Γ_R, sim_tdp, verbose)
+        if verbose : print("sim_cur =\n" + str(sim_cur))
 
         # Both simulations are returnd - mind the order!
         return sim_tdp, sim_cur
@@ -626,8 +632,8 @@ class MasterEquationSolver:
                                             t_max,
                                             P_0,
                                             Λ_evals, Λ_evecs,
-                                            check_tolerance=True,
-                                            verbose=False
+                                            check_tolerance,
+                                            verbose
                                            ):
         """
         Simulates the time development of the propabilities :math:`P(t)`.
@@ -741,7 +747,7 @@ class MasterEquationSolver:
         # Return the (valid or invalid) simulation.
         return sim
 
-    def __calculateStationaryCurrents(self, Γ_L, Γ_R, stat_ps, verbose=False):
+    def __calculateStationaryCurrents(self, Γ_L, Γ_R, stat_ps, verbose):
         """
         Calculates the current :math:`I_{stat,i}` to all stationary solutions
         :math:`\\vec{P}{stat,i}`.
@@ -774,7 +780,7 @@ class MasterEquationSolver:
                                 Γ_L,
                                 Γ_R,
                                 sim_time_dev_prop,
-                                verbose=False
+                                verbose
                                ):
         """
         Simulates the time current :math:`I(t)` for an :math:`n`-state
