@@ -3,6 +3,7 @@ import HaPPPy
 import unittest
 import numpy as np
 from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
+from HaPPPy.TwoBody.TwoParticle import createTwoParticleData
 
 class TwoBodyTestSuite(unittest.TestCase):
     """A test class to the TwoBody module.
@@ -17,8 +18,33 @@ class TwoBodyTestSuite(unittest.TestCase):
     def test_TwoBody_doCalculation(self):
         """ Checks the dummy calculation
         """
-        TBSolver = HaPPPy.TwoBody.TwoBodySolver()
-        self.assertIsNotNone(TBSolver.doCalculation('data_group1'))
+        # TBSolver = HaPPPy.TwoBody.TwoBodySolver()
+        # self.assertIsNotNone(TBSolver.doCalculation('data_group1'))
+
+    def test_opWaves_count_convergence(self):
+        """ Checks whether the two-body base energy converges when increasing the amount of feed in one-body states.
+        """
+        _step = 1.0
+        _max = 20.0
+        obDataFile='data_group1' #TODO the data must be sorted for this to work
+        obData = SpectrumData()
+        obData.open(obDataFile)
+        N = np.arange(_step, min(obData.m, _max), _step)
+        it = np.nditer([N, None])
+        for n, e in it:
+            print("running with %d ob-states:" % n)
+            obData.m = int(n)
+            ev = createTwoParticleData(obData)[0]
+            print(ev)
+            e[...] = ev[0]
+        E = it.operands[1]
+        print("summary of two-body base energies:")
+        print(E)
+
+    def test_coulomb_epsilon_convergence(self):
+        """ Checks whether the two-body energy states converge when decreasing epsilon (the coulomb interaction cutoff)
+        """
+        #TODO write this test
 
     def test_oneParticleLoader(self):
         """ Checks the OneParticleLoader for self consistency
