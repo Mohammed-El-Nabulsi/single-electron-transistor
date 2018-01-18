@@ -202,7 +202,7 @@ class MasterEquationSolver:
             sim_tdp.quickPlot(xlabel="t", ylabel="P")
             print("static solutions (P_ij) =\\n", stat_ps)
             # 2nd plot: time development of netto current
-            sim_cur.quickPlot(xlabel="t", ylabel="I",legend=["$I^L$","$I^R$")
+            sim_cur.quickPlot(xlabel="t", ylabel="I",legend=["$I^L$","$I^R$"])
             print("static solutions (I_i) = \\n", stat_curs)
 
 
