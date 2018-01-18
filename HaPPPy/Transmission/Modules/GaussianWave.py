@@ -4,7 +4,7 @@ from scipy.constants import codata
 import matplotlib.pyplot as plt
 
 me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to milli eV/c^2
-hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to ps*millielectronvolts
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10*fs*millielectronvolts
 
 
 
@@ -31,11 +31,11 @@ class GaussianWave():
     
     def plot_x_package(self):
         
-        psi_abs_squared_x = np.multiply(self.x_package, self.x_package.conj()).real
+        #psi_abs_squared_x = np.multiply(self.x_package, self.x_package.conj()).real
         
-        x_package = plt.plot(self.x_grid, psi_abs_squared_x)
+        x_package = plt.plot(self.x_grid, np.abs(self.x_package))
         plt.title ("Propabilitydensity of gaussian package at time zero in position-space")
         plt.xlabel("position grid")
         plt.ylabel("probabilitydensity")
         
-        plt.show()
+        plt.show(x_package)
