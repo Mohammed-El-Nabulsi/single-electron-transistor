@@ -21,6 +21,7 @@ class RateCalculator:
         print("Hello from the RateCalculator, what can I do for you?")
      
     def doCalculation(self, E1, E2, muL, muR, T, V, C, TCalc, Density):
+
         """This class is responsible for calculating all rates of transmissions of electrons into the dot and from the dot.
         It needs the following inputs:
         E1 (np.array): array of eigenvalues of the single-particle-states on the dot (calculated in the One Body Module)
@@ -44,11 +45,16 @@ class RateCalculator:
         """ 
         kB=0.08629 #Boltzmann constant in meV/K
         #The fermi-function is called by the Gamma_ij-equations (Gamma_12,Gamma_21,Gamma_01,Gamma_10) that calculate our rates.
+
+      
         def fermi(E,mu,T):
             f=1/(math.exp((E-mu)/(kB*T) )+1)
             return(f)
           
+
 	#This function is called by the Gamma_ij-equations and includes the transmission-coefficient for each tunnelling-event and the density of state-function of the source and drain. 
+
+
         def Gamma(Ea,Eb,V):
              return (np.absolute(TCalc.calculate_transmission(np.absolute(Eb-Ea),V))**2*Density.calculate_DensityofStates(np.absolute(Ea-Eb)))
 
@@ -61,7 +67,6 @@ class RateCalculator:
         #And between transmissions where the number of electrons on the dot change from zero to one(Gamma_01) and reverse(Gamma_10).
         def Gamma_12(Ea,Eb,mu,T): 
             summe=0
-            #Skalarproduktsumme (10.29)
             j=0
             Cb=C[np.where(E2==Eb)[0][0]]
             while j< NEcut:
@@ -82,7 +87,7 @@ class RateCalculator:
                  nu=nu+1
             return(Gamma(Ea,Eb,V)*(np.absolute(summe))**2*(1-fermi(np.absolute(Eb-Ea),mu,T)))
 
-        def Gamma_10(Ea,mu,T): #anfangszustand a einteilchen
+        def Gamma_10(Ea,mu,T): 
             return(Gamma(Ea,0,V)*(1-fermi(Ea,mu,T)))
 
 
@@ -120,9 +125,13 @@ class RateCalculator:
 #        Gamma_21R = np.transpose(Gamma_21R)
 #        Gamma_R = np.array([[Gamma_00 , Gamma_01R, Gamma_02 ],[Gamma_10R, Gamma_11 , Gamma_12R],[Gamma_20 , Gamma_21R, Gamma_22 ]])
 
-        
+
         Gamma_R=np.zeros((1+np.size(E1)+np.size(E2),1+np.size(E1)+np.size(E2)))   #defining the matrix that contains all rates of transmissions through the right barrier
         Gamma_L=np.zeros((1+np.size(E1)+np.size(E2),1+np.size(E1)+np.size(E2)))   #defining the matrix that contains all rates of transmissions through the left barrier
+
+        Gamma_R=np.zeros((1+np.size(E1)+np.size(E2),1+np.size(E1)+np.size(E2)))
+        Gamma_L=np.zeros((1+np.size(E1)+np.size(E2),1+np.size(E1)+np.size(E2)))
+
         i_=0
         for i in E1:
                 j_=0
@@ -138,8 +147,6 @@ class RateCalculator:
                 Gamma_L[i_+1][0]=Gamma_10(i,muL,T)
                 Gamma_R[i_+1][0]=Gamma_10(i,muR,T)
                 i_=1+i_
-        """
-        """
         print(Gamma_L)
         print(Gamma_R)
         return(Gamma_L,Gamma_R)
