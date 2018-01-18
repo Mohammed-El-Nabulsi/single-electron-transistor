@@ -705,7 +705,7 @@ class MasterEquationSolver:
         # Calculate P(t=0) in the eigenvector basis.
         P_evb_0 = np.dot(np.linalg.inv(Λ_evecs), P_0)
         # For each desired point in time the solution is calculated discretly.
-        for t in sim.getTimeBins():
+        for t in sim.getBins():
             # verbose only: Print the current point in time.
             if verbose: print("\nt = ", t)
 
@@ -901,7 +901,7 @@ class Simulation():
 
     If :code:`sim` is a valid HaPPPy.MasterEquation.Simulation then:
 
-    :code:`sim.getTimeBins()` ≣ :math:`(0, \\Delta t, 2 \\cdot \\Delta t,
+    :code:`sim.getParameters()` ≣ :math:`(0, \\Delta t, 2 \\cdot \\Delta t,
     \\dots, m \\cdot \\Delta t)`
 
     and
@@ -938,7 +938,7 @@ class Simulation():
         """
         return self.t_max
 
-    def getTimeBins(self):
+    def getBins(self):
         """
         :return: A list of all values :math:`n \\cdot \\Delta t` where
                  :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}`
@@ -947,31 +947,24 @@ class Simulation():
         """
         return np.arange(0, self.t_max + self.Δt, self.Δt)
 
+    def getParameters(self):
+        """
+        :return: A list of all **valid** values :math:`n \\cdot \\Delta t` where
+                 :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}`
+                 with increasing :math:`n`.
+        :rtype: numpy.ndarray
+        """
+        return np.arange(0, len(self) * self.Δt, self.Δt)
+
     def getValues(self):
         """
-        :return: Alist of all values :math:`f(n \\cdot \\Delta t)` where
-                 :math:`f` is the simulated function and :math:`n \in
+        :return: A list of all **valid** values :math:`f(n \\cdot \\Delta t)`
+                 where :math:`f` is the simulated function and :math:`n \in
                  \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}` with
                  increasing :math:`n`.
         :rtype: numpy.ndarray
         """
-        vs = copy.copy(self.__values)
-        # If the simulation is invalid fill values up with None values.
-        # This allows mathplotlib to plot invalid plots as well.
-        if not self.valid():
-            Ts = self.t_max / self.Δt + 1  # = len(self.getTimeBins())
-            v = None
-            # If the values are vectors a vector with Nones of the same
-            # dimension is needed.
-            if (len(vs) > 0
-                and (type(vs[0]) == list or type(vs[0]) == np.ndarray)
-               ):
-                n = len(vs[0])
-                v = [None] * n
-            # Append None vaules until there are as many values as time bins.
-            while len(vs) < Ts:
-                vs.append(v)
-        return np.array(vs)
+        return np.array(copy.copy(self.__values))
 
     def append(self, value):
         # for internal use only
@@ -1004,7 +997,7 @@ class Simulation():
         return len(self.__values)
 
     def __repr__(self):
-        ts = self.getTimeBins()
+        ts = self.getParameters()
         vs = self.getValues()
         return "Sim<" + str([(ts[i], vs[i]) for i in range(len(self))]) + ">"
 
@@ -1044,6 +1037,7 @@ class Simulation():
         # Aquire all values related to the discrete representation of the
         # function.
         ts = self.getTimeBins()
+        ts = self.getParameters()
         vs = self.getValues()
 
         # Plot the function.
