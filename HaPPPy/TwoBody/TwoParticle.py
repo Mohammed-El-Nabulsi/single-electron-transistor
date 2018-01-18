@@ -79,7 +79,7 @@ def createTwoParticleData(opData):
 			D[i,j] = 1/2 * (PartA-PartB)
 			D[j,i] = D[i,j]
 
-	sys.stdout.write("> setup main mat      \r")
+	sys.stdout.write("> setup main mat       \r")
 	# Eigenenergien der Einteilchen kombiniert 
 
 	Energies=np.zeros(n**2)
@@ -105,7 +105,7 @@ def createTwoParticleData(opData):
 	MatrixAll=MatrixAll+MatrixEnergies
 
 	# Berechne die Eigenwerte und Eigenvektoren des Problems 
-	sys.stdout.write("> diagonalizing\r")
+	sys.stdout.write("> diagonalizing \r")
 	[Eigenenergies, Eigenvectors]=np.linalg.eig(MatrixAll) # Eigenvalues and eigenvectors 
 	order = np.argsort(Eigenenergies)	
 
