@@ -13,6 +13,8 @@ from HaPPPy.MasterEquation import MasterEquationSolver
 #C= Koeffizienten_Zweiteilchen #TBSolver.doCalculation()
 #muL, muR,T, Vinput aus main importieren 
 #Transimissionsmatrix wird in def Gamma importiert
+
+
 class RateCalculator:
     
     def __init__(self):
@@ -20,34 +22,24 @@ class RateCalculator:
         """
 
         print("Hello from the RateCalculator, what can I do for you?")
-    
-   
+     
+    def doCalculation(self, E1, E2, muL, muR, T, V, C, TCalc, Density):
+      
 
-    #benoetigte Konstanten 
+        kB=0.08629 #Boltzmannkonstante in meV/K
 
-    kB=1 #Boltzmannkonstante in eV
-    
-
-    #definiere Fermifunktion
-    def doCalculation(self, E1, E2, muL, muR, T, V, C):
-        kB=1
         def fermi(E,mu,T):
             f=1/(math.exp((E-mu)/(kB*T) )+1)
             return(f)
-
-        def D(A):
-            if A == 0:
-                return(1)
-            else:
-                return(0)
+          
+	
         def Gamma(Ea,Eb,V):
-            return (np.absolute(t(np.absolute(Eb-Ea),V))**2*D(np.absolute(Ea-Eb)))
+             return (np.absolute(TCalc.calculate_transmission(np.absolute(Eb-Ea),V))**2*Density.calculate_DensityofStates(np.absolute(Ea-Eb)))
 
-        def t(E, V):
-            return(0.1)
+ 
         NEcut= np.size(E2)
           
-        #Um Tunnelraten zu berechnen, die durch die linke Tunnerlbariere gehen, muss als Parameter mu das chemische Potential der linken Tunnelbariere eingesetzt werden. Umgekehrt symmetrisch fuer die rechte Tunnelbariere
+        #Um Tunnelraten zu berechnen, die durch die linke Tunnelbarriere gehen, muss als Parameter mu das chemische Potential der linken Tunnelbariere eingesetzt werden. Umgekehrt symmetrisch fuer die rechte Tunnelbariere
 
         def Gamma_12(Ea,Eb,mu,T): 
             summe=0
@@ -77,51 +69,60 @@ class RateCalculator:
 
 
 
-        Gamma_12L=[[0 for i in E2]for i in E1]
-        Gamma_12R=[[0 for i in E2]for i in E1]
-        Gamma_21L=[[0 for i in E2]for i in E1]
-        Gamma_21R=[[0 for i in E2]for i in E1]
+#        Gamma_12L=[[0 for i in E2]for i in E1]
+#        Gamma_12R=[[0 for i in E2]for i in E1]
+#        Gamma_21L=[[0 for i in E2]for i in E1]
+#        Gamma_21R=[[0 for i in E2]for i in E1]
+#        for i in E1:
+#            for j in E2:
+#               Gamma_12L[np.where(E1==i)[0][0]][np.where(E2==j)[0][0]]=Gamma_12(i,j,muL,T)
+#               Gamma_12R[np.where(E1==i)[0][0]][np.where(E2==j)[0][0]]=Gamma_12(i,j,muR,T)
+#               Gamma_21L[np.where(E1==i)[0][0]][np.where(E2==j)[0][0]]=Gamma_21(j,i,muL,T)
+#               Gamma_21R[np.where(E1==i)[0][0]][np.where(E2==j)[0][0]]=Gamma_21(j,i,muR,T)
+#
+#        Gamma_01L=[0 for i in E1]
+#        Gamma_01R=[0 for i in E1]
+#        Gamma_10L=[0 for i in E1]
+#        Gamma_10R=[0 for i in E1]
+#        for i in E1:
+#            Gamma_01L[np.where(E1==i)[0][0]]=Gamma_01(i,muL,T)
+#            Gamma_01R[np.where(E1==i)[0][0]]=Gamma_01(i,muR,T)
+#            Gamma_10L[np.where(E1==i)[0][0]]=Gamma_10(i,muL,T)
+#            Gamma_10R[np.where(E1==i)[0][0]]=Gamma_10(i,muR,T)
+
+#        Gamma_00=np.array([0])
+#        Gamma_11=np.zeros((np.size(E1), np.size(E1)))
+#        Gamma_22=np.zeros((np.size(E2), np.size(E2)))
+#        Gamma_02=np.zeros((1,np.size(E2)))
+#        Gamma_20=np.zeros((np.size(E2),1))
+#        Gamma_10L = np.transpose(Gamma_10L)
+#        Gamma_21L = np.transpose(Gamma_21L)
+#        Gamma_L = np.array([[Gamma_00 , Gamma_01L, Gamma_02 ], [Gamma_10L, Gamma_11 , Gamma_12L], [Gamma_20 , Gamma_21L, Gamma_22 ]])
+#        Gamma_10R = np.transpose(Gamma_10R)
+#        Gamma_21R = np.transpose(Gamma_21R)
+#        Gamma_R = np.array([[Gamma_00 , Gamma_01R, Gamma_02 ],[Gamma_10R, Gamma_11 , Gamma_12R],[Gamma_20 , Gamma_21R, Gamma_22 ]])
+
+        Gamma_R=np.zeros((1+np.size(E1)+np.size(E2),1+np.size(E1)+np.size(E2)))
+        Gamma_L=np.zeros((1+np.size(E1)+np.size(E2),1+np.size(E1)+np.size(E2)))
+        i_=0
         for i in E1:
-            for j in E2:
-               Gamma_12L[np.where(E1==i)[0][0]][np.where(E2==j)[0][0]]=Gamma_12(i,j,muL,T)
-               Gamma_12R[np.where(E1==i)[0][0]][np.where(E2==j)[0][0]]=Gamma_12(i,j,muR,T)
-               Gamma_21L[np.where(E1==i)[0][0]][np.where(E2==j)[0][0]]=Gamma_21(j,i,muL,T)
-               Gamma_21R[np.where(E1==i)[0][0]][np.where(E2==j)[0][0]]=Gamma_21(j,i,muR,T)
-
-        Gamma_01L=[0 for i in E1]
-        Gamma_01R=[0 for i in E1]
-        Gamma_10L=[0 for i in E1]
-        Gamma_10R=[0 for i in E1]
-        for i in E1:
-            Gamma_01L[np.where(E1==i)[0][0]]=Gamma_01(i,muL,T)
-            Gamma_01R[np.where(E1==i)[0][0]]=Gamma_01(i,muR,T)
-            Gamma_10L[np.where(E1==i)[0][0]]=Gamma_10(i,muL,T)
-            Gamma_10R[np.where(E1==i)[0][0]]=Gamma_10(i,muR,T)
-        print(Gamma_01L,Gamma_01R,Gamma_10L,Gamma_10R,Gamma_12L,Gamma_12R,Gamma_21L,Gamma_21R)
-        print('reihenfolge 01L,01R,10L,10R,12L,12R,21L,21R')
-        return(Gamma_01L,Gamma_01R,Gamma_10L,Gamma_10R,Gamma_12L,Gamma_12R,Gamma_21L,Gamma_21R)
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                j_=0
+                for j in E2:
+                        j_ =np.where(E2==j)[0][0]
+                        Gamma_L[i_+1][j_+1+np.size(E1)]=Gamma_12(i,j,muL,T)
+                        Gamma_L[j_+1+np.size(E1)][i_+1]=Gamma_21(j,i,muL,T)
+                        Gamma_R[i_+1][j_+1+np.size(E1)]=Gamma_12(i,j,muR,T)
+                        Gamma_R[j_+1+np.size(E1)][i_+1]=Gamma_21(j,i,muR,T)
+                        j_=j_+1
+                Gamma_L[0][i_+1]=Gamma_01(i,muL,T)
+                Gamma_R[0][i_+1]=Gamma_01(i,muR,T)
+                Gamma_L[i_+1][0]=Gamma_10(i,muL,T)
+                Gamma_R[i_+1][0]=Gamma_10(i,muR,T)
+                i_=1+i_
+        print(Gamma_L)
+        print(Gamma_R)
+        return(Gamma_L,Gamma_R)
+       
 
 
 
