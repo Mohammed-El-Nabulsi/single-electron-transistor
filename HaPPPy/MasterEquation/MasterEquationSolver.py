@@ -166,11 +166,10 @@ class MasterEquationSolver:
     (See HaPPPy.MasterEquation.Simulation for more details.)
 
     :example: .. code-block:: Python
-            :emphasize-lines: 1-2,7-8,10, 12-13
+            :emphasize-lines: 1-2, 6-7, 9, 11-15
 
             import HaPPPy
             import numpy as np
-            import matplotlib.pyplot as plt
 
             ## simple simulation with the MasterEquationSolver class
             # set-up a reasonable Γ-matrix
@@ -179,14 +178,18 @@ class MasterEquationSolver:
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([0.9, 0.0, 0.1])
             # simulate
+            Δt = 1
+            t_max = 100
             mes = HaPPPy.MasterEquation.MasterEquationSolver()
-            sim_time_dev_prop, sim_current = mes.doCalculation(0.1, 10, P_0, Γ_L, Γ_R)
-
-            ## plot results
+            sim_tdp, sim_cur = mes.simulateDynamicSloution(Δt, t_max, P_0, Γ_L, Γ_R)
+            stat_ps, stat_curs = mes.calculateStationarySloutions(Γ_L, Γ_R)
+            ## plot/print results
             # 1st plot: time development of propabilities
-            sim_time_dev_prop.quickPlot(xlabel="t", ylabel="P")
+            sim_tdp.quickPlot(xlabel="t", ylabel="P")
+            print("static solutions (P_ij) =\\n", stat_ps)
             # 2nd plot: time development of netto current
-            sim_current.quickPlot(xlabel="t", ylabel="I")
+            sim_cur.quickPlot(xlabel="t", ylabel="I")
+            print("static solutions (I_i) = \\n", stat_curs)
 
 
         The relevant lines of code for the simulation to work are highlighted.
