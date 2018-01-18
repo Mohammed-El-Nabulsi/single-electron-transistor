@@ -951,7 +951,8 @@ class Simulation():
     def quickPlot(self,
                   title=None,
                   xlabel=None, ylabel=None,
-                  xunit=None, yunit=None
+                  xunit=None, yunit=None,
+                  legend=None
                  ):
         """
         Simple plotting method to quickly get an overview on the simulation.
@@ -969,6 +970,10 @@ class Simulation():
         :type xunit: string
         :param yunit: The unit the function valuesare meassured in. (optional)
         :type yunit: string
+        :param legend: A list of strings representing the symbols of each graph.
+                       Vectorial graphs are ploted component-wise and labeled in
+                       increasing order of their index. (optional)
+        :type legend: list(string)
 
         :example: See the example given at the documentation of
                   HaPPPy.MasterEquation.MasterEquationSolver.
@@ -1004,12 +1009,14 @@ class Simulation():
         # Add a legend if requested.
         # If the function values are vetors ylabel is treated as a LATEX
         # expression representing a symbol and automatic indicies are added.
-        if (ylabel != None
+        if (legend == None
+            and ylabel != None
             and (type(vs[0]) == list or type(vs[0]) == np.ndarray)
             and len(vs[0]) > 1
            ):
             n = len(vs[0]) # dimension of v
             legend = ["${" + str(ylabel) + "}_{" + str(i) + "}$" for i in range(n)]
+        if legend != None:
             plt.legend(legend)
         # Add a grid.
         plt.grid()
