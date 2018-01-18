@@ -1,6 +1,7 @@
 import numpy as np 
 from .MatrixElement import getMatrixElement, testFunction, MatrixElement
 from .OneParticleLoader import SpectrumData
+import sys
 
 _SQRT2 = np.sqrt(2)
 
@@ -40,6 +41,7 @@ def createTwoParticleData(opData):
 	# Antisymmetric spatial wavefunctions D (<a,b|V|cd>)
 
 	# Matrix A
+	sys.stdout.write("> mat A\r")
 	A=np.zeros((n,n))
 	for i in range (n):
 		for j in range(n):
@@ -48,6 +50,7 @@ def createTwoParticleData(opData):
 			A[i, j] = matrixElement.doCalculation(vi, vi, vj, vj)
 
 	# Matrix B und Matrix B transponiert 
+	sys.stdout.write("> mat B\r")
 	L=int(1/2*n*(n-1))
 	B=np.zeros((L, n))
 
@@ -63,7 +66,7 @@ def createTwoParticleData(opData):
 	D=np.zeros((L, L))
 
 	for i in range(L):
-		print(i, "of", L)
+		sys.stdout.write("> mat C&D: %d of %d\r" % (i, L))
 		for j in range(i+1):
 			va = SP_EV[:, int(I[i, 0])]
 			vb = SP_EV[:, int(I[i, 1])]
@@ -76,6 +79,7 @@ def createTwoParticleData(opData):
 			D[i,j] = 1/2 * (PartA-PartB)
 			D[j,i] = D[i,j]
 
+	sys.stdout.write("> setup main mat      \r")
 	# Eigenenergien der Einteilchen kombiniert 
 
 	Energies=np.zeros(n**2)
@@ -101,10 +105,11 @@ def createTwoParticleData(opData):
 	MatrixAll=MatrixAll+MatrixEnergies
 
 	# Berechne die Eigenwerte und Eigenvektoren des Problems 
+	sys.stdout.write("> diagonalizing\r")
 	[Eigenenergies, Eigenvectors]=np.linalg.eig(MatrixAll) # Eigenvalues and eigenvectors 
 
 	#Transform the eigenvectors back to the product state basis
-
+	sys.stdout.write("> setup product basis\r")
 	Eigenvectors_Productbasis = np.zeros((n**2,n**2))
 	
 	#Z is the Matrix of the basis change from the product basis to the singlet/triplet-basis
@@ -133,5 +138,5 @@ def createTwoParticleData(opData):
 			else:
 				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1+L,:]				
 	
-
+	sys.stdout.write("> done!              \r")
 	return [Eigenenergies, Q]
