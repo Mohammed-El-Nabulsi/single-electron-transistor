@@ -9,9 +9,6 @@ __docformat__ = 'reStructuredText'
 
 class MasterEquationSolver:
     """
-    .. TODO::
-        Add relaxation.
-        Udpate example.
 
     Simulates the time development of propabilities :math:`\\vec{P}(t)` or finds
     stationary solutions :math:`\\vec{P}_{stat}` for an :math:`n`-state quantum
@@ -195,6 +192,9 @@ class MasterEquationSolver:
         The relevant lines of code for the simulation to work are highlighted.
         To give a real live example and to demonstarte the usage of the result
         some code to plot the result is added.
+
+    .. TODO::
+        The algorithm might be easily extended to allow relaxation.
 
     """
     # Don't remove the last dot/paragrph since it is a workaround to shpinx's
