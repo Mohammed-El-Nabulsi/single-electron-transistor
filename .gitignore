@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+env/
 build/
 develop-eggs/
 dist/
@@ -105,5 +106,13 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+<<<<<<< HEAD
+<<<<<<< HEAD
 
 .DS_Store
+=======
+>>>>>>> feature/transmission
+=======
+
+.DS_Store
+>>>>>>> time-dev-prop

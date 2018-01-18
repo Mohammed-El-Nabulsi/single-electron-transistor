@@ -815,9 +815,6 @@ class MasterEquationSolver:
         if valid:
             sim.validate()
 
-        # Calculate the stationary current
-        #cur_stat = sum(sum(np.dot(ΔΓ, P_stat)))
-
         # Return the (valid or invaid) simulation.
         return sim
 

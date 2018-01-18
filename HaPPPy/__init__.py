@@ -22,8 +22,8 @@ import sys
 import datetime
 import socket
 import getpass
-
-from .ParameterHandler import ParameterHandler
+import json
+import h5py
 
 from HaPPPy.OneBody import OneBodySolver
 from HaPPPy.TwoBody import TwoBodySolver
@@ -85,21 +85,81 @@ def main(argv=None):
     print("###")
     print("################################################################################")
 
-    parameter = ParameterHandler()
+    # Loading config from json file
+    configdata = json.load(open('config.json'))
 
-    OBSolver = OneBodySolver()
-    OBSolver.doCalculation()
+    L = configdata["L"]
+    N = configdata["N"]
+    E0 = configdata["E0"]
 
-    TBSolver = TwoBodySolver()
-    TBSolver.doCalculation()
+    # Do the one body calculation
+    # TODO Group 1: Fix spelling mistakes
+    OneBody = OneBodySolver(L,N)
+    OneBodyEigenvalues, OneBodyEigenVectors, Info = OneBody.calcualteHarmonicPotential(E0)
 
-    TMCal = TransmissionCalculator()
-    TMCal.doCalculation()
+    # Save file to hdf5 file
+    # TODO Group 1: Allow to choose the path for hdf5
+    # TODO Group 1: Also allow to importData from hdf5
+    OneBody.exportData(OneBodyEigenvalues, OneBodyEigenVectors, Info)
 
+    # TODO Group 2: Put all this into a class, say "TwoBodySolver"
+    # TODO Group 2: Fix the interface with Group 1 in an elegant way
+    # TODO Group 2: Make sure the module works as expected with the interface provided
+    # TODO Group 2: Try to enhance performance by using BLAS routines
+    from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
+    onebodydatapath = 'data_group1'
+    obData = SpectrumData()
+    obData.open(onebodydatapath)
+    TwoBodyEigenvalues, TwoBodyEigenvectors = createTwoParticleData(obData)
+
+    # Save the two body result
+    # TODO Group 2: Write a function that allows to store the results in a hdf5 file as part of "TwoBodySolver"
+    twobodydatapath = 'data_group2.hdf5'
+    dataFile = h5py.File(twobodydatapath, "w")
+    dataSet_calcInfo = dataFile.create_dataset("TwoBodyEigenvalues", data=TwoBodyEigenvalues)
+    dataSet_eigvalues = dataFile.create_dataset("TwoBodyEigenvectors", data=TwoBodyEigenvectors)  
+    dataFile.close()
+
+    # TODO Group 2 or Group 3: Read two body data from hdf5
+    file = h5py.File('data_group2.hdf5', "a")
+    TwoBodyEigenvalues = file["TwoBodyEigenvalues"][:]
+    TwoBodyEigenvectors = file["TwoBodyEigenvectors"][:]
+    file.close()
+
+    # TODO Group 3 or Group 4: Make an interface between both modules. 
+    #                          How do the transmission coefficients get into the RateCalculator
+    #                          Maybe think of function pointers
+    Transmission = TransmissionCalculator()
+
+    muL = configdata["muL"]
+    muR = configdata["muR"]
+    T = 1.0
+    V = 1.0 # What is V actually?
+
+    # TODO Group 4: There seems to be a problem with the Fermin function
+    # TODO Group 4 and Group 5: Fix the interface between both modules
+    #                           There is no common way to transfer the rates 
     RateCal = RateCalculator()
-    RateCal.doCalculation()
+    Gamma_01L,Gamma_01R,Gamma_10L,Gamma_10R,\
+    Gamma_12L,Gamma_12R,Gamma_21L,Gamma_21R = Rates.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
+                                                                  muL, muR, T, V, TwoBodyEigenvectors)
 
+    # Getting some parameters
+    TMax = configdata["Tmax"]
+    DT = configdata["DT"]
+
+    # TODO Group 5: Allow to calculate stationary states
+    # TODO Group 5: Allow to calculate stationary conductance
+    # TODO Group 5: OPTIONAL Think how do we get the initial states from the config file in here
+    #               Maybe divide into specific QD states. Like "empty", "double occupied", ...
+    P_0 = []
     MSolver = MasterEquationSolver()
-    MSolver.doCalculation()
+    sim_time_dev_prop, sim_current = mes.doCalculation(DT, TMax, P_0, Gamma_01L, Gamma_01R)
+
+    # Plot the stuff
+    # 1st plot: time development of propabilities
+    sim_time_dev_prop.quickPlot(xlabel="t", ylabel="P")
+    # 2nd plot: time development of netto current
+    sim_current.quickPlot(xlabel="t", ylabel="I")
 
     return 0

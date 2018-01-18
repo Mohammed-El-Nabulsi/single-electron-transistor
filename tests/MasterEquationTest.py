@@ -14,7 +14,7 @@ class MasterEquationTestSuite(unittest.TestCase):
         self.assertTrue(hasattr(HaPPPy, 'MasterEquation'))
 
     def test_MasterEquation_simulateDynamicSloution(self,
-                                                    plot_figures=True,
+                                                    plot_figures=False,
                                                     verbose=False,
                                                    ):
         """
