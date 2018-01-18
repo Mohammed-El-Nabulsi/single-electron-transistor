@@ -3,6 +3,7 @@ import numpy as np
 import numpy.linalg as lin
 import matplotlib.pyplot as plt
 import math
+import copy
 
 
 __docformat__ = 'reStructuredText'
@@ -887,7 +888,7 @@ class Simulation():
                  increasing :math:`n`.
         :rtype: numpy.ndarray
         """
-        vs = self.__values
+        vs = copy.copy(self.__values)
         # If the simulation is invalid fill values up with None values.
         # This allows mathplotlib to plot invalid plots as well.
         if not self.valid():
