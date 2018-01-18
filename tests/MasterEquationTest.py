@@ -13,7 +13,10 @@ class MasterEquationTestSuite(unittest.TestCase):
         """
         self.assertTrue(hasattr(HaPPPy, 'MasterEquation'))
 
-    def test_MasterEquation_doCalculation(self, plot_figures=False):
+    def test_MasterEquation_simulateDynamicSloution(self,
+                                                    plot_figures=True,
+                                                    verbose=False,
+                                                   ):
         """
         This method tests the bahaviour of the HaPPPy.MasterEquation module
         by checking some simple edge cases.
@@ -32,9 +35,10 @@ class MasterEquationTestSuite(unittest.TestCase):
             mes = HaPPPy.MasterEquation.MasterEquationSolver()
             # parameters of this tets:
             ε = mes.getε()
+            δ = 1E-2
             a = 1 # > 0
-            p0 = 0.7 # > 0
-            p1 = 0.1 # > 0
+            p0 = 0.1 # > 0
+            p1 = 0.7 # > 0
             p2 = 0.2 # > 0, p0 + p1 + p2 = 1
             Δt = 1
             t_max = 100
@@ -44,7 +48,16 @@ class MasterEquationTestSuite(unittest.TestCase):
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([p0, p1, p2])
             # simulate
-            sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
+            sim_tdp, sim_cur = mes.simulateDynamicSloution(
+                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                  )
+            stat_ps, stat_curs = mes.calculateStationarySloutions(
+                                    Γ_L, Γ_R, verbose=verbose
+                                   )
+            # plot result
+            if plot_figures:
+                sim_tdp.quickPlot(xlabel="t", ylabel="P")
+                sim_cur.quickPlot(xlabel="t", ylabel="I")
             # check validity
             self.assertTrue(sim_tdp.valid())
             self.assertTrue(sim_cur.valid())
@@ -56,13 +69,9 @@ class MasterEquationTestSuite(unittest.TestCase):
             #     b. check values after a 'long' time period
             #        expected: propability of state 1 'shifts' to state 2
             #                  state 3 is constant
-            self.assertTrue(Ps[t_max][0] <= ε)
-            self.assertTrue(Ps[t_max][1] <= p0 + p1 + ε)
-            self.assertTrue(Ps[t_max][2] <= p2 + ε)
-            # plot result
-            if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I")
+            self.assertTrue(abs(Ps[t_max][0] - (p0 + p1)) <= δ)
+            self.assertTrue(abs(Ps[t_max][1])  <= δ)
+            self.assertTrue(abs(Ps[t_max][2] - p2) <= ε)
 
         if do_test_2:
             ## test 2:
@@ -76,13 +85,22 @@ class MasterEquationTestSuite(unittest.TestCase):
             t_max = 100
             n = 50
             # set-up a reasonable Γ-matrix
-            Γ_L = np.array([[2*(i + j)/n**2 for j in range(n)] for i in range(n)])
-            Γ_R = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
+            Γ_L = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
+            Γ_R = 2 * Γ_L
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([i for i in range(n)])
             P_0 = P_0 / sum(P_0)
             # simulate
-            sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
+            sim_tdp, sim_cur = mes.simulateDynamicSloution(
+                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                  )
+            stat_ps, stat_curs = mes.calculateStationarySloutions(
+                                    Γ_L, Γ_R, verbose=verbose
+                                   )
+            # plot result
+            if plot_figures:
+                sim_tdp.quickPlot(xlabel="t", ylabel="P")
+                sim_cur.quickPlot(xlabel="t", ylabel="I")
             # check validity
             self.assertTrue(sim_tdp.valid())
             self.assertTrue(sim_cur.valid())
@@ -95,10 +113,6 @@ class MasterEquationTestSuite(unittest.TestCase):
             #        expected: uniform distribution
             for P_i in Ps[t_max]:
                 self.assertTrue(1/n - ε <= P_i <= 1/n + ε)
-            # plot result
-            if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I")
 
         if do_test_3:
             ## test 3:
@@ -111,13 +125,22 @@ class MasterEquationTestSuite(unittest.TestCase):
             t_max = 100
             n = 50
             # set-up a reasonable Γ-matrix
-            Γ_L = np.array([[0 for j in range(n)] for i in range(n)])
-            Γ_R = np.array([[0 for j in range(n)] for i in range(n)])
+            Γ_L = np.zeros((n, n))
+            Γ_R = np.zeros((n, n))
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([i for i in range(n)])
             P_0 = P_0 / sum(P_0)
             # simulate
-            sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
+            sim_tdp, sim_cur = mes.simulateDynamicSloution(
+                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                  )
+            stat_ps, stat_curs = mes.calculateStationarySloutions(
+                                    Γ_L, Γ_R, verbose=verbose
+                                   )
+            # plot result
+            if plot_figures:
+                sim_tdp.quickPlot(xlabel="t", ylabel="P")
+                sim_cur.quickPlot(xlabel="t", ylabel="I")
             # check validity
             self.assertTrue(sim_tdp.valid())
             self.assertTrue(sim_cur.valid())
@@ -131,10 +154,6 @@ class MasterEquationTestSuite(unittest.TestCase):
             #     a. check if current is constntly 0
             for I in Is:
                 self.assertTrue(-ε <= abs(I) <= +ε)
-            # plot result
-            if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I")
 
         if do_test_4:
             ## test 4:
@@ -147,15 +166,20 @@ class MasterEquationTestSuite(unittest.TestCase):
             ε = mes.getε()
             Δt = 1
             t_max = 100
-            n = 1000
+            n = 100
             # set-up a reasonable Γ-matrix
-            Γ_L = np.array([[2*(i + j)/n**2 for j in range(n)] for i in range(n)])
-            Γ_R = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
+            Γ_L = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
+            Γ_R = 2 * Γ_L
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([i for i in range(n)])
             P_0 = P_0 / sum(P_0)
             # simulate
-            sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
+            sim_tdp, sim_cur = mes.simulateDynamicSloution(
+                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                  )
+            stat_ps, stat_curs = mes.calculateStationarySloutions(
+                                    Γ_L, Γ_R, verbose=verbose
+                                   )
             # check validity
             self.assertTrue(sim_tdp.valid())
             self.assertTrue(sim_cur.valid())
@@ -179,22 +203,27 @@ class MasterEquationTestSuite(unittest.TestCase):
             t_max = 100
             n = 10
             # set-up a reasonable Γ-matrix
-            Γ_L = np.array([[2*(i + j)/n**2 for j in range(n)] for i in range(n)])
-            Γ_R = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
+            Γ_L = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
+            Γ_R = 2 * Γ_L
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([i for i in range(n)])
             P_0 = P_0 / sum(P_0)
             # instanciate a MasterEquationSolver
             mes = HaPPPy.MasterEquation.MasterEquationSolver(ε=ε)
             # simulate
-            sim_tdp, sim_cur = mes.doCalculation(Δt, t_max, P_0, Γ_L, Γ_R)
-            # check validity
-            self.assertTrue(not sim_tdp.valid())
-            self.assertTrue(not sim_cur.valid())
+            sim_tdp, sim_cur = mes.simulateDynamicSloution(
+                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                  )
+            stat_ps, stat_curs = mes.calculateStationarySloutions(
+                                    Γ_L, Γ_R, verbose=verbose
+                                   )
             # plot result
             if plot_figures:
                 sim_tdp.quickPlot(xlabel="t", ylabel="P")
                 sim_cur.quickPlot(xlabel="t", ylabel="I")
+            # check validity
+            self.assertTrue(not sim_tdp.valid())
+            self.assertTrue(not sim_cur.valid())
 
 if __name__ == '__main__':
     master_equation_suite = unittest.TestLoader().loadTestsFromTestCase(MasterEquationTestSuite)
