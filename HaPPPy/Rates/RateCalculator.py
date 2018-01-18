@@ -23,7 +23,7 @@ class RateCalculator:
 
         print("Hello from the RateCalculator, what can I do for you?")
      
-    def doCalculation(self, E1, E2, muL, muR, T, V, C, TCalc):
+    def doCalculation(self, E1, E2, muL, muR, T, V, C, TCalc, Density):
       
 
         kB=0.08629 #Boltzmannkonstante in meV/K
@@ -31,15 +31,10 @@ class RateCalculator:
         def fermi(E,mu,T):
             f=1/(math.exp((E-mu)/(kB*T) )+1)
             return(f)
-
-        def D(A):
-            if A == 0:
-                return(1)
-            else:
-                return(0)
+          
 	
         def Gamma(Ea,Eb,V):
-             return (np.absolute(TCalc.calculate_transmission(np.absolute(Eb-Ea),V))**2*D(np.absolute(Ea-Eb)))
+             return (np.absolute(TCalc.calculate_transmission(np.absolute(Eb-Ea),V))**2*Density.calculate_DensityofStates(np.absolute(Ea-Eb)))
 
  
         NEcut= np.size(E2)
@@ -109,18 +104,21 @@ class RateCalculator:
 
         Gamma_R=np.zeros((1+np.size(E1)+np.size(E2),1+np.size(E1)+np.size(E2)))
         Gamma_L=np.zeros((1+np.size(E1)+np.size(E2),1+np.size(E1)+np.size(E2)))
+        i_=0
         for i in E1:
-                i_=np.where(E1==i)[0][0]
+                j_=0
                 for j in E2:
                         j_ =np.where(E2==j)[0][0]
-                        Gamma_L[i_+1+np.size(E1)][j_+1]=Gamma_12(i,j,muL,T)
-                        Gamma_L[j_+1][i_+1+np.size(E1)]=Gamma_21(j,i,muL,T)
-                        Gamma_R[i_+1+np.size(E1)][j_+1]=Gamma_12(i,j,muR,T)
-                        Gamma_R[j_+1][i_+1+np.size(E1)]=Gamma_21(j,i,muR,T)
+                        Gamma_L[i_+1][j_+1+np.size(E1)]=Gamma_12(i,j,muL,T)
+                        Gamma_L[j_+1+np.size(E1)][i_+1]=Gamma_21(j,i,muL,T)
+                        Gamma_R[i_+1][j_+1+np.size(E1)]=Gamma_12(i,j,muR,T)
+                        Gamma_R[j_+1+np.size(E1)][i_+1]=Gamma_21(j,i,muR,T)
+                        j_=j_+1
                 Gamma_L[0][i_+1]=Gamma_01(i,muL,T)
                 Gamma_R[0][i_+1]=Gamma_01(i,muR,T)
                 Gamma_L[i_+1][0]=Gamma_10(i,muL,T)
                 Gamma_R[i_+1][0]=Gamma_10(i,muR,T)
+                i_=1+i_
         print(Gamma_L)
         print(Gamma_R)
         return(Gamma_L,Gamma_R)
