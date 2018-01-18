@@ -24,8 +24,8 @@ class TwoBodyTestSuite(unittest.TestCase):
     def test_opWaves_count_convergence(self):
         """ Checks whether the two-body base energy converges when increasing the amount of feed in one-body states.
         """
-        _step = 1.0
-        _max = 20.0
+        _step = 5.0
+        _max = 50.0
         obDataFile='data_group1' #TODO the data must be sorted for this to work
         obData = SpectrumData()
         obData.open(obDataFile)
@@ -40,6 +40,13 @@ class TwoBodyTestSuite(unittest.TestCase):
         E = it.operands[1]
         print("summary of two-body base energies:")
         print(E)
+        dE = np.ediff1d(E)
+        L_max = 0.0
+        for i in range(len(dE) - 1):
+            L = dE[i + 1] / dE[i]
+            self.assertLess(L, 1.0, msg='not converging!')
+            L_max = max(L_max, L)
+        print("converges with a factor < %.2f per %d added wavefunctions" % (L_max, _step))
 
     def test_coulomb_epsilon_convergence(self):
         """ Checks whether the two-body energy states converge when decreasing epsilon (the coulomb interaction cutoff)
