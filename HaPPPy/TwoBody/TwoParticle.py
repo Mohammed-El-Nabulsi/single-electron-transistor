@@ -107,6 +107,7 @@ def createTwoParticleData(opData):
 	# Berechne die Eigenwerte und Eigenvektoren des Problems 
 	sys.stdout.write("> diagonalizing\r")
 	[Eigenenergies, Eigenvectors]=np.linalg.eig(MatrixAll) # Eigenvalues and eigenvectors 
+	order = np.argsort(Eigenenergies)	
 
 	#Transform the eigenvectors back to the product state basis
 	sys.stdout.write("> setup product basis\r")
@@ -138,5 +139,6 @@ def createTwoParticleData(opData):
 			else:
 				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1+L,:]				
 	
-	sys.stdout.write("> done!              \r")
-	return [Eigenenergies, Q]
+	sys.stdout.write("> sorting by energies\r")
+	return [np.take(Eigenenergies, order), np.take(Q, order, axis=2)]
+	# return [Eigenenergies, Q]
