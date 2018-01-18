@@ -1,4 +1,3 @@
-
 # The following imports where disabled to prevent runtime errors caused by
 # double imports with Python 3.6.x or higher. Since all listed classes are
 # part of test_main.py - which is the file containing the program entry point -
