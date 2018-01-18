@@ -1,17 +1,15 @@
-#TODO: docu, test(kommt nach Silvester, habe nun endlich Maple...)
-#In dieser Version ist beruecksichtigt, dass im Algo idft und dft aufeinander folgen.
-#auf diese weise wird eine vielzahl an Operationen eingespart.
-#Ausfuehrliche Erklaerungen folgen, docu hier unbrauchbar/zT falsch(Relikt aus Experimenten)
-
 import numpy as np
+
+from Fourier00 import Fourier
 
 from scipy.constants import codata
 
-dt = 10**(-1)
-me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to milli eV/c^2
-hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10fs*meV    
+dt = 10**(2)
+me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to milli eV
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to p
 
-class SplitStepOperator():
+
+class Split_Step_Operator():
     """
     Parameters
     ----------
@@ -34,7 +32,8 @@ class SplitStepOperator():
         
         self.const = hbar/(2*me)
         
-        self.k = np.fft.fft(position_grid, norm='ortho')
+        self.fourier = Fourier(position_grid)
+        self.k = self.fourier.k
         
         self.pot = pot
         
@@ -54,7 +53,7 @@ class SplitStepOperator():
             
             for a in indices:
                 kinetic_operator[a]=kinetic_diagonal_element(self,
-                                                             self.k[a])
+                                                             self.fourier.k[a])
             return kinetic_operator
         
         def create_kinetic_operator_half(self):
@@ -64,18 +63,11 @@ class SplitStepOperator():
             
             for a in indices:
                 kinetic_operator_half[a]=kinetic_diagonal_element_half(self,
-                                                                       self.k[a])
+                                                             self.fourier.k[a])
             return kinetic_operator_half
         
         self.kinetic_operator = create_kinetic_operator(self)
         self.kinetic_operator_half = create_kinetic_operator_half(self)
-        
-#        print("shapes of the kinetic operators")
-#        print(self.kinetic_operator.shape)
-#        print(self.kinetic_operator_half.shape)
-#        print("types of the kinetic operators")
-#        print(type(self.kinetic_operator))
-#        print(type(self.kinetic_operator_half))
 
         def create_potential_operator(self):
             potential_operator = np.zeros(self.pot.size, dtype=np.complex64)
@@ -88,38 +80,61 @@ class SplitStepOperator():
             return potential_operator
         
         self.potential_operator = create_potential_operator(self)
+    
+    def first_step(self, x_wave_1):
+        """
+        First interation step.
         
-#        print("shape of the potenital operator")
-#        print(self.potential_operator.shape)
-#        print("type of the potential operator")
-#        print(type(self.potential_operator))
-    
-    def first_step(self, x_wave_is):
+        Parameters
+        ----------
+        xx_wave_1: Array
+            Gaussian package
+            
+        Returns
+        --------
+        ft_pot_x_wave : Array, len(xx_wave_1)
+            Wavefunction after applying the half kinetc- and full potentialoperator
         """
-        ACHTUNG: Rechne mit Operatoren, dies ist im Algorithmus somit der ERSTE Befehl der anzuwenden ist!
-        """
-        k_wave_f = np.fft.fft(x_wave_is, norm='ortho')
+        k_wave_f = self.fourier.dft(x_wave_1)
         kin_k_wave = np.multiply(self.kinetic_operator_half, k_wave_f, dtype=np.complex64)
-        x_wave2 = np.fft.ifft(kin_k_wave, norm='ortho')
+        x_wave2 = self.fourier.idft(kin_k_wave)
         pot_x_wave = np.multiply(self.potential_operator, x_wave2, dtype=np.complex64)
-        return np.fft.fft(pot_x_wave)
+        return self.fourier.dft(pot_x_wave)
     
-    def step(self, wave):
+    def steps(self, wave):
         """
-        Anwendung nach final step, bis Abbruchkriterium erfuellt. 
+        Performs the Split Step iteration. This command combines sequentices fourier transformations.
+        
+        Parameter
+        ---------
+        wave : Array
+            Wavefunction in wavenumberspace
+        Returns
+        -------
+        v_k_wave_s2 : Array, len(wave)
+            wavefunction after applying full kinetic-, full potential- and again full kineticoperator
         """
         kin_k_wave_s = np.multiply(self.kinetic_operator, wave, dtype=np.complex64)
-        x_wave_s = np.fft.ifft(kin_k_wave_s, norm='ortho')
+        x_wave_s = self.fourier.idft(kin_k_wave_s)
         pot_x_wave_s = np.multiply(self.potential_operator, x_wave_s, dtype=np.complex64)
-        k_wave_s2 = np.fft.fft(pot_x_wave_s, norm='ortho')
+        k_wave_s2 = self.fourier.dft(pot_x_wave_s)
         return np.multiply(self.kinetic_operator, k_wave_s2, dtype=np.complex64)
     
     def final_step(self, k_wave_fs):
         """
-        Anwendung nachdem das Abbruchkriterium erfuellt wurde.
+        Concludes the last full timestep of the splitstep-iteration.
+        
+        Parameter
+        ---------
+        k_wave_fs : Array
+            Wavefunction after reacing the stopping criterion.
+        Returns
+        -------
+        ift_kin_k_wave_fs : Array, len(k_wave_fs)
+            Wavefuntion in positionspace after the split-step-algorithm
         """
-        x_wave_fs = np.fft.ifft(k_wave_fs, norm='ortho')
+        x_wave_fs = self.fourier.idft(k_wave_fs)
         pot_x_wave_fs = np.multiply(self.potential_operator, x_wave_fs, dtype=np.complex64)
-        k_wave_fs2 = np.fft.fft(pot_x_wave_fs, norm='ortho')
+        k_wave_fs2 = self.fourier.dft(pot_x_wave_fs)
         kin_k_wave_fs = np.multiply(self.kinetic_operator_half, k_wave_fs2, dtype=np.complex64)
-        return np.fft.ifft(kin_k_wave_fs)
+        return self.fourier.idft(kin_k_wave_fs)
