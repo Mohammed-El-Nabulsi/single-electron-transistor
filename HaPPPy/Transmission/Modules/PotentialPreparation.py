@@ -51,8 +51,8 @@ class Potential():
         self.gauss_width = self.gauss_index_width*self.dx
         
         def create_potential(self):
-            praefix = np.zeros(int(6*self.gauss_index_width+1))
-            suffix = np.zeros(500*self.gauss_index_width)
+            praefix = np.zeros(int(50*self.gauss_index_width+1))
+            suffix = np.zeros(100*self.gauss_index_width)
             
             pot = np.append(praefix,self.barrier)
             return np.append(pot, suffix)
