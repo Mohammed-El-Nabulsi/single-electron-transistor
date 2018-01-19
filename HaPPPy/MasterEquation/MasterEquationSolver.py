@@ -154,16 +154,18 @@ class MasterEquationSolver:
     .. math::
         \\sigma_{\\alpha \\rightarrow \\beta}
         =   \\begin{cases}
-                -1 & | \\text{ if the transition }
-                       \\alpha \\rightarrow \\beta
-                       \\text{ adds a particle}\\\\
-                 0 & | \\text{ if the transition }
-                       \\alpha \\rightarrow \\beta
-                       \\text{ adds or removes no particle}\\\\
                 +1 & | \\text{ if the transition }
                        \\alpha \\rightarrow \\beta
-                       \\text{ removes a particle}
+                       \\text{ adds a particle (*)}\\\\
+                 0 & | \\text{ if the transition }
+                       \\alpha \\rightarrow \\beta
+                       \\text{ adds or removes no particle (*)}\\\\
+                -1 & | \\text{ if the transition }
+                       \\alpha \\rightarrow \\beta
+                       \\text{ removes a particle (*)}
             \\end{cases}
+
+    (*) with respect to the left barrier.
 
     During the calculation it is assumed that the charge per particle is
     :math:`q = 1` which is equal to divide the given formulae by :math:`q`.
