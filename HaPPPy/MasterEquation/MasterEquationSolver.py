@@ -909,7 +909,10 @@ class Simulation():
     :code:`sim.getValues()` ≣ :math:`(f(0), f(\\Delta t), f(2 \\cdot \\Delta t),
     \\dots, f(m \\cdot \\Delta t))`.
 
-    where :math:`m = \\lfloor \\frac{t_{max}}{\\Delta t}) \\rfloor`
+    where :math:`m = \\lfloor \\frac{t_{max}}{\\Delta t} \\rfloor`
+    ≣ :code:`len(sim)`.
+
+    Note: :math:`m` might be smaller for invalid simulations (see valid()).
     """
 
     def __init__(self, Δt, t_max):
