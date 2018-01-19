@@ -18,6 +18,10 @@ class SpectrumData:
 	n -- the number of grid points used to represent the wavefunctions
 	dx -- the spacial distance between grid points in [nm]: (x1-x0) = dx * (n-1)
 	l -- the spacial width of the grid in [nm]: l = dx * n
+	
+	Preconditions to data:
+	- all the rasterized wavefunctions (v) should be spatially normalized: sum x in v of (|x|^2 * dx) = 1.0
+	- all the one-particle states should be sorted by energy in ascending order: energies[i+1] >= energies[i]
 	"""
 	
 	def open(self, filename):
