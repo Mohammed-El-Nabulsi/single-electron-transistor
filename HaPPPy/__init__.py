@@ -148,26 +148,66 @@ def main(argv=None):
     Gamma_L, Gamma_R = Rates.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
                                                                   muL, muR, T, V, TwoBodyEigenvectors, Transmission, DensityofStates)
 
-    # Getting some parameters
-    TMax = configdata["Tmax"]
-    DT = configdata["DT"]
 
+    ## Group 5: MASTER MODULE
+    if verbose: print("\nSTEP 5 : MASTER EQUATION\n")
     # TODO Group 5: Allow to calculate stationary conductance
-    # TODO Group 5: OPTIONAL Think how do we get the initial states from the config file in here
-    #               Maybe divide into specific QD states. Like "empty", "double occupied", ...
-    n = Gamma_L.shape[0]
-    # choose a legitimate start value for P_0 (currently a dummy!)
-    P_0 = np.arange(n)
-    P_0 = 1 / sum(P_0) * P_0
+    # Get all relevant parameters from config file and previous calculations.
+    n_one = len(OneBodyEigenvalues)
+    n_two = len(TwoBodyEigenvalues)
+    n_tot = 1 + n_one + n_two
+    BCond = configdata["BCond"]
+    Epsilon = configdata["Epsilon"]
+    if Epsilon == "default":
+        Epsilon = None
+    if verbose: print("Epsilon = " + str(Epsilon))
+    if verbose: print("n_one = " + str(n_one))
+    if verbose: print("n_two = " + str(n_two))
+    if verbose: print("n_tot = " + str(n_tot))
+    if verbose: print("BCond = " + str(BCond))
+    if verbose: print("Gamma_L =\n" + str(Gamma_L))
+    if verbose: print("Gamma_R =\n" + str(Gamma_R))
+    # Calculate static or dynamic solution(s).
     mes = HaPPPy.MasterEquation.MasterEquationSolver()
-    sim_tdp, sim_cur = mes.simulateDynamicSloution(DT, TMax, P_0, Gamma_L, Gamma_R)
-    stat_ps, stat_curs = mes.calculateStationarySloutions(Gamma_L, Gamma_R)
-    ## plot/print results
-    # 1st plot: time development of propabilities
-    sim_tdp.quickPlot(xlabel="t", ylabel="P")
-    print("static solutions (P_ij) =\n", stat_ps)
-    # 2nd plot: time development of netto current
-    sim_cur.quickPlot(xlabel="t", ylabel="I",legend=["$I^L$","$I^R$"])
-    print("static solutions (I_i) = \n", stat_curs)
+    if BCond == "static":
+        # Static solutions are requested.
+        if verbose: print("mode = STATIC")
+        stat_ps, stat_curs = mes.calculateStationarySloutions(Gamma_L, Gamma_R,
+                                                              verbose=verbose,
+                                                             )
+        print("(P_stat_ij) =\n", stat_ps)
+        print("(I^k_stat_i) = \n", stat_curs)
+    else:
+        # A simulation is requested.
+        if verbose: print("mode = DYNAMIC")
+        # Get additional parameters for simulation.
+        DT = configdata["DT"]
+        TMax = configdata["TMax"]
+        if verbose: print("DT = " + str(DT))
+        if verbose: print("TMax = " + str(TMax))
+        # Calculate a legitimate value for P_0 based on the input:
+        P_0 = np.zeros(n_tot)
+        if BCond == "empty":
+            P_0[0] = 1
+        elif BCond == "one":
+            P_0[1] = 1
+        elif BCond == "two":
+            P_0[1 + n_one] = 1
+        else:
+            P_0 = np.array(BCond)
+        P_0 = P_0 / sum(P_0)
+        if verbose: print("P_0 =\n" + str(P_0))
+        # Calculate the simulation.
+        sim_p, sim_cur = mes.simulateDynamicSloution(DT, TMax,
+                                                     P_0,
+                                                     Gamma_L, Gamma_R,
+                                                     verbose=verbose,
+                                                    )
+        # Plot the simulations.
+        # 1st plot: time development of propabilities
+        sim_p.quickPlot(xlabel="t", ylabel="P")
+        # 2nd plot: time development of netto current
+        sim_cur.quickPlot(xlabel="t", ylabel="I",legend=["$I^L$","$I^R$"])
+
 
     return 0
