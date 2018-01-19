@@ -85,6 +85,11 @@ def main(argv=None):
     print("###")
     print("################################################################################")
 
+    # parse passed commandline arguments
+    verbose = "-v" in argv
+    if verbose: print("Running in verbose mode."
+                     +"This is recommended for debuging only!")
+
     # Loading config from json file
     configdata = json.load(open('config.json'))
 
