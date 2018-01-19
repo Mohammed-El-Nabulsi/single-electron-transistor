@@ -1004,7 +1004,11 @@ class Simulation():
     def __repr__(self):
         ts = self.getParameters()
         vs = self.getValues()
-        return "Sim<" + str([(ts[i], vs[i]) for i in range(len(self))]) + ">"
+        return ("Sim<valid="
+                + str(self.valid()) + ","
+                + str([(ts[i], vs[i]) for i in range(len(self))])
+                + ">"
+               )
 
     def __str__(self):
         return repr(self)
