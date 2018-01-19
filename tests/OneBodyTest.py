@@ -45,8 +45,9 @@ if __name__ == '__main__':
     #la ,v = OBSolver.calcualteGaussPotential(1 ,5)
     #print(v)
 
-	OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
-	la, v , Info = OBSolver.calculateBoxPotential(1)
-	
+    OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
+    la, v , Info = OBSolver.calculateBoxPotential(1)
+    OBSolver.exportData(la, v, Info)
+    
     #one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)
     #unittest.TextTestRunner(verbosity=2, buffer=True).run(one_body_suite)

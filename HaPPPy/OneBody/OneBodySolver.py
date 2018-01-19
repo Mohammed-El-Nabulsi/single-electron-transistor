@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import h5py
 from math import sqrt
+from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
 
 class OneBodySolver:
     """ Solves the one body problem
@@ -67,7 +68,7 @@ class OneBodySolver:
             la, v_norm, Info
 
         """
-        print("\nYou've choosen BoxPotential.")
+        print("\nYou've chosen BoxPotential.")
 		
 		# creating potential matrix with user input n elements
         pot_mat = np.zeros((self.n, self.n))
@@ -98,7 +99,7 @@ class OneBodySolver:
             i += 1
         #print(kin_mat)
 
-        # unit system and calculation of final hamiltonian matrix ham_mat
+        # unit system and calculation of final Hamiltonian matrix ham_mat
         # factor 1000 for the unit system in order to reach meV
         #unit_pot = ((1/2)*self.me*(3.5174*(10**29))*((10**-9))**2)/self.e  # potential matrix in meV
         unit_pot = 1
@@ -107,16 +108,16 @@ class OneBodySolver:
         #print(unit_kin, "\n", unit_pot)  # control print for unit
         # dx for the derivate of the matrix
         dx = self.l/self.n
-        # build the final hamilton matrix ham_mat
+        # build the final Hamilton matrix ham_mat
         ham_mat = unit_kin * kin_mat * (1/(dx*dx)) + unit_pot * pot_mat
 
         # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
         la, v = np.linalg.eigh(ham_mat)
 
-        # printing eingenvalues and eigenvectors
+        # printing eigenvalues and eigenvectors
         # as option for debugging
-        for i in range(10):
-            print("Eigenvalue:\t\t ", la[i])
+        #for i in range(10):
+        #    print("Eigenvalue:\t\t ", la[i])
         
         # create norm of the eigenvectors
         norm = 0.0
@@ -135,7 +136,7 @@ class OneBodySolver:
         #print(norm)
         
         # list of tuples for calculation information
-        Info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)],["HarmonocPotential",str(True)], \
+        Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
         return la, v_norm , Info
@@ -158,7 +159,7 @@ class OneBodySolver:
             la, v_norm, Info
 
         """
-        
+        print("\nYou've chosen HarmonicPotential.")
         # creating potential matrix with user input n elements
         pot_mat = np.zeros((self.n, self.n))
         
@@ -188,7 +189,7 @@ class OneBodySolver:
             i += 1
         #print(kin_mat)
 
-        # unit system and calculation of final hamiltonian matrix ham_mat
+        # unit system and calculation of final Hamiltonian matrix ham_mat
         # factor 1000 for the unit system in order to reach meV
         unit_pot = ((1/2)*self.me*(3.5174*(10**29))*((10**-9))**2)/self.e  # potential matrix in meV
 
@@ -196,13 +197,13 @@ class OneBodySolver:
         #print(unit_kin, "\n", unit_pot)  # control print for unit
         # dx for the derivate of the matrix
         dx = self.l/self.n
-        # build the final hamilton matrix ham_mat
+        # build the final Hamilton matrix ham_mat
         ham_mat = unit_kin * kin_mat * (1/(dx*dx)) + unit_pot * pot_mat
 
         # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
         la, v = np.linalg.eigh(ham_mat)
 
-        # printing eingenvalues and eigenvectors
+        # printing eigenvalues and eigenvectors
         # as option for debugging
         #for i in range(10):
         #    print("Eigenvalue:\t\t ", la[i])
@@ -223,7 +224,7 @@ class OneBodySolver:
         #print(norm)
         
         # list of tuples for calculation information
-        Info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)],["HarmonocPotential",str(True)], \
+        Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
         return la, v_norm , Info
@@ -246,7 +247,7 @@ class OneBodySolver:
             la, v_norm, Info
 
         """
-        print("\nYou have chosen the Gauss potential!")
+        print("\nYou have chosen GaussPotential!")
         
 
         # creating potential matrix with user input n elements
@@ -283,18 +284,18 @@ class OneBodySolver:
         print(unit_kin, "\n", unit_pot)  # control print for unit
         # dx for the derivate of the matrix
         dx = self.l/self.n
-        # build the final hamilton matrix ham_mat
+        # build the final Hamilton matrix ham_mat
         ham_mat = unit_kin * kin_mat * (1/(dx*dx)) + unit_pot * pot_mat
         
         # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
         la, v = np.linalg.eigh(ham_mat)
 
-        # printing eingenvalues and eigenvectors
+        # printing eigenvalues and eigenvectors
         # as option for debugging
-        for i in range(10):
-            print("Eigenvalue:\t\t ", la[i])
+        #for i in range(10):
+        #    print("Eigenvalue:\t\t ", la[i])
         
-        # creat norm of the eigenvectors
+        # create norm of the eigenvectors
         norm = 0.0
         for i in range(self.n):
             norm += (v[i,0]*v[i,0]) * dx
@@ -311,21 +312,20 @@ class OneBodySolver:
         #print(norm)
         
         # list of tuples for calculation information
-        Info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)],["HarmonocPotential",str(False)], \
+        Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(False)], \
         ["GaussPotential",str(True)],["BoxPotential",str(False)]]).astype('S9')
         
         return la, v_norm, Info
 
 
- 
+    def exportData(self, la, v_norm, info, path="data_group1"):
+        Data = SpectrumData()
+        Data.init(path, len(la), len(la), info=info)
+        Data.energies[:] = la
+        Data.waves[:,:] = v_norm
+        Data.close()
 
 
-    
-    def exportData(self, la, v_norm, info):
-        # export data as hdf5 file in three sets
-        dataFile = h5py.File("data_group1.hdf5", "w")
-        dataSet_calcInfo = dataFile.create_dataset("settings", data=info)
-        dataSet_eigvalues = dataFile.create_dataset("eigenvalues", data=la)  
-        dataSet_eigvectors = dataFile.create_dataset("eigenvectors", data=v_norm)
-        dataFile.close()
+
+
 
