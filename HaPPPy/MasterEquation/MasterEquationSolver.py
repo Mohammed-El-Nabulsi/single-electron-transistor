@@ -959,7 +959,7 @@ class Simulation():
                  with increasing :math:`n`.
         :rtype: numpy.ndarray
         """
-        return np.arange(0, len(self) * self.Δt, self.Δt)
+        return self.Δt * np.arange(len(self))
 
     def getValues(self):
         """
