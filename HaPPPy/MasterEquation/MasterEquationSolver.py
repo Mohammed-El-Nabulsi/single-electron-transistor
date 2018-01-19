@@ -810,8 +810,8 @@ class MasterEquationSolver:
         # If no stationary solutions could be calculated there are no currents
         # to calculate.
         if stat_ps.shape[1] > 0:
-            stat_curs = (np.sum(np.dot(σΓ_L, stat_ps), axis=0)[0],
-                         np.sum(np.dot(σΓ_R, stat_ps), axis=0)[0])
+            stat_curs = (np.sum(np.dot(σΓ_L, stat_ps), axis=0),
+                         np.sum(np.dot(σΓ_R, stat_ps), axis=0))
         else:
             stat_curs = []
 
