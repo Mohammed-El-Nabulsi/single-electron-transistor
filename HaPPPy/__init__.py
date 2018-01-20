@@ -232,7 +232,8 @@ def main(argv=None):
                        )
         # 2nd plot: time development of netto current
         sim_cur.quickPlot(xlabel="t", ylabel="I"
-                          xunit_symbol="ps", yunit_symbol="$e$",
+                          xunit_symbol="ps",
+                          yunit_symbol="$\\frac{e}{\\text{ps}}$",
                           legend=["$I^L$","$I^R$"],
                          )
         # Store output values.
