@@ -111,19 +111,8 @@ def main(argv=None):
     # TODO Group 2: Fix the interface with Group 1 in an elegant way
     # TODO Group 2: Make sure the module works as expected with the interface provided
     # TODO Group 2: Try to enhance performance by using BLAS routines
-    from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
-    onebodydatapath = 'data_group1'
-    obData = SpectrumData()
-    obData.open(onebodydatapath)
-    TwoBodyEigenvalues, TwoBodyEigenvectors = createTwoParticleData(obData)
 
-    # Save the two body result
-    # TODO Group 2: Write a function that allows to store the results in a hdf5 file as part of "TwoBodySolver"
-    twobodydatapath = 'data_group2.hdf5'
-    dataFile = h5py.File(twobodydatapath, "w")
-    dataSet_calcInfo = dataFile.create_dataset("TwoBodyEigenvalues", data=TwoBodyEigenvalues)
-    dataSet_eigvalues = dataFile.create_dataset("TwoBodyEigenvectors", data=TwoBodyEigenvectors)
-    dataFile.close()
+    TwoBodySolver.doCalculation(obDataFile='data_group1', tbDataFile='data_group2')
 
     # TODO Group 2 or Group 3: Read two body data from hdf5
     file = h5py.File('data_group2.hdf5', "a")

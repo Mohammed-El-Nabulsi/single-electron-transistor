@@ -1,7 +1,9 @@
 import numpy as np 
-from .MatrixElement import getMatrixElement, testFunction
+from .MatrixElement import getMatrixElement, testFunction, MatrixElement
 from .OneParticleLoader import SpectrumData
+import sys
 
+_SQRT2 = np.sqrt(2)
 
 def createTwoParticleData(opData):
 	""" Calculate and return the two-electron eigenvalues and eigenvectors from the single-electron eigenfunctions.
@@ -16,6 +18,8 @@ def createTwoParticleData(opData):
 	n = opData.m
 	X = opData.n
 	dx = opData.dx
+	
+	matrixElement = MatrixElement(X, dx)
 
 	# Basis: 
 	#       Singuletts: n - terms: |1>|1>, ...|n>|n>
@@ -37,51 +41,49 @@ def createTwoParticleData(opData):
 	# Antisymmetric spatial wavefunctions D (<a,b|V|cd>)
 
 	# Matrix A
+	sys.stdout.write("> mat A\r")
 	A=np.zeros((n,n))
 	for i in range (n):
 		for j in range(n):
-			# TODO I think this is wrong
-			A[i,j]=getMatrixElement(dx, X, SP_EV[i, :], SP_EV[i, :], SP_EV[j, :], SP_EV[j, :])
-			# A[i,j]=getMatrixElement(dx, X, SP_EV[:, i], SP_EV[:, i], SP_EV[:,j], SP_EV[:, j])
+			vi = SP_EV[:, i]
+			vj = SP_EV[:, j]
+			A[i, j] = matrixElement.doCalculation(vi, vi, vj, vj)
 
 	# Matrix B und Matrix B transponiert 
+	sys.stdout.write("> mat B\r")
 	L=int(1/2*n*(n-1))
 	B=np.zeros((L, n))
 
 	for i in range(n):
 		for j in range(L):
-			a=int(I[j, 0])
-			b=int(I[j, 1])
-			# TODO I think this is wrong			
-			B[j, i]=np.sqrt(2)*getMatrixElement(dx, X, SP_EV[a, :], SP_EV[b,:],SP_EV[i, :], SP_EV[i, :] )
-			# B[j, i]=np.sqrt(2)*getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:,i], SP_EV[:,i] )
+			va = SP_EV[:, int(I[j, 0])]
+			vb = SP_EV[:, int(I[j, 1])]
+			vi = SP_EV[:, i]
+			B[j, i] = _SQRT2 * matrixElement.doCalculation(va, vb, vi, vi)
 
 	# Matrix C und D: 
 	C=np.zeros((L, L))
 	D=np.zeros((L, L))
 
 	for i in range(L):
-		print(i, "of", L)
+		sys.stdout.write("> mat C&D: %d of %d\r" % (i, L))
 		for j in range(i+1):
-			a=int(I[i, 0])
-			b=int(I[i, 1])
-			c=int(I[j, 0])
-			d=int(I[j, 1])
-			# TODO I think this is wrong
-			PartA=getMatrixElement(dx, X, SP_EV[a, :], SP_EV[b, :],SP_EV[c, :], SP_EV[d, :])+getMatrixElement(dx, X, SP_EV[b,:], SP_EV[a,:],SP_EV[d,:], SP_EV[c,:])
-			PartB=getMatrixElement(dx, X, SP_EV[a,:], SP_EV[b,:],SP_EV[d,:], SP_EV[c,:])+getMatrixElement(dx, X, SP_EV[b, :], SP_EV[a,:],SP_EV[c,:], SP_EV[d,:])
+			va = SP_EV[:, int(I[i, 0])]
+			vb = SP_EV[:, int(I[i, 1])]
+			vc = SP_EV[:, int(I[j, 0])]
+			vd = SP_EV[:, int(I[j, 1])]
+			PartA = matrixElement.doCalculation(va, vb, vc, vd) + matrixElement.doCalculation(vb, va, vd, vc)
+			PartB = matrixElement.doCalculation(va, vb, vd, vc) + matrixElement.doCalculation(vb, va, vc, vd)
+			C[i,j] = 1/2 * (PartA+PartB)
+			C[j,i] = C[i,j]
+			D[i,j] = 1/2 * (PartA-PartB)
+			D[j,i] = D[i,j]
 
-			# PartA=getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:, c], SP_EV[:,d])+getMatrixElement(dx, X, SP_EV[:,b], SP_EV[:,a],SP_EV[:,d], SP_EV[:,c])
-			# PartB=getMatrixElement(dx, X, SP_EV[:,a], SP_EV[:,b],SP_EV[:,d], SP_EV[:,c])+getMatrixElement(dx, X, SP_EV[:,b], SP_EV[:,a],SP_EV[:,c], SP_EV[:,d])
-			C[i,j]=1/2*(PartA+PartB)
-			C[j,i]=C[i,j]
-			D[i,j]=1/2*(PartA-PartB)
-			D[j,i]=D[i,j]
-
+	sys.stdout.write("> setup main mat       \r")
 	# Eigenenergien der Einteilchen kombiniert 
 
-	Energies=np.zeros( n**2)
-	for i in range(n): 
+	Energies=np.zeros(n**2)
+	for i in range(n):
 		Energies[ i]=2*SP_EE[i]
 	for i in range(L): 
 		a=int(I[i, 0])
@@ -103,10 +105,12 @@ def createTwoParticleData(opData):
 	MatrixAll=MatrixAll+MatrixEnergies
 
 	# Berechne die Eigenwerte und Eigenvektoren des Problems 
+	sys.stdout.write("> diagonalizing \r")
 	[Eigenenergies, Eigenvectors]=np.linalg.eig(MatrixAll) # Eigenvalues and eigenvectors 
+	order = np.argsort(Eigenenergies)	
 
 	#Transform the eigenvectors back to the product state basis
-
+	sys.stdout.write("> setup product basis\r")
 	Eigenvectors_Productbasis = np.zeros((n**2,n**2))
 	
 	#Z is the Matrix of the basis change from the product basis to the singlet/triplet-basis
@@ -115,11 +119,11 @@ def createTwoParticleData(opData):
 		if(i<n):
 			Z[i,i]=1
 		elif(i<n+L):
-			Z[i,i]=1/np.sqrt(2)
-			Z[i,i+L]=1/np.sqrt(2)
+			Z[i,i]=1/_SQRT2
+			Z[i,i+L]=1/_SQRT2
 		else:
-			Z[i,i]=(-1)/np.sqrt(2)
-			Z[i,i-L]=1/np.sqrt(2)
+			Z[i,i]=(-1)/_SQRT2
+			Z[i,i-L]=1/_SQRT2
 
 	#Eigenvectors are the eigenvectors in the singlet/triplet-basis, so the basis transformation Z gives the eigenvectors in the product basis.
 	Eigenvectors_Productbasis = np.dot(Eigenvectors, Z)
@@ -135,5 +139,6 @@ def createTwoParticleData(opData):
 			else:
 				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1+L,:]				
 	
-
-	return [Eigenenergies, Q]
+	sys.stdout.write("> sorting by energies\r")
+	return [np.take(Eigenenergies, order), np.take(Q, order, axis=2)]
+	# return [Eigenenergies, Q]
