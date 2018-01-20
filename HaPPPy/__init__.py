@@ -208,9 +208,14 @@ def main(argv=None):
                                                     )
         # Plot the simulations.
         # 1st plot: time development of propabilities
-        sim_p.quickPlot(xlabel="t", ylabel="P")
+        sim_p.quickPlot(xlabel="t", ylabel="P",
+                        xunit_symbol="ps",
+                       )
         # 2nd plot: time development of netto current
-        sim_cur.quickPlot(xlabel="t", ylabel="I",legend=["$I^L$","$I^R$"])
+        sim_cur.quickPlot(xlabel="t", ylabel="I"
+                          xunit_symbol="ps", yunit_symbol="$e$",
+                          legend=["$I^L$","$I^R$"],
+                         )
 
 
     return 0
