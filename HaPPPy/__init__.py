@@ -12,8 +12,8 @@
 The HaPPPy program
 ==================
 
-The **Ha**\ mburg **P**\ rogrammier **P**\ rojekt **Py**\ thon is the program written by the 
-students of the course *66-527 Proseminar: Programmierprojekt* at the University of Hamburg. 
+The **Ha**\ mburg **P**\ rogrammier **P**\ rojekt **Py**\ thon is the program written by the
+students of the course *66-527 Proseminar: Programmierprojekt* at the University of Hamburg.
 The program serves to simulate various properties of quantum dots.
 
 """
@@ -33,13 +33,13 @@ from HaPPPy.MasterEquation import MasterEquationSolver
 
 __version__ = "0.0.1"
 
-"""The main function of HaPPPy, which executed the code. 
+"""The main function of HaPPPy, which executed the code.
 
 Right now, HaPPPy does not require any command line variables
 """
 
 def main(argv=None):
-    """The main function of HaPPPy, which executed the code. 
+    """The main function of HaPPPy, which executed the code.
 
     Args:
        argv, the command line arguments.
@@ -61,7 +61,7 @@ def main(argv=None):
 
     .. warning::
 
-      This function requires Python version 3.0.0 or higher. 
+      This function requires Python version 3.0.0 or higher.
       It raises a RuntimeError when used with Python 2 interpreter.
 
     """
@@ -122,7 +122,7 @@ def main(argv=None):
     twobodydatapath = 'data_group2.hdf5'
     dataFile = h5py.File(twobodydatapath, "w")
     dataSet_calcInfo = dataFile.create_dataset("TwoBodyEigenvalues", data=TwoBodyEigenvalues)
-    dataSet_eigvalues = dataFile.create_dataset("TwoBodyEigenvectors", data=TwoBodyEigenvectors)  
+    dataSet_eigvalues = dataFile.create_dataset("TwoBodyEigenvectors", data=TwoBodyEigenvectors)
     dataFile.close()
 
     # TODO Group 2 or Group 3: Read two body data from hdf5
@@ -131,7 +131,7 @@ def main(argv=None):
     TwoBodyEigenvectors = file["TwoBodyEigenvectors"][:]
     file.close()
 
-    # TODO Group 3 or Group 4: Make an interface between both modules. 
+    # TODO Group 3 or Group 4: Make an interface between both modules.
     #                          How do the transmission coefficients get into the RateCalculator
     #                          Maybe think of function pointers
     Transmission = TransmissionCalculator()
@@ -143,7 +143,7 @@ def main(argv=None):
 
     # TODO Group 4: There seems to be a problem with the Fermin function
     # TODO Group 4 and Group 5: Fix the interface between both modules
-    #                           There is no common way to transfer the rates 
+    #                           There is no common way to transfer the rates
     RateCal = RateCalculator()
     Gamma_L, Gamma_R = Rates.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
                                                                   muL, muR, T, V, TwoBodyEigenvectors, Transmission, DensityofStates)
