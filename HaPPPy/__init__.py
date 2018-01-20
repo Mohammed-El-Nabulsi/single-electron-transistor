@@ -168,6 +168,18 @@ def main(argv=None):
     if verbose: print("BCond = " + str(BCond))
     if verbose: print("Gamma_L =\n" + str(Gamma_L))
     if verbose: print("Gamma_R =\n" + str(Gamma_R))
+
+    # Store input values to preserve the context.
+    datapath_master = 'data/group5.hdf5'
+    with h5py.File(datapath_master, "w") as f:
+        f.create_dataset("Epsilon", data=Epsilon)
+        f.create_dataset("n_one", data=n_one)
+        f.create_dataset("n_two", data=n_two)
+        f.create_dataset("n_tot", data=n_tot)
+        f.create_dataset("BCond", data=BCond)
+        f.create_dataset("Gamma_L", data=Gamma_L)
+        f.create_dataset("Gamma_R", data=Gamma_R)
+
     # Calculate static or dynamic solution(s).
     mes = HaPPPy.MasterEquation.MasterEquationSolver()
     if BCond == "static":
@@ -179,6 +191,10 @@ def main(argv=None):
                                                              )
         print("(P_stat_ij) =\n", stat_ps)
         print("(I^k_stat_i) = \n", stat_curs)
+        # Store output values.
+        with h5py.File(datapath_master, "w") as f:
+            f.create_dataset("stat_ps", data=stat_ps)
+            f.create_dataset("stat_curs", data=stat_curs)
     else:
         # A simulation is requested.
         if verbose: print("mode = DYNAMIC")
@@ -199,6 +215,9 @@ def main(argv=None):
             P_0 = np.array(BCond)
         P_0 = P_0 / sum(P_0)
         if verbose: print("P_0 =\n" + str(P_0))
+        # Store P_0 to preserve context.
+        with h5py.File(datapath_master, "w") as f:
+            f.create_dataset("P_0", data=P_0)
         # Calculate the simulation.
         sim_p, sim_cur = mes.simulateDynamicSloution(DT, TMax,
                                                      P_0,
@@ -216,6 +235,9 @@ def main(argv=None):
                           xunit_symbol="ps", yunit_symbol="$e$",
                           legend=["$I^L$","$I^R$"],
                          )
-
+        # Store output values.
+        with h5py.File(datapath_master, "w") as f:
+            f.create_dataset("sim_p", data=sim_p)
+            f.create_dataset("sim_cur", data=sim_cur)
 
     return 0
