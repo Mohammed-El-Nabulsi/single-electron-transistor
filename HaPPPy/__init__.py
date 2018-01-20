@@ -156,6 +156,7 @@ def main(argv=None):
     n_one = len(OneBodyEigenvalues)
     n_two = len(TwoBodyEigenvalues)
     n_tot = 1 + n_one + n_two
+    ns = [1, n_one, n_two]
     BCond = configdata["BCond"]
     Epsilon = configdata["Epsilon"]
     if Epsilon == "default":
@@ -173,6 +174,7 @@ def main(argv=None):
         # Static solutions are requested.
         if verbose: print("mode = STATIC")
         stat_ps, stat_curs = mes.calculateStationarySloutions(Gamma_L, Gamma_R,
+                                                              ns,
                                                               verbose=verbose,
                                                              )
         print("(P_stat_ij) =\n", stat_ps)
@@ -201,6 +203,7 @@ def main(argv=None):
         sim_p, sim_cur = mes.simulateDynamicSloution(DT, TMax,
                                                      P_0,
                                                      Gamma_L, Gamma_R,
+                                                     ns,
                                                      verbose=verbose,
                                                     )
         # Plot the simulations.

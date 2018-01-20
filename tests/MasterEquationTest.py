@@ -47,14 +47,15 @@ class MasterEquationTestSuite(unittest.TestCase):
             # set-up a reasonable Γ-matrix
             Γ_L = np.array([[0, a, 0], [0, 0, 0], [0, 0, 0]])
             Γ_R = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+            ns = [1, 2]
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([p0, p1, p2])
             # simulate
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
-                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                   Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
             stat_ps, stat_curs = mes.calculateStationarySloutions(
-                                    Γ_L, Γ_R, verbose=verbose
+                                    Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
@@ -96,14 +97,15 @@ class MasterEquationTestSuite(unittest.TestCase):
             # set-up a reasonable Γ-matrix
             Γ_L = np.array([[0, a], [0,  0]])
             Γ_R = f * Γ_L.transpose()
+            ns = [1, 1]
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([p0, p1])
             # simulate
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
-                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                   Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
             stat_ps, stat_curs = mes.calculateStationarySloutions(
-                                    Γ_L, Γ_R, verbose=verbose
+                                    Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
@@ -143,15 +145,16 @@ class MasterEquationTestSuite(unittest.TestCase):
             # set-up a reasonable Γ-matrix
             Γ_L = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
             Γ_R = 2 * Γ_L
+            ns = [1] * n
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([i for i in range(n)])
             P_0 = P_0 / sum(P_0)
             # simulate
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
-                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                   Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
             stat_ps, stat_curs = mes.calculateStationarySloutions(
-                                    Γ_L, Γ_R, verbose=verbose
+                                    Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
@@ -187,15 +190,16 @@ class MasterEquationTestSuite(unittest.TestCase):
             # set-up a reasonable Γ-matrix
             Γ_L = np.zeros((n, n))
             Γ_R = np.zeros((n, n))
+            ns = [1] * n
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([i for i in range(n)])
             P_0 = P_0 / sum(P_0)
             # simulate
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
-                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                   Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
             stat_ps, stat_curs = mes.calculateStationarySloutions(
-                                    Γ_L, Γ_R, verbose=verbose
+                                    Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
@@ -231,6 +235,7 @@ class MasterEquationTestSuite(unittest.TestCase):
             # set-up a reasonable Γ-matrix
             Γ_L = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
             Γ_R = 2 * Γ_L
+            ns = [1] * n
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([i for i in range(n)])
             P_0 = P_0 / sum(P_0)
@@ -238,10 +243,10 @@ class MasterEquationTestSuite(unittest.TestCase):
             mes = HaPPPy.MasterEquation.MasterEquationSolver(ε=ε)
             # simulate
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
-                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                   Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
             stat_ps, stat_curs = mes.calculateStationarySloutions(
-                                    Γ_L, Γ_R, verbose=verbose
+                                    Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
@@ -270,15 +275,16 @@ class MasterEquationTestSuite(unittest.TestCase):
             # set-up a reasonable Γ-matrix
             Γ_L = np.array([[(i + j)/n**2 for j in range(n)] for i in range(n)])
             Γ_R = 2 * Γ_L
+            ns = [1] * n
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([i for i in range(n)])
             P_0 = P_0 / sum(P_0)
             # simulate
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
-                                   Δt, t_max, P_0, Γ_L, Γ_R, verbose=verbose
+                                   Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
             stat_ps, stat_curs = mes.calculateStationarySloutions(
-                                    Γ_L, Γ_R, verbose=verbose
+                                    Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # check validity
             self.assertTrue(sim_tdp.valid())
