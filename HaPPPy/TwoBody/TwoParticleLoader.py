@@ -13,8 +13,8 @@ class TwoBodySpectrumData:
 	Fields available after initializing with 'open()' or 'init()':
 	file -- reference to the hdf5 file handle
 	energies -- dataset containing the energy eigenvalues in [meV] as floating point numbers: energies[i] stores the i-th eigenvalue
-	coeficients -- dataset containing the coeficient matrices: coeficients[i,:,:] contains the matrix for the i-th eigenvalue
-	m -- the number of eigenvalues/-functions
+	coeficients -- dataset containing the coeficient matrices: coeficients[i,k,l] contains the |k,l> product basis function entry in the coeficient matrix for the i-th eigenvalue
+	m -- the number of eigenvalues & matrices
 	n -- matrix size
 	"""
 	
@@ -37,7 +37,7 @@ class TwoBodySpectrumData:
 		
 		Arguments:
 		filename -- path to the file to store the data in (without the '.hsf5' ending)
-		m -- the number of eigenvalues
+		m -- the number of eigenvalues & matrices
 		n -- matrix size
 		"""
 		self.m = m

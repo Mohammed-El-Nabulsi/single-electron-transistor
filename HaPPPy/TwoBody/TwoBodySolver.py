@@ -22,7 +22,7 @@ class TwoBodySolver:
         obDataFile -- path to the file containing the one body data to use as input (filename without '.hdf5' ending)
         tbDataFile -- path to the file exporting the resulting two body data (filename without '.hdf5' ending)
         
-        Returns [E,Q], where E is an array of (scalar) eigen values and Q is an array of matrices of the shape [i,j,n], where Q[i,j,n] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function. These arrays do not have a special ordering, but Q[:,:,n] is the eigenvector belonging to E[n].
+        Returns [E,Q], where E is an array of (scalar) eigen values and Q is an array of matrices of the shape [n,i,j], where Q[n,i,j] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function. hese arrays are sorted by energy in ascending order, with Q[n,:,:] as the eigenvector belonging to E[n].
         """
         obData = SpectrumData()
         obData.open(obDataFile)
@@ -30,7 +30,7 @@ class TwoBodySolver:
         ev = result[0]
         Q = result[1]
         data = TwoBodySpectrumData()
-        data.init(tbDataFile, len(ev), len(Q[0,0,:]))
+        data.init(tbDataFile, len(ev), Q.shape[1])
         data.energies[:] = ev
         data.coeficients[:,:,:] = Q
         data.close()
