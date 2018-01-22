@@ -1,6 +1,6 @@
 import numpy as np
 
-from Fourier00 import Fourier
+from HaPPPy.Transmission.Modules.Fourier import Fourier
 
 from scipy.constants import codata
 
