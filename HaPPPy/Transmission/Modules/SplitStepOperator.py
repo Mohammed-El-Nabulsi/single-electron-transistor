@@ -5,8 +5,8 @@ from Fourier00 import Fourier
 from scipy.constants import codata
 
 dt = 10**(2)
-me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to meV
-hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10 meV fm
+me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to meV/c^2
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10*fs*millielectronvolts
 
 
 class Split_Step_Operator():
