@@ -1,6 +1,8 @@
 #Input: energy in meV. internal calculations in meV and 10 femtoseconds.
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
 
 from scipy.constants import codata
 
@@ -21,9 +23,9 @@ a = np.sqrt(me)/hbar
 #Main
 
 #set testparameters
-barriere = np.array([1,1,1,1,1])
+barriere = np.array([2,2,2,2,2])
 dy = 1/2 #Abstand zwischen zwei sample points
-energy = 1/100
+energy = 1/3
 
 #testing A_Potential00
 
@@ -59,7 +61,7 @@ gauss = GaussianWave(positions,gauss_symmetry_point,gauss_width,energy)
 print(gauss.k0)
 #print(gauss.x_grid.size)
 #print(gauss.x_probability)
-gauss.plot_x_package()
+#gauss.plot_x_package()
 #plt.savefig(GaussPlot)
 #gauss_package = gauss.x_package
 #print(gauss_package)
@@ -86,27 +88,104 @@ fourier = Fourier(positions)
 
 #Anm.: Fourier Trafo des Gausspaktes ist anscheiend wieder Gauss, aber k-werte und amplithuden stimmen keinesfalls!
 
+#Split Step Algorithm testing
 splitstep = Split_Step_Operator(positions,pot)
-a = splitstep.first_step(gauss.x_package)
-
-indices = np.arange(0,150,1)
-
-psi = gauss.x_package
-for i in indices:
-    
-    i = i+1
-    psi = splitstep.first_step(psi)
-#    psi21 =  np.multiply(psi,psi.conj()).real
-#    plt.plot(fourier.k,psi21)
+#a = splitstep.first_step(gauss.x_package)
+#
+#indices = np.arange(0,200,1)
+#
+#psi = gauss.x_package
+#for i in indices:
+#    
+#    i = i+1
+#    psi = splitstep.first_step(psi)
+##    psi21 =  np.multiply(psi,psi.conj()).real
+##    plt.plot(fourier.k,psi21)#    plt.show()
+#    
+#    psi = splitstep.steps(psi)
+#    psi = splitstep.steps(psi)
+#    psi = splitstep.steps(psi)
+#    psi = splitstep.steps(psi)
+#    
+#    psi = splitstep.final_step(psi)
+#
+#    psi2 = np.multiply(psi,psi.conj()).real
+#    plt.plot(positions, psi2,positions,0.1*pot)
+#    plt.xlabel('x')
+#    plt.ylabel('$|\Psi|^2$')
+#    
 #    plt.show()
-    
-    psi = splitstep.steps(psi)
-    psi = splitstep.steps(psi)
-    psi = splitstep.steps(psi)
-    psi = splitstep.steps(psi)
-    
-    psi = splitstep.final_step(psi)
+    #plt.savefig('i.png', bbox_inches='tight')
 
-    psi2 = np.multiply(psi,psi.conj()).real
-    plt.plot(positions, psi2,positions,0.1*pot)
-    plt.show()
+    
+#done. everything wirks fine here!
+    
+
+
+print(positions.size)
+#crrating an dynamic plot
+   
+fig, ax = plt.subplots()
+line, = ax.plot(positions,gauss.x_package) #np.random.rand(10)
+ax.set_ylim(0, 0.35)
+#ax.set_xlim([0,positions[-1]])
+
+#        plt.plot(positions, psi2,positions,0.1*pot)
+plt.xlabel('x')
+plt.ylabel('$|\Psi|^2$')
+
+def update(data):
+    line.set_ydata(data)
+    return line,
+
+
+def data_gen():
+    indices = np.arange(0,1000,1)
+    psi = gauss.x_package
+    for i in indices:
+        
+        i = i+1
+        psi = splitstep.first_step(psi)
+
+        psi = splitstep.steps(psi)
+        
+        psi = splitstep.final_step(psi)
+    
+        psi2 = np.multiply(psi,psi.conj()).real
+
+        yield psi2
+
+ani = animation.FuncAnimation(fig, update, data_gen, interval=10)
+plt.plot(positions,0.1*pot)
+plt.show()
+
+
+#
+#"""
+#A simple example of an animated plot
+#"""
+##import numpy as np
+##import matplotlib.pyplot as plt
+##import matplotlib.animation as animation
+#
+#fig, ax = plt.subplots()
+#
+#x = positions
+#line, = ax.plot(x, np.sin(x))
+#
+#
+#def animate(i):
+#    
+#    
+#    line.set_ydata(np.sin(x + i/10.0))  # update the data
+#    return line,
+#
+#
+## Init only required for blitting to give a clean slate.
+#def init():
+#    line.set_ydata(np.ma.array(x, mask=True))
+#    return line,
+#
+#ani = animation.FuncAnimation(fig, animate, np.arange(1, 200), init_func=init,
+#                              interval=25, blit=True)
+#plt.show()
