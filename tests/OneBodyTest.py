@@ -16,48 +16,105 @@ class OneBodyTestSuite(unittest.TestCase):
 
     def test_OneBody_Harmonic_kinetic(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
-        kin_mat, self.n, i = OBSolver.calcualteHarmonicPotential(0)
+        _,_,_,kin_mat,_ = OBSolver.calcualteHarmonicPotential(0)
         """ check the kin Matrix of the harmonic potential
             Confirm that all matrix elements are positive"""
-        lowest_value_harmonic = np.min(kin_mat)
-        print ("The Element with the lowest value in your kinetic matrix in the box potential are:", lowest_value_harmonic)
-        if lowest_value_harmonic > 0:
-            print("The kinetic Matrix in your harmonic potential is correct.")
-        else:
-            print ("Your make a mistake in your calculation of your kinetic matrix in your harmonic potential")
+        diagonalarray_harm_kin_main = np.diagonal(kin_mat, 0)
+        if np.all (diagonalarray_harm_kin_main > 0):
+            print("The elements of the kinetic matrix in the harmonic potential make sense")
+        else :
+            print("The elements of the kinetic matrix in the harmonic potential doesn't make sense")
+        diagonalarray_harm_kin_plusone = np.diagonal(kin_mat,1)
+        self.assertTrue (np.all(diagonalarray_harm_kin_plusone == -1),msg = "Your kinetic matrix in your harmonic potential is false")
+        
+        diagonalarray_harm_kin_minusone = np.diagonal(kin_mat,-1)
+        self.assertTrue (np.all(diagonalarray_harm_kin_minusone == -1), msg ="Your kinetic matrix in your harmonic potential is false")
+
 
     def test_OneBody_Box_kinetic(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
-        kin_mat, self.n, i = OBSolver.calculateBoxPotential(0)
+        _,_,_,kin_mat,_ = OBSolver.calculateBoxPotential(0)
         """ check the kin Matrix of the box potential
         Confirm that all matrix elements are positive"""
-        lowest_value_box = np.min(kin_mat)
-        print ("The Element with the lowest value in your kinetic matrix in the box potential are:", lowest_value_box)
-        if lowest_value_box > 0:
-            print("The kinetic Matrix in your box potential is correct.")
-        else:
-            print ("Your make a mistake in your calculation of your kinetic matrix in your box potential")
-
+        diagonalarray_box_kin_main = np.diagonal(kin_mat, 0)
+        if np.all (diagonalarray_box_kin_main > 0):
+            print("The elements of the kinetic matrix in the box potential make sense")
+        else :
+            print("The elements of the kinetic matrix in the box potential doesn't make sense")
+        diagonalarray_box_kin_plusone = np.diagonal(kin_mat,1)
+        self.assertTrue (np.all(diagonalarray_box_kin_plusone == -1),msg = "Your kinetic matrix in your box potential is false")
+        
+        diagonalarray_box_kin_minusone = np.diagonal(kin_mat,-1)
+        self.assertTrue (np.all(diagonalarray_box_kin_minusone == -1), msg ="Your kinetic matrix in your box potential is false")
 
     def test_OneBody_Gauss_kinetic(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
-        kin_mat, self.n, i = OBSolver.calcualteGaussPotential(0,1)
+        _,_,_,kin_mat,_ = OBSolver.calcualteGaussPotential(0,1)
         """ check the kin Matrix of the gauss potential
             Confirm that all matrix elements are positive"""
-        lowest_value_gauss = np.min(kin_mat)
-        print ("The Element with the lowest value in your kinetic matrix in the gauss potential are:", lowest_value_gauss)
-        if lowest_value_gauss > 0:
-            print("The kinetic Matrix in your gauss potential is correct.")
-        else:
-            print ("Your make a mistake in your calculation of your kinetic matrix in your gauss potential")
+        diagonalarray_gauss_kin_main = np.diagonal(kin_mat, 0)
+        if np.all (diagonalarray_gauss_kin_main > 0):
+            print("The elements of the kinetic matrix in the gauss potential make sense")
+        else :
+            print("The elements of the kinetic matrix in the gauss potential doesn't make sense")
+        diagonalarray_gauss_kin_plusone = np.diagonal(kin_mat,1)
+        self.assertTrue (np.all(diagonalarray_gauss_kin_plusone == -1),msg = "Your kinetic matrix in your gauss potential is false")
+        
+        diagonalarray_gauss_kin_minusone = np.diagonal(kin_mat,-1)
+        self.assertTrue (np.all(diagonalarray_gauss_kin_minusone == -1), msg ="Your kinetic matrix in your gauss potential is false")
+
+
+    def test_OneBody_Harmonic_potential(self):
+        OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
+        _,_,_,_,pot_mat = OBSolver.calcualteHarmonicPotential(0)
+        diagonalarray_main = np.diagonal(pot_mat, 0)
+        if np.all (diagonalarray_main > 0):
+            print("The elements of the potential matrix in the harmonic potential make sense")
+        else :
+            print("The elements of the potential matrix in the harmonic potential doesn't make sense")
+        diagonalarray_plusone = np.diagonal(pot_mat,1)
+        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "Your potential matrix is false")
+        
+        diagonalarray_minusone = np.diagonal(pot_mat,-1)
+        self.assertTrue (np.all(diagonalarray_minusone == 0), msg ="Your potential matrix is false")
+
+    def test_OneBody_Box_potential(self):
+        OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
+        _,_,_,_,pot_mat = OBSolver.calculateBoxPotential(0)
+        diagonalarray_main = np.diagonal(pot_mat, 0)
+        if np.all (diagonalarray_main > 0):
+            print("The elements of the potential matrix in the box potential make sense")
+        else :
+            print("The elements of the potential matrix in the box potential doesn't make sense")
+        diagonalarray_plusone = np.diagonal(pot_mat,1)
+        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "Your potential matrix is false")
+        
+        diagonalarray_minusone = np.diagonal(pot_mat,-1)
+        self.assertTrue (np.all(diagonalarray_minusone == 0), msg ="Your potential matrix is false")
+
+    def test_OneBody_Gauss_potential(self):
+        OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
+        _,_,_,_,pot_mat = OBSolver.calcualteGaussPotential(0,1)
+        diagonalarray_main = np.diagonal(pot_mat, 0)
+        if np.all (diagonalarray_main > 0):
+            print("The elements of the potential matrix in the gauss potential make sense")
+        else :
+            print("The elements of the potential matrix in the gauss potential doesn't make sense")
+        diagonalarray_plusone = np.diagonal(pot_mat,1)
+        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "Your potential matrix is false")
+        
+        diagonalarray_minusone = np.diagonal(pot_mat,-1)
+        self.assertTrue (np.all(diagonalarray_minusone == 0), msg ="Your potential matrix is false")
+
 
 
     def test_OneBody_calcualteHarmonicPotential(self):
         """ Checks a dummy Calculation of an Harmonic Potential
                 This code tests the deviation of the eigenvalues.
+                And confirm that the eigenvalues are sorted.
         """
         OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
-        la, vabcd, i = OBSolver.calcualteHarmonicPotential(0)
+        la, vabcd, i,_,_ = OBSolver.calcualteHarmonicPotential(0)
 
         zeroeigenvalue = la [0]
         firsteigenvalue = la[1]
@@ -76,6 +133,13 @@ class OneBodyTestSuite(unittest.TestCase):
         else :
             print("The Eigenvalues are correct, well done!")
         print ("The deviation of the Eigenvalues are:", finalcalculation_eigenvalues)
+
+#    def test_Wafefunktion(self)
+#        OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
+#        waves =
+#        for z in range (m)
+#            wave = waves [:,z]
+#            self.assertAlmostEqual(np.inner(wafe * wafe) * dx ,1.0 msg "wrong normalized")
 
 
 if __name__ == '__main__':

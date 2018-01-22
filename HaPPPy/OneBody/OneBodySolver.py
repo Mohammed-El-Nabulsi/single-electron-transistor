@@ -139,7 +139,7 @@ class OneBodySolver:
         Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
-        return la, v_norm , Info
+        return la, v_norm , Info, kin_mat, pot_mat
 			
     # possible input factor but we defined factor already as unit_pot
     def calcualteHarmonicPotential(self, intersection):
@@ -227,7 +227,7 @@ class OneBodySolver:
         Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
-        return la, v_norm , Info
+        return la, v_norm , Info, kin_mat, pot_mat
         
         
     def calcualteGaussPotential(self, A, sigma):
@@ -315,7 +315,7 @@ class OneBodySolver:
         Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(False)], \
         ["GaussPotential",str(True)],["BoxPotential",str(False)]]).astype('S9')
         
-        return la, v_norm, Info
+        return la, v_norm, Info, kin_mat, pot_mat
 
 
     def exportData(self, la, v_norm, info, path="data_group1"):
