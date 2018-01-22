@@ -12,7 +12,7 @@ class OneBodyTestSuite(unittest.TestCase):
         """ Checks wether the One Body module exists
         """
         self.assertTrue(hasattr(HaPPPy, 'OneBody'))
-        print("One Body module exists" )
+        print("\n""One Body module exists""\n" )
 
     def test_OneBody_Harmonic_kinetic(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
@@ -21,14 +21,14 @@ class OneBodyTestSuite(unittest.TestCase):
             Confirm that all matrix elements are positive"""
         diagonalarray_harm_kin_main = np.diagonal(kin_mat, 0)
         if np.all (diagonalarray_harm_kin_main > 0):
-            print("The elements of the kinetic matrix in the harmonic potential make sense")
+            print("\n""The elements of the kinetic matrix in the harmonic potential make sense""\n")
         else :
-            print("The elements of the kinetic matrix in the harmonic potential doesn't make sense")
+            print("\n""The elements of the kinetic matrix in the harmonic potential doesn't make sense""\n")
         diagonalarray_harm_kin_plusone = np.diagonal(kin_mat,1)
-        self.assertTrue (np.all(diagonalarray_harm_kin_plusone == -1),msg = "Your kinetic matrix in your harmonic potential is false")
+        self.assertTrue (np.all(diagonalarray_harm_kin_plusone == -1),msg = "\n""Your kinetic matrix in your harmonic potential is false""\n")
         
         diagonalarray_harm_kin_minusone = np.diagonal(kin_mat,-1)
-        self.assertTrue (np.all(diagonalarray_harm_kin_minusone == -1), msg ="Your kinetic matrix in your harmonic potential is false")
+        self.assertTrue (np.all(diagonalarray_harm_kin_minusone == -1), msg ="\n""Your kinetic matrix in your harmonic potential is false""\n")
 
 
     def test_OneBody_Box_kinetic(self):
@@ -38,14 +38,14 @@ class OneBodyTestSuite(unittest.TestCase):
         Confirm that all matrix elements are positive"""
         diagonalarray_box_kin_main = np.diagonal(kin_mat, 0)
         if np.all (diagonalarray_box_kin_main > 0):
-            print("The elements of the kinetic matrix in the box potential make sense")
+            print("\n""The elements of the kinetic matrix in the box potential make sense""\n")
         else :
-            print("The elements of the kinetic matrix in the box potential doesn't make sense")
+            print("\n""The elements of the kinetic matrix in the box potential doesn't make sense""\n")
         diagonalarray_box_kin_plusone = np.diagonal(kin_mat,1)
-        self.assertTrue (np.all(diagonalarray_box_kin_plusone == -1),msg = "Your kinetic matrix in your box potential is false")
+        self.assertTrue (np.all(diagonalarray_box_kin_plusone == -1),msg = "\n""Your kinetic matrix in your box potential is false""\n")
         
         diagonalarray_box_kin_minusone = np.diagonal(kin_mat,-1)
-        self.assertTrue (np.all(diagonalarray_box_kin_minusone == -1), msg ="Your kinetic matrix in your box potential is false")
+        self.assertTrue (np.all(diagonalarray_box_kin_minusone == -1), msg ="\n""Your kinetic matrix in your box potential is false""\n")
 
     def test_OneBody_Gauss_kinetic(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
@@ -54,14 +54,14 @@ class OneBodyTestSuite(unittest.TestCase):
             Confirm that all matrix elements are positive"""
         diagonalarray_gauss_kin_main = np.diagonal(kin_mat, 0)
         if np.all (diagonalarray_gauss_kin_main > 0):
-            print("The elements of the kinetic matrix in the gauss potential make sense")
+            print("\n""The elements of the kinetic matrix in the gauss potential make sense""\n")
         else :
-            print("The elements of the kinetic matrix in the gauss potential doesn't make sense")
+            print("\n""The elements of the kinetic matrix in the gauss potential doesn't make sense""\n")
         diagonalarray_gauss_kin_plusone = np.diagonal(kin_mat,1)
-        self.assertTrue (np.all(diagonalarray_gauss_kin_plusone == -1),msg = "Your kinetic matrix in your gauss potential is false")
-        
+        self.assertTrue (np.all(diagonalarray_gauss_kin_plusone == -1),msg = "\n""Your kinetic matrix in your gauss potential is false""\n")
+
         diagonalarray_gauss_kin_minusone = np.diagonal(kin_mat,-1)
-        self.assertTrue (np.all(diagonalarray_gauss_kin_minusone == -1), msg ="Your kinetic matrix in your gauss potential is false")
+        self.assertTrue (np.all(diagonalarray_gauss_kin_minusone == -1), msg ="\n""Your kinetic matrix in your gauss potential is false""\n")
 
 
     def test_OneBody_Harmonic_potential(self):
@@ -69,42 +69,42 @@ class OneBodyTestSuite(unittest.TestCase):
         _,_,_,_,pot_mat = OBSolver.calcualteHarmonicPotential(0)
         diagonalarray_main = np.diagonal(pot_mat, 0)
         if np.all (diagonalarray_main > 0):
-            print("The elements of the potential matrix in the harmonic potential make sense")
+            print("\n""The elements of the potential matrix in the harmonic potential make sense""\n")
         else :
-            print("The elements of the potential matrix in the harmonic potential doesn't make sense")
+            print("\n""The elements of the potential matrix in the harmonic potential doesn't make sense""\n")
         diagonalarray_plusone = np.diagonal(pot_mat,1)
-        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "Your potential matrix is false")
+        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "\n""Your potential matrix is false""\n")
         
         diagonalarray_minusone = np.diagonal(pot_mat,-1)
-        self.assertTrue (np.all(diagonalarray_minusone == 0), msg ="Your potential matrix is false")
+        self.assertTrue (np.all(diagonalarray_minusone == 0), msg ="\n""Your potential matrix is false""\n")
 
     def test_OneBody_Box_potential(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
         _,_,_,_,pot_mat = OBSolver.calculateBoxPotential(0)
         diagonalarray_main = np.diagonal(pot_mat, 0)
         if np.all (diagonalarray_main > 0):
-            print("The elements of the potential matrix in the box potential make sense")
+            print("\n""The elements of the potential matrix in the box potential make sense""\n")
         else :
-            print("The elements of the potential matrix in the box potential doesn't make sense")
+            print("\n""The elements of the potential matrix in the box potential doesn't make sense""\n")
         diagonalarray_plusone = np.diagonal(pot_mat,1)
-        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "Your potential matrix is false")
+        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "\n""Your potential matrix is false""\n")
         
         diagonalarray_minusone = np.diagonal(pot_mat,-1)
-        self.assertTrue (np.all(diagonalarray_minusone == 0), msg ="Your potential matrix is false")
+        self.assertTrue (np.all(diagonalarray_minusone == 0), msg = "\n""Your potential matrix is false""\n")
 
     def test_OneBody_Gauss_potential(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
         _,_,_,_,pot_mat = OBSolver.calcualteGaussPotential(0,1)
         diagonalarray_main = np.diagonal(pot_mat, 0)
         if np.all (diagonalarray_main > 0):
-            print("The elements of the potential matrix in the gauss potential make sense")
+            print("\n""The elements of the potential matrix in the gauss potential make sense""\n")
         else :
-            print("The elements of the potential matrix in the gauss potential doesn't make sense")
+            print("\n""The elements of the potential matrix in the gauss potential doesn't make sense""\n")
         diagonalarray_plusone = np.diagonal(pot_mat,1)
-        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "Your potential matrix is false")
-        
+        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "\n""Your potential matrix is false""\n")
+
         diagonalarray_minusone = np.diagonal(pot_mat,-1)
-        self.assertTrue (np.all(diagonalarray_minusone == 0), msg ="Your potential matrix is false")
+        self.assertTrue (np.all(diagonalarray_minusone == 0), msg = "\n""Your potential matrix is false""\n")
 
 
 
@@ -126,20 +126,20 @@ class OneBodyTestSuite(unittest.TestCase):
         secondcalculation = (secondeigenvalue-firsteigenvalue)
         thirdcalculation = (thirdeigenvalue-secondeigenvalue)
         fourthcalculation = (fourtheigenvalue-thirdeigenvalue)
-        print("The Diffrence between the first eigenvalues are:",firstcalculation ,",", secondcalculation ,",", thirdcalculation ,",", fourthcalculation)
+        print("\n""The Diffrence between the first eigenvalues are:",firstcalculation ,",", secondcalculation ,",", thirdcalculation ,",", fourthcalculation)
         finalcalculation_eigenvalues =(fourthcalculation-thirdcalculation)
         if finalcalculation_eigenvalues > 1:
-            print("The Eigenvalues are wrong, your calculation is bullshit")
+            print("\n""The Eigenvalues are wrong, your calculation is bullshit""\n")
         else :
-            print("The Eigenvalues are correct, well done!")
-        print ("The deviation of the Eigenvalues are:", finalcalculation_eigenvalues)
+            print("\n""The Eigenvalues are correct, well done!""\n")
+        print ("\n""The deviation of the Eigenvalues are:", finalcalculation_eigenvalues,"\n")
 
-#    def test_Wafefunktion(self)
+#    def test_Wafefunktion(self):
 #        OBSolver = HaPPPy.OneBody.OneBodySolver(100, 3000)
-#        waves =
-#        for z in range (m)
-#            wave = waves [:,z]
-#            self.assertAlmostEqual(np.inner(wafe * wafe) * dx ,1.0 msg "wrong normalized")
+#        _, v_norm, _,_,_ = OBSolver.calcualteHarmonicPotential(0)
+#        for z in range 3000
+#            v_norm = waves [:,z]
+#        self.assertAlmostEqual((np.all(np.inner(v_norm, v_norm)) * 1/30),1.0 , msg ="wrong normalized")
 
 
 if __name__ == '__main__':
