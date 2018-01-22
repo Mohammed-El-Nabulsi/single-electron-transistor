@@ -41,7 +41,7 @@ class Fourier:
         plt.grid()
         plt.show()
        
-    def idft(self,F):
+    def idft(self,F):    #evtl hier den shift raus nehmen
         """
         Parameter
         ---------
