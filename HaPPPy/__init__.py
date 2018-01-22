@@ -19,6 +19,7 @@ The program serves to simulate various properties of quantum dots.
 """
 
 import sys
+import argparse
 import datetime
 import socket
 import getpass
@@ -85,13 +86,30 @@ def main(argv=None):
     print("###")
     print("################################################################################")
 
-    # parse passed commandline arguments
-    verbose = "-v" in argv
-    if verbose: print("Running in verbose mode."
-                     +"This is recommended for debuging only!")
+    # Constants.
+    default_path_config = 'config.json'
+
+    # Parse passed commandline arguments.
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose',
+                        action="store_true",
+                        help="print detailed information about each step of the calulations",
+                       )
+    parser.add_argument('-c', '--config',
+                        type=str,
+                        default=default_path_config,
+                        metavar="<PATH TO CONFIG FILE>",
+                        dest="path_config",
+                        help="defines path to the config file (see documentation)",
+                       )
+    args = parser.parse_args()
+
+    if args.verbose:
+        print("Running in VERBOSE mode ...")
+        print("Path to cofig file = \"" + str(args.path_config)+ "\"")
 
     # Loading config from json file
-    configdata = json.load(open('config.json'))
+    configdata = json.load(open(args.path_config))
 
     L = configdata["L"]
     N = configdata["N"]
