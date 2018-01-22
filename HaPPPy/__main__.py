@@ -5,4 +5,4 @@ import HaPPPy
 import sys
 
 if __name__ == '__main__':
-    HaPPPy.main()
+    HaPPPy.main(sys.argv)

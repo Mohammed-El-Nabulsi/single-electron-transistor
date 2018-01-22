@@ -27,21 +27,24 @@ class MasterEquationSolver:
 
     **1st Problem: Propabilities**
 
-    Let :math:`n \in \mathbb{N}` be the number of states of the particles in the
-    quantum dot. (It does not matter how many paricles are in a specific state.)
+    Let :math:`n_i \in \mathbb{N}` be the number of states of :math:`i`
+    particles in the quantum dot where :math:`i` runns from :math:`0` to
+    :math:`m` and :math:`n = \\sum_{i=0}^m n_i`.
     The propability of the system to be in state :math:`\\alpha \\in
     \\{1, \\dots n\\}` is called :math:`P_{\\alpha}(t)` which can variy with the
     time :math:`t`. They are summarized as a vector :math:`\\vec{P}(t)`.
     The rates for any such state to transit to any other state is represented as
-    :math:`\Gamma = \Gamma^L + \Gamma^R \in Mat(n, n, \mathbb{R}^+_0)` where
-    :math:`\Gamma_{\\alpha \\beta} \equiv \Gamma_{\\alpha \\rightarrow \\beta}`
-    denotes the rate from state :math:`\\alpha` to :math:`\\beta`. There are two
-    different matricies :math:`\\Gamma^L` and :math:`\\Gamma^R` to describe the
-    transitions whitch include exchanges of particles with the two reservoirs
-    (called *left* and *right*). Since for this problem only the total rates
-    matter they are added up. (They will be used in the second problem. For
-    relaxation procreeses a third matrix would be added but this module does not
-    support this.)
+    :math:`\Gamma = \Gamma^L + \Gamma^R + \Gamma^0 \in
+    Mat(n, n, \mathbb{R}^+_0)` where :math:`\Gamma_{\\alpha \\beta}
+    \equiv \Gamma_{\\alpha \\rightarrow \\beta}` denotes the rate from state
+    :math:`\\alpha` to :math:`\\beta`. There are two different matricies
+    :math:`\\Gamma^L` and :math:`\\Gamma^R` to describe the transitions whitch
+    include exchanges of particles with the two reservoirs
+    (called *left* and *right*). The third matrix :math:`\Gamma^0` is
+    *optional* and describes the rates for relaxation and stimualtion which do
+    not require any interaction with the reservoirs. Since for this problem only
+    the total rates matter they are added up. (The idividual rates are only
+    relevant to the second problem.)
 
     The time development of propabilities are derived from the master equation
     (a differential equation of first order with constant coefficients).
@@ -75,14 +78,14 @@ class MasterEquationSolver:
             \\begin{pmatrix}
                 \\Gamma_{11} & \\Gamma_{21} & \\dots  & \\Gamma_{n1} \\\\
                 \\Gamma_{12} & \\Gamma_{22} & \\dots  & \\Gamma_{n2} \\\\
-                \\vdots      & \\ddots      & \\vdots & \\vdots      \\\\
+                \\vdots      & \\vdots      & \\ddots & \\vdots      \\\\
                 \\Gamma_{1n} & \\Gamma_{2n} & \\dots  & \\Gamma_{nn}
             \\end{pmatrix}
             -
             \\begin{pmatrix}
                 \\sum^{n}_{\\beta = 1}{\\Gamma_{1 \\beta}} & 0 & \\dots & 0 \\\\
                 0 & \\sum^{n}_{\\beta = 1}{\\Gamma_{2 \\beta}} & \\dots & 0 \\\\
-                \\vdots & \\ddots & \\vdots & \\vdots \\\\
+                \\vdots & \\vdots & \\ddots & \\vdots \\\\
                 0 & 0 & \\dots & \\sum^{n}_{\\beta = 1}{\\Gamma_{n \\beta}}
             \\end{pmatrix}
         \\right) }_{:= \\Lambda}
@@ -91,12 +94,17 @@ class MasterEquationSolver:
         \\end{pmatrix}
 
     When time development is considered the solution to this differntial
-    equation becomes almost trivial when :math:`\\Lambda` is diagonalized:
-    Let :math:`\\vec{P}(t=0)` be an eigenvector of :math:`\\Lambda`. It's
-    solution is
+    equation is:
 
     .. math::
         \\vec{P}(t) = \\exp(\\Lambda t) \\cdot \\vec{P}(t=0)
+
+    This equation becomes almost trivial when :math:`\\Lambda` is diagonalized:
+    Let :math:`\\vec{v}_i(t=0)` be an eigenvector of :math:`\\Lambda` with
+    eigenvalue :math:`\\lambda_i`. It's solution is:
+
+    .. math::
+        \\vec{v}_i(t) = \\exp(\\lambda_i t) \\cdot \\vec{v}_i(t=0)
 
     Note that sationary solutions :math:`\\vec{P}_{stat,i}` have eigenvalues
     :math:`\\lambda_i = 0`. All other eigenvectors have eigenvalues
@@ -154,16 +162,18 @@ class MasterEquationSolver:
     .. math::
         \\sigma_{\\alpha \\rightarrow \\beta}
         =   \\begin{cases}
-                -1 & | \\text{ if the transition }
-                       \\alpha \\rightarrow \\beta
-                       \\text{ adds a particle}\\\\
-                 0 & | \\text{ if the transition }
-                       \\alpha \\rightarrow \\beta
-                       \\text{ adds or removes no particle}\\\\
                 +1 & | \\text{ if the transition }
                        \\alpha \\rightarrow \\beta
-                       \\text{ removes a particle}
+                       \\text{ adds a particle (*)}\\\\
+                 0 & | \\text{ if the transition }
+                       \\alpha \\rightarrow \\beta
+                       \\text{ adds or removes no particle (*)}\\\\
+                -1 & | \\text{ if the transition }
+                       \\alpha \\rightarrow \\beta
+                       \\text{ removes a particle (*)}
             \\end{cases}
+
+    (*) with respect to the left barrier.
 
     During the calculation it is assumed that the charge per particle is
     :math:`q = 1` which is equal to divide the given formulae by :math:`q`.
@@ -180,7 +190,7 @@ class MasterEquationSolver:
     (See HaPPPy.MasterEquation.Simulation for more details.)
 
     :example: .. code-block:: Python
-            :emphasize-lines: 1-2, 6-7, 9, 11-15
+            :emphasize-lines: 1-2, 6-8, 10, 12-16
 
             import HaPPPy
             import numpy as np
@@ -189,14 +199,15 @@ class MasterEquationSolver:
             # set-up a reasonable Γ-matrix
             Γ_L = np.array([[0, 0.5, 0.5], [0.5, 0, 0.5], [0.5, 0.5, 0]])
             Γ_R = np.array([[0, 0.0, 0.5], [0.0, 0, 0.5], [0.0, 0.5, 0]])
+            ns = [1, 2]
             # choose a legitimate start value for P_0 (P_0 = P(t=0))
             P_0 = np.array([0.9, 0.0, 0.1])
             # simulate
             Δt = 1
             t_max = 100
             mes = HaPPPy.MasterEquation.MasterEquationSolver()
-            sim_tdp, sim_cur = mes.simulateDynamicSloution(Δt, t_max, P_0, Γ_L, Γ_R)
-            stat_ps, stat_curs = mes.calculateStationarySloutions(Γ_L, Γ_R)
+            sim_tdp, sim_cur = mes.simulateDynamicSloution(Δt, t_max, P_0, Γ_L, Γ_R, ns)
+            stat_ps, stat_curs = mes.calculateStationarySloutions(Γ_L, Γ_R, ns)
             ## plot/print results
             # 1st plot: time development of propabilities
             sim_tdp.quickPlot(xlabel="t", ylabel="P")
@@ -209,9 +220,6 @@ class MasterEquationSolver:
         The relevant lines of code for the simulation to work are highlighted.
         To give a real live example and to demonstarte the usage of the result
         some code to plot the result is added.
-
-    .. TODO::
-        The algorithm might be easily extended to allow relaxation.
 
     """
     # Don't remove the last dot/paragrph since it is a workaround to shpinx's
@@ -256,6 +264,8 @@ class MasterEquationSolver:
 
     def calculateStationarySloutions(self,
                                      Γ_L, Γ_R,
+                                     ns,
+                                     Γ_0 = None,
                                      check_tolerance=True,
                                      verbose=False,
                                     ):
@@ -277,18 +287,32 @@ class MasterEquationSolver:
 
         :param Γ_L: Matrix containing the transition rates regarding electrons
                     tunneling trough the *left* barrier where
-                    :code:`Γ_L[i][j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
+                    :code:`Γ_L[i,j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_L: numpy.ndarray
         :param Γ_R: Matrix containing the transition rates regarding electrons
                     tunneling trough the *right* barrier where
-                    :code:`Γ_R[i][j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
+                    :code:`Γ_R[i,j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_R: numpy.ndarray
+        :param ns: List of numbers of states :math:`n_i` with the same number
+                   :math:`i` of electrons in inreasing order of :math:`i`:
 
-        :return: Returns stat_ps, stat_curs where
-                 :code:`stat_ps[i][j]` ≣ :math:`P_{stat,ij}` and
-                 :code:`stat_curs[i][k]` ≣ :math:`I^k_{stat,i}`.
+                   :code:`ns = [n_0, n_1, …, n_k]`
+                   ≣ :math:`(n_0, n_1, \\dots, n_k)`.
+
+                   E.g.
+                   :code:`ns = [<numer of empty states>, <number of one body states>, ...]`
+        :type ns: list(int)
+        :param Γ_0: Matrix containing the transition rates for relaxation or
+                    stimulation where
+                    :code:`Γ_0[i,j]` ≣ :math:`\Gamma^0_{i \\rightarrow j}`.
+                    Must be a ``nxn`` matrix. (optinal)
+        :type Γ_0: numpy.ndarray
+
+        :return: Returns :code:`stat_ps, stat_curs` where
+                 :code:`stat_ps[i,j]` ≣ :math:`P_{stat,ij}` and
+                 :code:`stat_curs[i,k]` ≣ :math:`I^k_{stat,i}`.
         :rtype: numpy.ndarray(float), numpy.ndarray(float)
         """
 
@@ -326,7 +350,7 @@ class MasterEquationSolver:
         # In this step the actual calculation happens.
 
         # Calculate the eigenvectors and eigenvalues of Λ.
-        Λ_evals, Λ_evecs = self.__calculateLambda(Γ_L, Γ_R,
+        Λ_evals, Λ_evecs = self.__calculateLambda(Γ_L, Γ_R, Γ_0,
                                                   check_tolerance,
                                                   verbose,
                                                  )
@@ -343,6 +367,7 @@ class MasterEquationSolver:
         # Γ_L and Γ_R are passed seperatly to preserve the information of
         # direction.
         stat_curs = self.__calculateStationaryCurrents(Γ_L, Γ_R,
+                                                       ns,
                                                        stat_ps,
                                                        verbose,
                                                       )
@@ -355,6 +380,8 @@ class MasterEquationSolver:
                                 Δt, t_max,
                                 P_0,
                                 Γ_L, Γ_R,
+                                ns,
+                                Γ_0 = None,
                                 check_tolerance=True,
                                 verbose=False,
                                ):
@@ -365,10 +392,10 @@ class MasterEquationSolver:
         Raises an exception of the type RuntimeError when the calculation must
         be abored due to bad or unreasonable parameters. If the simulation is
         aborded during the calculation process later on an incomplete answer is
-        still returned and can be check via the method :code:`valid()` (see
+        still returned and this can be check via the method :code:`valid()` (see
         HaPPPy.MasterEquation.Simulation.valid()). The invalid simulation
         contains all calculated datapoints up to the point in time where the
-        calculation failed. Leaving the tolverance value :math:`\\epsilon`
+        calculation failed. Leaving the tolverance of :math:`\\epsilon`
         is considered as a failure. E.g. it is assured that
         :math:`\\left| \\sum^n_{i=1} P_i - 1 \\right| < \\epsilon`.
 
@@ -380,14 +407,28 @@ class MasterEquationSolver:
         :type P_0: numpy.array or numpy.ndarray
         :param Γ_L: Matrix containing the transition rates regarding electrons
                     tunneling trough the *left* barrier where
-                    :code:`Γ_L[i][j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
+                    :code:`Γ_L[i,j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_L: numpy.ndarray
         :param Γ_R: Matrix containing the transition rates regarding electrons
                     tunneling trough the *right* barrier where
-                    :code:`Γ_R[i][j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
+                    :code:`Γ_R[i,j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_R: numpy.ndarray
+        :param ns: List of numbers of states :math:`n_i` with the same number
+                   :math:`i` of electrons in inreasing order of :math:`i`:
+
+                   :code:`ns = [n_0, n_1, …, n_k]`
+                   ≣ :math:`(n_0, n_1, \\dots, n_k)`.
+
+                   E.g.
+                   :code:`ns = [<numer of empty states>, <number of one body states>, ...]`
+        :type ns: list(int)
+        :param Γ_0: Matrix containing the transition rates for relaxation or
+                    stimulation where
+                    :code:`Γ_0[i,j]` ≣ :math:`\Gamma^0_{i \\rightarrow j}`.
+                    Must be a ``nxn`` matrix. (optinal)
+        :type Γ_0: numpy.ndarray
         :param t_max: Last point in time to be simulated. Must fulfil
                       :code:`t_max >= 0`.
         :type t_max: float
@@ -425,6 +466,19 @@ class MasterEquationSolver:
             raise RuntimeError("ε must be a positive number > 0."
                                + "\nε = " + str(self.ε)
                               )
+        # Check and warn if ns does not add up to n.
+        if sum(ns) != n:
+            raise RuntimeError("The total number of states must be "
+                               + str(n)
+                               + "."
+                               + "\n ns = "
+                               + str(ns)
+                               + "\n"
+                               + " Σ = "
+                               + str(sum(ns))
+                               + " != "
+                               + str(n)
+                              )
         # Check and warn if P_0 is not a nx1 matrix.
         if P_0.ndim != 2 or P_0.shape[1] != 1:
             raise RuntimeError("P_0 must be a "
@@ -434,8 +488,8 @@ class MasterEquationSolver:
                               )
         # Check and warn if Γ_L is not a nxn matrix with positive coeffiecents.
         if (Γ_L.ndim != 2
-            or Γ_L.shape[0] != P_0.shape[0]
-            or Γ_L.shape[1] != P_0.shape[0]
+            or Γ_L.shape[0] != n
+            or Γ_L.shape[1] != n
             or not (Γ_L >= 0).all()
            ):
             raise RuntimeError("Γ_L must be a "
@@ -445,14 +499,27 @@ class MasterEquationSolver:
                               )
         # Check and warn if Γ_R is not a nxn matrix with positive coeffiecents.
         if (Γ_R.ndim != 2
-            or Γ_R.shape[0] != P_0.shape[0]
-            or Γ_R.shape[1] != P_0.shape[0]
+            or Γ_R.shape[0] != n
+            or Γ_R.shape[1] != n
             or not (Γ_R >= 0).all()
            ):
             raise RuntimeError("Γ_R must be a "
                                + str(n) + "x" + str(n) +
                                " matrix with coefficients >= 0."
                                + "\nΓ_R = \n" + str(Γ_R)
+                              )
+        # Check and warn if Γ_0 is not a nxn matrix with positive coeffiecents.
+        # Γ_0 is optional!
+        if (Γ_0 != None and (Γ_0.ndim != 2
+                             or Γ_0.shape[0] != n
+                             or Γ_0.shape[1] != n
+                             or not (Γ_0 >= 0).all()
+                            )
+           ):
+            raise RuntimeError("Γ_0 must be a "
+                               + str(n) + "x" + str(n) +
+                               " matrix with coefficients >= 0."
+                               + "\nΓ_0 = \n" + str(Γ_0)
                               )
         # Check and warn if coefficients of P_0 are not positive.
         if not (P_0 >= 0).all():
@@ -484,7 +551,7 @@ class MasterEquationSolver:
         # In this step the actual simulation happens.
 
         # Calculate the eigenvectors and eigenvalues of Λ.
-        Λ_evals, Λ_evecs = self.__calculateLambda(Γ_L, Γ_R,
+        Λ_evals, Λ_evecs = self.__calculateLambda(Γ_L, Γ_R, Γ_0,
                                                   check_tolerance,
                                                   verbose,
                                                  )
@@ -504,18 +571,18 @@ class MasterEquationSolver:
         # Calls the simulation method of the netto current.
         # Γ_L and Γ_R are passed seperatly to preserve the information of
         # direction.
-        sim_cur = self.__simulateDynamicCurrent(Γ_L, Γ_R, sim_tdp, verbose)
+        sim_cur = self.__simulateDynamicCurrent(Γ_L, Γ_R, ns, sim_tdp, verbose)
         if verbose : print("sim_cur =\n" + str(sim_cur))
 
         # Both simulations are returnd - mind the order!
         return sim_tdp, sim_cur
 
-    def __calculateLambda(self, Γ_L, Γ_R, check_tolerance, verbose):
+    def __calculateLambda(self, Γ_L, Γ_R, Γ_0, check_tolerance, verbose):
         """
-        Takes both matricies :math:`\\Gamma^i`and calculates :math:`\\Lambda` in
+        Takes both matricies :math:`\\Gamma^k`and calculates :math:`\\Lambda` in
         diagonalized form: a list of eigenvalues :math:`\\lambda_i` and a
         :math:`n \\times n`-matrix containing all eigenvectors
-        :math:`\\vec{P}_i` (in the original basis) formated like:
+        :math:`\\vec{P}_i` formated like:
 
         .. math::
             \\Eta =
@@ -550,6 +617,8 @@ class MasterEquationSolver:
 
         # Γ stores the total rates - in a non-directional manner.
         Γ = Γ_L + Γ_R
+        if Γ_0 != None:
+            Γ += Γ_0
 
         # verbose only: Print Γ (and ε if tolerence checks are enabled).
         if verbose:
@@ -603,6 +672,64 @@ class MasterEquationSolver:
             raise RuntimeError("Could not invert Λ = \n" + str(Λ))
 
         return Λ_evals, Λ_evecs
+
+    def __calculateSigma(self, ns, verbose, fast=False):
+        """
+        Calculates the σ_αβ as described in the master equation (see
+        documentation).
+
+        :param ns: List of numbers of states :math:`n_i` with the same number
+                   :math:`i` of electrons in inreasing order of :math:`i`:
+
+                   :code:`ns = [n_0, n_1, …, n_k]`
+                   ≣ :math:`(n_0, n_1, \\dots, n_k)`.
+
+                   E.g.
+                   :code:`ns = [<numer of empty states>, <number of one body states>, ...]`
+        :type ns: list(int)
+        :param fast: Set this to :code:`True` if it is not necessary to set the
+                     diagonal blocks in :math:`σ`
+                     (where :math:`\\sigma_{i \\rightarrow j} = 0`) to zero.
+
+        :return: Returns :code:`σ` where :code:`σ[i,j]`
+                 ≣ :math:`\\sigma_{i \\rightarrow j}`.
+        """
+        # Construct a Matrix σ containing the signs representing the direction
+        # of current for each rate. If the total numer of particles in the
+        # channel increases - e.g. with rate Γ_αβ - its contribution has an
+        # oppsite sign that the reverse process - e.g. with rate Γ_βα. For
+        # relaxation of stimulation precesses - whrere the total number of
+        # perticles does not change - no current flows through a barrier. All
+        # of these 'signs' are zero.
+        #
+        # σ =
+        #      n_0 |     n_1   |  ⋯ |  n_k
+        # n_0 ⎧ 0  |  1  1  1  | ⋯  |  1  1⎫
+        #     ------------------------------
+        #     ⎪-1  |  0  0  0  | ⋯  |  1  1⎪
+        # n_1 ⎪-1  |  0  0  0  | ⋯  |  1  1⎪
+        #     ⎪-1  |  0  0  0  | ⋯  |  1  1⎪
+        #     ------------------------------
+        #     ⎪ ⋮  |  ⋮  ⋮  ⋮  | ⋱  |  ⋮  ⋮⎪
+        #     ------------------------------
+        # n_k ⎪-1  | -1 -1     | ⋯  |  0  0⎪
+        #     ⎩-1  | -1 -1     | ⋯  |  0  0⎭
+        # Set-up the ones.
+        n_tot = np.sum(ns)
+        σ = np.tri(n_tot).transpose() - np.tri(n_tot)
+        # Make blocks on diagonal zero.
+        # This step can be omitted if all diagonal blocks in Γ_L and Γ_R
+        # are zero dy default. (It is a time-consuming step!)
+        if not fast:
+            i = 0
+            for n_i in ns:
+                σ[i:i+n_i, i:i+n_i] = np.zeros((n_i, n_i))
+                i += n_i
+        # verbose only: Pront σ.
+        if verbose:
+            print("σ<fast=" + str(fast) + "> =\n" + str(σ))
+
+        return σ
 
     def __calculateStationaryPossibilitySolutions(self,
                                                   Λ_evals,
@@ -770,7 +897,12 @@ class MasterEquationSolver:
         # Return the (valid or invalid) simulation.
         return sim
 
-    def __calculateStationaryCurrents(self, Γ_L, Γ_R, stat_ps, verbose):
+    def __calculateStationaryCurrents(self,
+                                      Γ_L, Γ_R,
+                                      ns,
+                                      stat_ps,
+                                      verbose,
+                                     ):
         """
         Calculates the current :math:`I_{stat,i}` to all stationary solutions
         :math:`\\vec{P}{stat,i}`.
@@ -778,6 +910,26 @@ class MasterEquationSolver:
         This is a private function and should not be called from outside the
         MasterEquationSolver class! (Hence it does not perform further tests
         than MasterEquationSolver.)
+
+        :param Γ_L: Matrix containing the transition rates regarding electrons
+                    tunneling trough the *left* barrier where
+                    :code:`Γ_L[i,j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
+                    Must be a ``nxn`` matrix.
+        :type Γ_L: numpy.ndarray
+        :param Γ_R: Matrix containing the transition rates regarding electrons
+                    tunneling trough the *right* barrier where
+                    :code:`Γ_R[i,j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
+                    Must be a ``nxn`` matrix.
+        :type Γ_R: numpy.ndarray
+        :param ns: List of numbers of states :math:`n_i` with the same number
+                   :math:`i` of electrons in inreasing order of :math:`i`:
+
+                   :code:`ns = [n_0, n_1, …, n_k]`
+                   ≣ :math:`(n_0, n_1, \\dots, n_k)`.
+
+                   E.g.
+                   :code:`ns = [<numer of empty states>, <number of one body states>, ...]`
+        :type ns: list(int)
 
         :return: :code:`stat_curs` where :code:`stat_curs[i][k]` ≣
                  :math:`I^k_{stat,i}`
@@ -787,18 +939,9 @@ class MasterEquationSolver:
         for more details.
         """
 
-        # TODO: The relaxation/stimulation rates (σ_αβ) need to be zero!
         # Construct a Matrix σ containing the signs representing the direction
-        # of current for each rate. If the total numer of particles in the
-        # channel increases - e.g. with rate Γ_αβ - its contribution has an
-        # oppsite sign that the reverse process - e.g. with rate Γ_βα.
-        #     ⎧ 0  1  1 ⋯   1  1⎫
-        #     ⎪-1  0  1 ⋯   1  1⎪
-        # σ = ⎪ ⋮  ⋮  ⋮  ⋱   ⋮  ⋮⎪
-        #     ⎪-1 -1 -1 ⋯   0  1⎪
-        #     ⎩-1 -1 -1 ⋯  -1  0⎭
-        n = Γ_L.shape[0]
-        σ = np.tri(n).transpose() - np.tri(n)
+        # of current for each rate.
+        σ = self.__calculateSigma(ns, verbose)
         # Calculate σΓ_k - a direction sensivtive form of the rates matricies.
         σΓ_L =  np.multiply(σ,Γ_L)
         σΓ_R = -np.multiply(σ,Γ_R)
@@ -810,8 +953,8 @@ class MasterEquationSolver:
         # If no stationary solutions could be calculated there are no currents
         # to calculate.
         if stat_ps.shape[1] > 0:
-            stat_curs = (np.sum(np.dot(σΓ_L, stat_ps), axis=0)[0],
-                         np.sum(np.dot(σΓ_R, stat_ps), axis=0)[0])
+            stat_curs = (np.sum(np.dot(σΓ_L, stat_ps), axis=0),
+                         np.sum(np.dot(σΓ_R, stat_ps), axis=0))
         else:
             stat_curs = []
 
@@ -819,8 +962,8 @@ class MasterEquationSolver:
 
 
     def __simulateDynamicCurrent(self,
-                                Γ_L,
-                                Γ_R,
+                                Γ_L, Γ_R,
+                                ns,
                                 sim_time_dev_prop,
                                 verbose
                                ):
@@ -831,6 +974,26 @@ class MasterEquationSolver:
         This is a private function and should not be called from outside the
         MasterEquationSolver class! (Hence it does not perform further tests
         than MasterEquationSolver.)
+
+        :param Γ_L: Matrix containing the transition rates regarding electrons
+                    tunneling trough the *left* barrier where
+                    :code:`Γ_L[i,j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
+                    Must be a ``nxn`` matrix.
+        :type Γ_L: numpy.ndarray
+        :param Γ_R: Matrix containing the transition rates regarding electrons
+                    tunneling trough the *right* barrier where
+                    :code:`Γ_R[i,j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
+                    Must be a ``nxn`` matrix.
+        :type Γ_R: numpy.ndarray
+        :param ns: List of numbers of states :math:`n_i` with the same number
+                   :math:`i` of electrons in inreasing order of :math:`i`:
+
+                   :code:`ns = [n_0, n_1, …, n_k]`
+                   ≣ :math:`(n_0, n_1, \\dots, n_k)`.
+
+                   E.g.
+                   :code:`ns = [<numer of empty states>, <number of one body states>, ...]`
+        :type ns: list(int)
 
         :return: Returns a Simulation of :math:`I(t)`
         :rtype: HaPPPy.MasterEquation.Simulation
@@ -844,18 +1007,9 @@ class MasterEquationSolver:
         # Copy all parameters from the propabilities simulation.
         sim = Simulation(sim_time_dev_prop.getΔt(),sim_time_dev_prop.getT_max())
 
-        # TODO: The relaxation/stimulation rates (σ_αβ) need to be zero!
         # Construct a Matrix σ containing the signs representing the direction
-        # of current for each rate. If the total numer of particles in the
-        # channel increases - e.g. with rate Γ_αβ - its contribution has an
-        # oppsite sign that the reverse process - e.g. with rate Γ_βα.
-        #     ⎧ 0  1  1 ⋯   1  1⎫
-        #     ⎪-1  0  1 ⋯   1  1⎪
-        # σ = ⎪ ⋮  ⋮  ⋮  ⋱   ⋮  ⋮⎪
-        #     ⎪-1 -1 -1 ⋯   0  1⎪
-        #     ⎩-1 -1 -1 ⋯  -1  0⎭
-        n = Γ_L.shape[0]
-        σ = np.tri(n).transpose() - np.tri(n)
+        # of current for each rate.
+        σ = self.__calculateSigma(ns, verbose)
         # Calculate σΓ_k - a direction sensivtive form of the rates matricies.
         σΓ_L =  np.multiply(σ,Γ_L)
         σΓ_R = -np.multiply(σ,Γ_R)
@@ -909,7 +1063,10 @@ class Simulation():
     :code:`sim.getValues()` ≣ :math:`(f(0), f(\\Delta t), f(2 \\cdot \\Delta t),
     \\dots, f(m \\cdot \\Delta t))`.
 
-    where :math:`m = \\lfloor \\frac{t_{max}}{\\Delta t}) \\rfloor`
+    where :math:`m = \\lfloor \\frac{t_{max}}{\\Delta t} \\rfloor`
+    ≣ :code:`len(sim)`.
+
+    Note: :math:`m` might be smaller for invalid simulations (see valid()).
     """
 
     def __init__(self, Δt, t_max):
@@ -954,7 +1111,7 @@ class Simulation():
                  with increasing :math:`n`.
         :rtype: numpy.ndarray
         """
-        return np.arange(0, len(self) * self.Δt, self.Δt)
+        return self.Δt * np.arange(len(self))
 
     def getValues(self):
         """
@@ -999,7 +1156,11 @@ class Simulation():
     def __repr__(self):
         ts = self.getParameters()
         vs = self.getValues()
-        return "Sim<" + str([(ts[i], vs[i]) for i in range(len(self))]) + ">"
+        return ("Sim<valid="
+                + str(self.valid()) + ","
+                + str([(ts[i], vs[i]) for i in range(len(self))])
+                + ">"
+               )
 
     def __str__(self):
         return repr(self)

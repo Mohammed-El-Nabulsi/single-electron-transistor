@@ -5,5 +5,8 @@
    "muL": 0.0,
    "muR": 0.0,
    "T" : 10.0,
-   "DT" : 0.1
+   "Epsilon" : 1E-10,
+   "BCond" : "empty",
+   "DT" : 0.1,
+   "TMax" : 10.0
 }
