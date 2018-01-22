@@ -136,18 +136,22 @@ def main(argv=None):
     TMax = configdata["Tmax"]
     DT = configdata["DT"]
 
-    # TODO Group 5: Allow to calculate stationary states
     # TODO Group 5: Allow to calculate stationary conductance
     # TODO Group 5: OPTIONAL Think how do we get the initial states from the config file in here
     #               Maybe divide into specific QD states. Like "empty", "double occupied", ...
-    P_0 = []
-    MSolver = MasterEquationSolver()
-    sim_time_dev_prop, sim_current = mes.doCalculation(DT, TMax, P_0, Gamma_01L, Gamma_01R)
-
-    # Plot the stuff
+    n = Gamma_L.shape[0]
+    # choose a legitimate start value for P_0 (currently a dummy!)
+    P_0 = np.arange(n)
+    P_0 = 1 / sum(P_0) * P_0
+    mes = HaPPPy.MasterEquation.MasterEquationSolver()
+    sim_tdp, sim_cur = mes.simulateDynamicSloution(DT, TMax, P_0, Gamma_L, Gamma_R)
+    stat_ps, stat_curs = mes.calculateStationarySloutions(Gamma_L, Gamma_R)
+    ## plot/print results
     # 1st plot: time development of propabilities
-    sim_time_dev_prop.quickPlot(xlabel="t", ylabel="P")
+    sim_tdp.quickPlot(xlabel="t", ylabel="P")
+    print("static solutions (P_ij) =\n", stat_ps)
     # 2nd plot: time development of netto current
-    sim_current.quickPlot(xlabel="t", ylabel="I")
+    sim_cur.quickPlot(xlabel="t", ylabel="I",legend=["$I^L$","$I^R$"])
+    print("static solutions (I_i) = \n", stat_curs)
 
     return 0
