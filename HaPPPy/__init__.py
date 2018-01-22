@@ -157,7 +157,7 @@ def main(argv=None):
 
 
     ## Group 5: MASTER MODULE
-    if verbose: print("\nSTEP 5 : MASTER EQUATION\n")
+    if args.verbose: print("\nSTEP 5 : MASTER EQUATION\n")
     # TODO Group 5: Allow to calculate stationary conductance
     # Get all relevant parameters from config file and previous calculations.
     n_one = len(OneBodyEigenvalues)
@@ -168,13 +168,16 @@ def main(argv=None):
     Epsilon = configdata["Epsilon"]
     if Epsilon == "default":
         Epsilon = None
-    if verbose: print("Epsilon = " + str(Epsilon))
-    if verbose: print("n_one = " + str(n_one))
-    if verbose: print("n_two = " + str(n_two))
-    if verbose: print("n_tot = " + str(n_tot))
-    if verbose: print("BCond = " + str(BCond))
-    if verbose: print("Gamma_L =\n" + str(Gamma_L))
-    if verbose: print("Gamma_R =\n" + str(Gamma_R))
+    # verbose only: Print all parmeters.
+    if args.verbose: print("Epsilon = " + str(Epsilon))
+    if args.verbose: print("n_one = " + str(n_one))
+    if args.verbose: print("n_two = " + str(n_two))
+    if args.verbose: print("n_tot = " + str(n_tot))
+    if args.verbose: print("BCond = " + str(BCond))
+    if args.verbose: print("muL = " + str(muL))
+    if args.verbose: print("muR = " + str(muR))
+    if args.verbose: print("Gamma_L =\n" + str(Gamma_L))
+    if args.verbose: print("Gamma_R =\n" + str(Gamma_R))
 
     # Store input values to preserve the context.
     datapath_master = 'data/group5.hdf5'
@@ -191,10 +194,10 @@ def main(argv=None):
     mes = HaPPPy.MasterEquation.MasterEquationSolver()
     if BCond == "static":
         # Static solutions are requested.
-        if verbose: print("mode = STATIC")
+        if args.verbose: print("mode = STATIC")
         stat_ps, stat_curs = mes.calculateStationarySloutions(Gamma_L, Gamma_R,
                                                               ns,
-                                                              verbose=verbose,
+                                                              verbose=args.verbose,
                                                              )
         print("(P_stat_ij) =\n", stat_ps)
         print("(I^k_stat_i) = \n", stat_curs)
@@ -204,12 +207,12 @@ def main(argv=None):
             f.create_dataset("stat_curs", data=stat_curs)
     else:
         # A simulation is requested.
-        if verbose: print("mode = DYNAMIC")
+        if args.verbose: print("mode = DYNAMIC")
         # Get additional parameters for simulation.
         DT = configdata["DT"]
         TMax = configdata["TMax"]
-        if verbose: print("DT = " + str(DT))
-        if verbose: print("TMax = " + str(TMax))
+        if args.verbose: print("DT = " + str(DT))
+        if args.verbose: print("TMax = " + str(TMax))
         # Calculate a legitimate value for P_0 based on the input:
         P_0 = np.zeros(n_tot)
         if BCond == "empty":
@@ -221,7 +224,7 @@ def main(argv=None):
         else:
             P_0 = np.array(BCond)
         P_0 = P_0 / sum(P_0)
-        if verbose: print("P_0 =\n" + str(P_0))
+        if args.verbose: print("P_0 =\n" + str(P_0))
         # Store P_0 to preserve context.
         with h5py.File(datapath_master, "w") as f:
             f.create_dataset("P_0", data=P_0)
@@ -230,7 +233,7 @@ def main(argv=None):
                                                      P_0,
                                                      Gamma_L, Gamma_R,
                                                      ns,
-                                                     verbose=verbose,
+                                                     verbose=args.verbose,
                                                     )
         # Plot the simulations.
         # 1st plot: time development of propabilities
