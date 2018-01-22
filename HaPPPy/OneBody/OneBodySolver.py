@@ -42,8 +42,8 @@ class OneBodySolver:
         """
         self.l = l
         self.n = n
-        print("Hello from the OneBody Solver, what can I do for you?")
-        
+#        print("Hello from the OneBody Solver, what can I do for you?")
+
         # creating array in user input length l and user input elements n and not changeable array for plot x-axis
         self.a = np.linspace((-self.l / 2), (self.l / 2), self.n)
 
@@ -68,8 +68,8 @@ class OneBodySolver:
             la, v_norm, Info
 
         """
-        print("\nYou've chosen BoxPotential.")
-		
+#        print("\nYou've chosen BoxPotential.")
+
 		# creating potential matrix with user input n elements
         pot_mat = np.zeros((self.n, self.n))
         
@@ -139,7 +139,7 @@ class OneBodySolver:
         Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
-        return la, v_norm , Info
+        return la, v_norm , Info, kin_mat, pot_mat
 			
     # possible input factor but we defined factor already as unit_pot
     def calcualteHarmonicPotential(self, intersection):
@@ -159,7 +159,7 @@ class OneBodySolver:
             la, v_norm, Info
 
         """
-        print("\nYou've chosen HarmonicPotential.")
+#        print("\nYou've chosen HarmonicPotential.")
         # creating potential matrix with user input n elements
         pot_mat = np.zeros((self.n, self.n))
         
@@ -227,7 +227,7 @@ class OneBodySolver:
         Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
-        return la, v_norm , Info
+        return la, v_norm , Info, kin_mat, pot_mat
         
         
     def calcualteGaussPotential(self, A, sigma):
@@ -247,8 +247,8 @@ class OneBodySolver:
             la, v_norm, Info
 
         """
-        print("\nYou have chosen GaussPotential!")
-        
+#        print("\nYou have chosen GaussPotential!")
+
 
         # creating potential matrix with user input n elements
         pot_mat = np.zeros((self.n,self.n))
@@ -277,11 +277,11 @@ class OneBodySolver:
         while i < self.n-1:
             kin_mat[i, i+1] = kin_mat[i+1, i] = -1
             i += 1
-        print(kin_mat)
+#        print(kin_mat)
 
         unit_pot = A
         unit_kin = ((self.hbar**2)*1000)/(2*self.me*(10**-18)*self.e)
-        print(unit_kin, "\n", unit_pot)  # control print for unit
+#        print(unit_kin, "\n", unit_pot)  # control print for unit
         # dx for the derivate of the matrix
         dx = self.l/self.n
         # build the final Hamilton matrix ham_mat
@@ -301,7 +301,7 @@ class OneBodySolver:
             norm += (v[i,0]*v[i,0]) * dx
 
         sqrt_norm = sqrt(norm)
-        print(sqrt_norm)
+#        print(sqrt_norm)
 
         v_norm = v / sqrt_norm # v is now norm matrix of eigenvectors
 
@@ -315,7 +315,7 @@ class OneBodySolver:
         Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(False)], \
         ["GaussPotential",str(True)],["BoxPotential",str(False)]]).astype('S9')
         
-        return la, v_norm, Info
+        return la, v_norm, Info, kin_mat, pot_mat
 
 
     def exportData(self, la, v_norm, info, path="data_group1"):
