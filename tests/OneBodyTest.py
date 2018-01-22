@@ -120,6 +120,8 @@ class OneBodyTestSuite(unittest.TestCase):
         eigenvalue = la [0]
         x = 0
         gridpoints = 3000
+        lenght_eigenvector = len(la)
+        self.assertTrue ((lenght_eigenvector == gridpoints), msg ="You have not enough or too much eigenvalues")
         while x < gridpoints:
             eigenvalue = la[x]
             eigenvalue2 = la[x+1]
