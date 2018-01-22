@@ -4,17 +4,18 @@ from scipy.constants import codata
 import matplotlib.pyplot as plt
 
 me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to milli eV/c^2
-hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10*femtoseconds*millielectronvolt
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10*fs*millielectronvolts
 
 
 
 class GaussianWave():
     
     def __init__(self, x_grid, symm, width, energy):
+        
         """
         Creates the inital wavefunction in positionspace
         """
-
+        
         self.width = width
         self.symm = symm
         self.x_grid = x_grid
@@ -27,7 +28,7 @@ class GaussianWave():
     
     def create_gauss_at_x(self,x):
         norm_x = ( 2/(np.pi*self.width**2) )**(1/4)
-        return norm_x * np.exp(1j*self.k0*(x-self.symm)) * np.exp(- ( (x-self.symm)/self.width )**2 )
+        return norm_x * np.exp(-1j*self.k0*(x-self.symm)) * np.exp(- ( (x-self.symm)/self.width )**2 ) #evtl hier minus vor k0 raus
     
     def create_gauss_x_package(self):
         """
@@ -36,7 +37,7 @@ class GaussianWave():
         return np.array([self.create_gauss_at_x(pos) for pos in self.x_grid])
     
     def plot_x_package(self):
-        
+                
         x_package = plt.plot(self.x_grid, np.abs(self.x_package))
         plt.title ("Propabilitydensity of gaussian package at time zero in position-space")
         plt.xlabel("position grid")
