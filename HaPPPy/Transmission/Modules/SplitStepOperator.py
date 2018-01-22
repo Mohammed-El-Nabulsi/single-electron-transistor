@@ -1,12 +1,18 @@
+#TODO: docu, test(kommt nach Silvester, habe nun endlich Maple...)
+#In dieser Version ist berÃ¼cksichtigt, dass im Algo idft und dft aufeinander folgen.
+#auf diese weise wird eine vielzahl an Operationen eingespart.
+#Ausfuehrliche ErklÃ¤rungen folgen, docu hier unbrauchbar/zT falsch(Relikt aus Experimenten)
+
 import numpy as np
 
+#from A_Potential01 import Potential #encomment for testing interaction between Fourier, SlpitStep and Potential class
 from Fourier00 import Fourier
 
 from scipy.constants import codata
 
 dt = 10**(2)
-me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to milli eV
-hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to p
+me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to meV
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10 meV fm
 
 
 class Split_Step_Operator():
@@ -68,6 +74,13 @@ class Split_Step_Operator():
         
         self.kinetic_operator = create_kinetic_operator(self)
         self.kinetic_operator_half = create_kinetic_operator_half(self)
+        
+#        print("shapes of the kinetic operators")
+#        print(self.kinetic_operator.shape)
+#        print(self.kinetic_operator_half.shape)
+#        print("types of the kinetic operators")
+#        print(type(self.kinetic_operator))
+#        print(type(self.kinetic_operator_half))
 
         def create_potential_operator(self):
             potential_operator = np.zeros(self.pot.size, dtype=np.complex64)
@@ -80,6 +93,11 @@ class Split_Step_Operator():
             return potential_operator
         
         self.potential_operator = create_potential_operator(self)
+        
+#        print("shape of the potenital operator")
+#        print(self.potential_operator.shape)
+#        print("type of the potential operator")
+#        print(type(self.potential_operator))
     
     def first_step(self, x_wave_1):
         """
