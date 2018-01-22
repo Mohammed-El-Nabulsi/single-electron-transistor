@@ -10,6 +10,8 @@ class Potential():
         
         Calculates the position to be used for the gaussian wave symmetry point.
         
+        NOTICE: barrier.size should be 20 or greater to provide an satisfying resoluion for the gauss-package
+    
     Parameters
     ----------
     barrier : Array
