@@ -4,7 +4,7 @@ import math
 
 from numpy import sin, exp
 
-_epsilon = 1e-1
+_epsilon = 2e-5
 _coulomb_consts = 1.440343e3 #[nm*meV]
 
 class MatrixElement:

@@ -105,7 +105,8 @@ class TwoBodyTestSuite(unittest.TestCase):
         _factor = 2.0 # factor by which epsilon gets divided each step
         _steps = 20 # amount of steps to run
         _obCount = 20 # number of one body state to use for calculation
-        _num = 20 # number of two body energies to plot and evaluate
+        _ofs = 5 # index of first two body energy to plot       
+        _num = 1 # number of two body energies to plot and evaluate
         
         # generate / load test data
         if (_useExistingData):
@@ -130,7 +131,7 @@ class TwoBodyTestSuite(unittest.TestCase):
             repository.flush()
         
         #evaluate data
-        En = En[:, 0:_num]
+        En = En[:, _ofs:_ofs+_num]
         if _debug: print("summary of two-body base energies:")
         if _debug: print(En)
         plt.plot(Ep, En)
