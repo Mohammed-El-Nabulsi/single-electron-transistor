@@ -1104,16 +1104,19 @@ class Simulation():
         """
         return np.arange(0, self.t_max + self.Δt, self.Δt)
 
-    def getParameters(self):
+    def getParameters(self, start=0, stop=None, step=1):
         """
         :return: A list of all **valid** values :math:`n \\cdot \\Delta t` where
                  :math:`n \in \mathbb{N}_0 \land n \cdot \Delta t \leq t_{max}`
                  with increasing :math:`n`.
         :rtype: numpy.ndarray
         """
-        return self.Δt * np.arange(len(self))
+        if stop == None or stop > len(self):
+            stop = len(self)
 
-    def getValues(self):
+        return self.Δt * np.arange(start, stop, step)
+
+    def getValues(self, start=0, stop=None, step=1):
         """
         :return: A list of all **valid** values :math:`f(n \\cdot \\Delta t)`
                  where :math:`f` is the simulated function and :math:`n \in
@@ -1121,7 +1124,10 @@ class Simulation():
                  increasing :math:`n`.
         :rtype: numpy.ndarray
         """
-        return np.array(copy.copy(self.__values))
+        if stop == None or stop > len(self):
+            stop = len(self)
+
+        return np.array([self.__values[i] for i in range(start, stop, step)])
 
     def append(self, value):
         # for internal use only
@@ -1170,7 +1176,10 @@ class Simulation():
                   xlabel=None, ylabel=None,
                   xunit=1, yunit=1,
                   xunit_symbol=None, yunit_symbol=None,
-                  legend=None
+                  legend=None,
+                  start=0,
+                  stop=None,
+                  step=1,
                  ):
         """
         Simple plotting method to quickly get an overview on the simulation.
@@ -1198,14 +1207,23 @@ class Simulation():
                        Vectorial graphs are ploted component-wise and labeled in
                        increasing order of their index. (optional)
         :type legend: list(string)
+        :param start: The :math:`i`th value to start the plot with. (optional)
+        :type start: int
+        :param stop: The :math:`i`th value to stop the plot with.
+                     :math:`i` is not included. (optional)
+        :type stop: int
+        :param start: The distance between two ploted bins. E.g. :code:`step=1`
+                      plots all values and :code:`i=2` plots every odd indexed
+                      value. (optional)
+        :type step: int
 
         :example: See the example given at the documentation of
                   HaPPPy.MasterEquation.MasterEquationSolver.
         """
         # Aquire all values related to the discrete representation of the
         # function.
-        ts = self.getParameters()
-        vs = self.getValues()
+        ts = self.getParameters(start, stop, step)
+        vs = self.getValues(start, stop, step)
 
         # Plot the function.
         plt.plot(ts / xunit, vs / yunit)

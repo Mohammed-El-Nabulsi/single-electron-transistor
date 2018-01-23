@@ -43,7 +43,10 @@ class MasterEquationTestSuite(unittest.TestCase):
             p1 = 0.7 # > 0
             p2 = 0.2 # > 0, p0 + p1 + p2 = 1
             Δt = 1
-            t_max = 100
+            t_max = 100 # >= plot_stop, plot_start
+            plot_start = 0
+            plot_stop = 20
+            plot_step = 1
             # set-up a reasonable Γ-matrix
             Γ_L = np.array([[0, a, 0], [0, 0, 0], [0, 0, 0]])
             Γ_R = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
@@ -59,9 +62,16 @@ class MasterEquationTestSuite(unittest.TestCase):
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
+                sim_tdp.quickPlot(xlabel="t", ylabel="P",
+                                  start=plot_start,
+                                  stop=plot_stop,
+                                  step=plot_step,
+                                 )
                 sim_cur.quickPlot(xlabel="t", ylabel="I",
                                   legend=["$I^L$","$I^R$"],
+                                  start=plot_start,
+                                  stop=plot_stop,
+                                  step=plot_step,
                                  )
             # check validity
             self.assertTrue(sim_tdp.valid())
