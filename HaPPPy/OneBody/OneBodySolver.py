@@ -46,8 +46,8 @@ class OneBodySolver:
 
         # creating array in user input length l and user input elements n and not changeable array for plot x-axis
         self.a = np.linspace((-self.l / 2), (self.l / 2), self.n)
-
-        
+        self.a_axis = np.linspace((-self.l / 2), (self.l / 2), self.n)
+    
         
 
 
@@ -173,6 +173,7 @@ class OneBodySolver:
         
         for x in np.nditer(self.a, op_flags=['readwrite']):
             x[...] =(x**2) + intersection
+        
         mat_build(self.a)  # build pot_mat
         #print(pot_mat)
         
@@ -227,7 +228,7 @@ class OneBodySolver:
         Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
-        return la, v_norm , Info, kin_mat, pot_mat
+        return la, v_norm , Info, kin_mat, pot_mat, self.a_axis
         
         
     def calcualteGaussPotential(self, A, sigma):
@@ -262,7 +263,7 @@ class OneBodySolver:
             return pot_mat
 
         for x in np.nditer(self.a, op_flags=['readwrite']):
-            x[...] = A*(-np.exp(-np.power((x) / sigma, 2.) / 2.))
+            x[...] = -A*(np.exp(-np.power((x) / sigma, 2.) / 2.))
         mat_build(self.a)  # build pot_mat
 
 
