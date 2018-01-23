@@ -41,7 +41,7 @@ class MatrixElement:
         """
         c = np.multiply(Phi1, Phi3)
         d = np.multiply(Phi2, Phi4)
-        return np.dot(c,np.dot(self.A,d)) * self.dy * self.dy * _coulomb_consts
+        return np.dot(c,np.dot(self.A,d))
 
 def getMatrixElement(dX, n, Phi1, Phi2, Phi3, Phi4):
 	"""Compute the coulomb energy matrix element for two pairs of single-electron wavefunctions.

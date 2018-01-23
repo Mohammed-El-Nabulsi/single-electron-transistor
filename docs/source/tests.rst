@@ -3,20 +3,18 @@ Tests for HaPPPy
 
 Here you find a details description of all test cases.
 
-.. autoclass:: tests.HappyBasicTestSuite
+.. automodule:: tests.HaPPPyTest
     :members:
 
-.. autoclass:: tests.OneBodyTestSuite
+.. automodule:: tests.OneBodyTest
     :members:    
 
-.. autoclass:: tests.TwoBodyTestSuite
-    :members:        
 
-.. autoclass:: tests.TransmissionTestSuite
+.. automodule:: tests.TransmissionTest
     :members:            
 
-.. autoclass:: tests.RatesTestSuite
+.. automodule:: tests.RatesTest
     :members:   
                  
-.. autoclass:: tests.MasterEquationTestSuite
+.. automodule:: tests.MasterEquationTest
     :members:                
