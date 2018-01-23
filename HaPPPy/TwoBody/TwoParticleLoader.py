@@ -29,8 +29,8 @@ class TwoBodySpectrumData:
 		self.energies = self.file[_EN_NAME]
 		self.coeficients = self.file[_CM_NAME]
 		self.par = self.file[_OPT_NAME]
-		self.m = par[0]
-		self.n = par[1]
+		self.m = self.par[0]
+		self.n = self.par[1]
 		
 	def init(self, filename, m, n):
 		"""Initialize with empty data and create the datasets for a new hdf5-file
@@ -44,7 +44,7 @@ class TwoBodySpectrumData:
 		self.n = n
 		self.file = h5py.File(filename + ".hdf5", "w")
 		self.energies = self.file.create_dataset(_EN_NAME, (m,), dtype='d')
-		self.coeficients = self.file.create_dataset(_CM_NAME, (n, m, m), dtype='d')
+		self.coeficients = self.file.create_dataset(_CM_NAME, (m, n, n), dtype='d')
 		self.file.create_dataset(_OPT_NAME, (2,), data=[m, n])
 		self.file.flush()
 
