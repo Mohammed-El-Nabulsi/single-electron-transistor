@@ -15,7 +15,7 @@ class TwoBodySolver:
 
         print("Hello from the TwoBodySolver, what can I do for you?")
 
-    def doCalculation(self, obDataFile='HaPPPy/OneBody/data_group1', tbDataFile='HaPPPy/TwoBody/data_group2'):
+    def doCalculation(self, obDataFile='HaPPPy/OneBody/data_group1', tbDataFile='HaPPPy/TwoBody/data_group2', obLimit=50):
         """ Calculate and return the two-electron eigenvalues and eigenvectors from the single-electron eigenfunctions.
         
         Arguments:
@@ -26,6 +26,7 @@ class TwoBodySolver:
         """
         obData = SpectrumData()
         obData.open(obDataFile)
+        obData.m = min(obData.m, obLimit)
         result = createTwoParticleData(obData)
         ev = result[0]
         Q = result[1]
