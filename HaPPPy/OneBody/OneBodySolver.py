@@ -326,12 +326,12 @@ class OneBodySolver:
         return la, v_norm, Info, kin_mat, pot_mat, la_l, v_norm_l
 
 
-    def exportData(self, la, v_norm, info, self.a, path="data_group1"):
+    def exportData(self, la, v_norm, info, path="data_group1"):
         Data = SpectrumData()
         Data.init(path, len(la), len(la), info=info)
         Data.energies[:] = la
         Data.waves[:,:] = v_norm
-        Data.potential[:] = self.a
+#       Data.potential[:] = self.a
         Data.close()
 
 
