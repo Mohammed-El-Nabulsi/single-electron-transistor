@@ -20,7 +20,7 @@ class GaussianWave():
         self.symm = symm
         self.x_grid = x_grid
         
-        self.k0 = hbar/np.sqrt(2*me*energy)
+        self.k0 = np.sqrt(2*me*energy)/hbar
         
         self.x_package = self.create_gauss_x_package()
         

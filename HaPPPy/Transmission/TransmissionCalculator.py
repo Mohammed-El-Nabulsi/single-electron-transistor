@@ -48,7 +48,7 @@ class TransmissionCalculator:
         potential_utils = Potential(V, dx)
 
         potential = potential_utils.potential
-        symmetry_point = potential_utils.gauss_symmetry_point
+        symmetry_point = potential_utils.gauss_symmerey_point
         width = potential_utils.gauss_width
 
         x = potential_utils.position_grid
