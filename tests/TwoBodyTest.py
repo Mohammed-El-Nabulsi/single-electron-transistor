@@ -10,7 +10,7 @@ import HaPPPy.TwoBody.MatrixElement as MatrixElement
 
 # general settings
 _debug = False # whether to log debug info
-_useExistingData = False # whether to use data that was generated in a previous test instead of recalculating everything
+_useExistingData = True # whether to use data that was generated in a previous test instead of recalculating everything
 _filePath = 'tests/data/twoBody.h5py' # file used to store or load test data
 _obDataFile='data_group1' # file which provides the used one body data
 
