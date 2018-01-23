@@ -11,7 +11,7 @@ def createTwoParticleData(opData):
 	Arguments:
 	opData -- the SpectrumData object containing the single-electron spectrum data to use for calculation
 	
-	Returns [E,Q], where E is an array of (scalar) eigen values and Q is an array of matrices of the shape [i,j,n], where Q[i,j,n] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function. These arrays do not have a special ordering, but Q[:,:,n] is the eigenvector belonging to E[n].
+	Returns [E,Q], where E is an array of (scalar) eigen values and Q is an array of matrices of the shape [n,i,j], where Q[n,i,j] is the coefficient of the nth eigenvector belonging to the |i,j> product basis function. These arrays are sorted by energy in ascending order, with Q[n,:,:] as the eigenvector belonging to E[n].
 	"""
 	SP_EE = opData.energies[:]
 	SP_EV = opData.waves[:,:]
@@ -129,16 +129,16 @@ def createTwoParticleData(opData):
 	Eigenvectors_Productbasis = np.dot(Eigenvectors, Z)
 	
 	#Transform  Eigenvectors_Productbasis into n**2 Matrices with the coefficients 
-	Q=np.zeros((n,n, n**2))
+	Q=np.zeros((n**2,n,n))
 	for i in range(n):
 		for j in range(n):
 			if i==j:
-				Q[i,j,:]=Eigenvectors_Productbasis[i, :]
+				Q[:,i,j]=Eigenvectors_Productbasis[i, :]
 			elif i<j:
-				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1,:]
+				Q[:,i,j]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1, :]
 			else:
-				Q[i,j,:]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1+L,:]				
+				Q[:,i,j]=Eigenvectors_Productbasis[int((2*n-i-1)*i/2)+j-1+L, :]				
 	
 	sys.stdout.write("> sorting by energies\r")
-	return [np.take(Eigenenergies, order), np.take(Q, order, axis=2)]
+	return [np.take(Eigenenergies, order), np.take(Q, order, axis=0)]
 	# return [Eigenenergies, Q]
