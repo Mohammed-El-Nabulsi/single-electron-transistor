@@ -6,6 +6,7 @@ import math
 _EN_NAME = "eigenvalues"
 _EV_NAME = "eigenvectors"
 _OPT_NAME = "settings"
+_POT_NAME = "potential"
 
 class SpectrumData:
 	"""Used to store and load data of one-particle wave energy spectrums in hdf5-files.
@@ -14,6 +15,7 @@ class SpectrumData:
 	file -- reference to the hdf5 file handle
 	energies -- dataset containing the energy eigenvalues in [meV] as floating point numbers: energies[i] stores the i-th eigenvalue
 	waves -- dataset containing the wavefunctions as rasterized floating point arrays of probabilities in [nm^(-1/2)]: waves[i,j] stores the i-th grid entry of the j-th eigenvector
+	potential -- dataset containing the potential that caused the one body states in [meV]: potential[i] stores potential energy at grid index i
 	m -- the number of eigenvalues/-functions
 	n -- the number of grid points used to represent the wavefunctions
 	dx -- the spacial distance between grid points in [nm]: (x1-x0) = dx * (n-1)
@@ -34,6 +36,7 @@ class SpectrumData:
 
 		self.energies = self.file[_EN_NAME]
 		self.waves = self.file[_EV_NAME]
+		self.potential = self.file[_POT_NAME]
 		par = self.file[_OPT_NAME]
 
 		self.n = len(self.waves[:,0])
@@ -69,6 +72,7 @@ class SpectrumData:
 		self.file = h5py.File(filename + ".hdf5", "w")
 		self.energies = self.file.create_dataset(_EN_NAME, (m,), dtype='d')
 		self.waves = self.file.create_dataset(_EV_NAME, (n, m), dtype='d')
+		self.potential = self.file.create_dataset(_POT_NAME, (n,), dtype='d')
 		if info is None:
 			info = np.array([["n-grids point" ,str(self.n)],["l-lenght of potential",str(self.l)]]).astype('S9')
 		self.file.create_dataset(_OPT_NAME, data=info)
