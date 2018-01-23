@@ -1,9 +1,45 @@
 
 import HaPPPy
 import unittest
+import h5py
 import numpy as np
+import matplotlib.pyplot as plt
 from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
 from HaPPPy.TwoBody.TwoParticle import createTwoParticleData
+import HaPPPy.TwoBody.MatrixElement as MatrixElement
+
+# general settings
+_debug = False # whether to log debug info
+_useExistingData = True # whether to use data that was generated in a previous test instead of recalculating everything
+_filePath = 'tests/data/twoBody.h5py' # file used to store or load test data
+_obDataFile='data_group1' # file which provides the used one body data
+
+# opens the hdf5 file for storing test data
+if _useExistingData:
+    repository = h5py.File(_filePath, "r")
+else:
+    repository = h5py.File(_filePath, "w")
+
+def check_convergence(Val):
+    """helper function to test whether a given array of test data converges to a certain value.
+    
+    raises an AssertionError if data is not converging
+    return lowest and highest convergence factor from one element to the next.
+    Values between -1 and +1 indicate convergence: close to 0 = fast, close to +/-1 = slow
+    Values below -1 or above +1 indicate divergence: close to +/-1 = slow, close to +/-infinite = fast
+    Positive indicates monotone whereas negative indicates oscillating convergence/divergence
+    """
+    dE = np.ediff1d(Val)
+    L_max = -1.0
+    L_min = 1.0
+    for i in range(len(dE) - 1):
+        e = dE[i + 1]
+        if (abs(e / Val[i]) < 1e-6): break
+        L = e / dE[i]
+        L_max = max(L_max, L)
+        L_min = min(L_min, L)
+    return L_min, L_max
+
 
 class TwoBodyTestSuite(unittest.TestCase):
     """A test class to the TwoBody module.
@@ -24,34 +60,89 @@ class TwoBodyTestSuite(unittest.TestCase):
     def test_opWaves_count_convergence(self):
         """ Checks whether the two-body base energy converges when increasing the amount of feed in one-body states.
         """
-        _step = 5.0
-        _max = 50.0
-        obDataFile='data_group1' #TODO the data must be sorted for this to work
-        obData = SpectrumData()
-        obData.open(obDataFile)
-        N = np.arange(_step, min(obData.m, _max), _step)
-        it = np.nditer([N, None])
-        for n, e in it:
-            print("running with %d ob-states:" % n)
-            obData.m = int(n)
-            ev = createTwoParticleData(obData)[0]
-            print(ev)
-            e[...] = ev[0]
-        E = it.operands[1]
-        print("summary of two-body base energies:")
-        print(E)
-        dE = np.ediff1d(E)
-        L_max = 0.0
-        for i in range(len(dE) - 1):
-            L = dE[i + 1] / dE[i]
-            self.assertLess(L, 1.0, msg='not converging!')
-            L_max = max(L_max, L)
-        print("converges with a factor < %.2f per %d added wavefunctions" % (L_max, _step))
+        # settings
+        _step = 2.0
+        _max = 20.0
+        
+        # generate / load test data
+        if (_useExistingData):
+            N = repository['varObCount/count'][:]
+            E = repository['varObCount/energy'][:]
+        else:
+            obData = SpectrumData()
+            obData.open(_obDataFile)
+            N = np.arange(_step, min(obData.m, _max), _step)
+            it = np.nditer([N, None])
+            for n, e in it:
+                if _debug: print("running with %d ob-states:" % n)
+                obData.m = int(n)
+                ev = createTwoParticleData(obData)[0]
+                if _debug: print(ev)
+                e[...] = ev[0]
+            E = it.operands[1]
+            repository.create_dataset('varObCount/count', data=N, dtype='i')
+            repository.create_dataset('varObCount/energy', data=E, dtype='d')
+            repository.flush()
+        
+        # evaluate data
+        if _debug: print("summary of two-body base energies:")
+        if _debug: print(E)
+        plt.plot(N, E)
+        plt.title("Variation of one body state count")
+        plt.xlabel("used one body states")
+        plt.ylabel("base energy [meV]")
+        plt.show()
+        L_min, L_max = check_convergence(E)
+        print("Converges with %.2f < factor < %.2f per %d added wavefunctions" % (L_min, L_max, _step))
+        self.assertLess(L_max, 1.0, msg='diverging!')
+        self.assertGreater(L_min, -1.0, msg='diverging!')
 
     def test_coulomb_epsilon_convergence(self):
         """ Checks whether the two-body energy states converge when decreasing epsilon (the coulomb interaction cutoff)
         """
-        #TODO write this test
+        # settings
+        _epsilon = 0.1 # start value for epsilon
+        _factor = 2.0 # factor by which epsilon gets divided each step
+        _steps = 20 # amount of steps to run
+        _obCount = 20 # number of one body state to use for calculation
+        _num = 20 # number of two body energies to plot and evaluate
+        
+        # generate / load test data
+        if (_useExistingData):
+            Ep = repository['varEpsilon/epsilon'][:]
+            En = repository['varEpsilon/energies'][:,:]
+        else:
+            obData = SpectrumData()
+            obData.open(_obDataFile)
+            obData.m = _obCount
+            Ep = np.zeros(_steps)
+            En = np.zeros((_steps, _obCount**2))
+            for i in range(_steps):
+                if _debug: print("running with epsilon of %s" % _epsilon)
+                MatrixElement._epsilon = _epsilon
+                ev = createTwoParticleData(obData)[0]
+                if _debug: print(ev)
+                Ep[i] = _epsilon
+                En[i,:] = ev
+                _epsilon /= _factor
+            repository.create_dataset('varEpsilon/epsilon', data=Ep, dtype='d')
+            repository.create_dataset('varEpsilon/energies', data=En, dtype='d')
+            repository.flush()
+        
+        #evaluate data
+        En = En[:, 0:_num]
+        if _debug: print("summary of two-body base energies:")
+        if _debug: print(En)
+        plt.plot(Ep, En)
+        plt.title("Variation of epsilon from coulomb interaction")
+        plt.xlabel("value of epsilon")
+        plt.xscale('log')
+        plt.ylabel("energy [meV]")
+        plt.show()
+        L_min, L_max = check_convergence(En[:,_num-1])
+        print("Converges with %.2f < factor < %.2f when epsilon decreased by factor %s" % (L_min, L_max, _factor))
+        self.assertLess(L_max, 1.0, msg='diverging!')
+        self.assertGreater(L_min, -1.0, msg='diverging!')
 
     def test_oneParticleLoader(self):
         """ Checks the OneParticleLoader for self consistency
@@ -91,4 +182,4 @@ class TwoBodyTestSuite(unittest.TestCase):
 
 if __name__ == '__main__':
     two_body_suite = unittest.TestLoader().loadTestsFromTestCase(TwoBodyTestSuite)
-    unittest.TextTestRunner(verbosity=2, buffer=True).run(two_body_suite)
+    unittest.TextTestRunner(verbosity=2, buffer=False).run(two_body_suite)
