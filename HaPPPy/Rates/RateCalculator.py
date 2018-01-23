@@ -46,7 +46,8 @@ class RateCalculator:
         Gamma=[[0,Gamma_01,zeros],
                [Gamma_10,zeros,Gamma_12]
                [zeros, Gamma_21,zeros]] 
-        """ 
+        """
+        NEcut = len(E1)
         VG=np.diag(pot)
         E= int(0.5*np.size(VG))
         V = VG[0:E]
@@ -66,15 +67,13 @@ class RateCalculator:
         def Gamma(Ea,Eb,V):
              print(Ea)
              print(V)
-             return (np.absolute(TCalc.calculate_transmission(Ea,V))**2*Density.calculate_DensityofStates(np.absolute(Ea-Eb)))
-
- 
-        NEcut= np.size(E1) #NEcut tells us how many two-particle states (that are significant for our calculations) there are on the dot.
-          
+             return (np.absolute(TCalc.calculate_transmission(Ea,V,0.1)*Density.calculate_DensityofStates(np.absolute(Ea-Eb))))
+                     
         #These next four functions are used to calculate the rates of transmissions.
         #Each function represents a specific kind of equation that deals with a certain kind of transmission;
         #We distinguish between transmissions, where the number of electrons on the dot changes from one to two(Gamma_12) and reverse(Gamma_21).
         #And between transmissions where the number of electrons on the dot change from zero to one(Gamma_01) and reverse(Gamma_10).
+
         def Gamma_12(Ea,Eb,mu,T): 
             summe=0
             j=0
