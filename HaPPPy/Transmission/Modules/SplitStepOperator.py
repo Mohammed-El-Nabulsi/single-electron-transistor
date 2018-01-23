@@ -1,12 +1,11 @@
 import numpy as np
-
 from HaPPPy.Transmission.Modules.Fourier import Fourier
 
 from scipy.constants import codata
 
 dt = 10**(2)
-me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to meV/c^2
-hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10*fs*millielectronvolts
+me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to meV
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10 meV fm
 
 
 class Split_Step_Operator():
@@ -68,6 +67,13 @@ class Split_Step_Operator():
         
         self.kinetic_operator = create_kinetic_operator(self)
         self.kinetic_operator_half = create_kinetic_operator_half(self)
+        
+#        print("shapes of the kinetic operators")
+#        print(self.kinetic_operator.shape)
+#        print(self.kinetic_operator_half.shape)
+#        print("types of the kinetic operators")
+#        print(type(self.kinetic_operator))
+#        print(type(self.kinetic_operator_half))
 
         def create_potential_operator(self):
             potential_operator = np.zeros(self.pot.size, dtype=np.complex64)
@@ -80,6 +86,11 @@ class Split_Step_Operator():
             return potential_operator
         
         self.potential_operator = create_potential_operator(self)
+        
+#        print("shape of the potenital operator")
+#        print(self.potential_operator.shape)
+#        print("type of the potential operator")
+#        print(type(self.potential_operator))
     
     def first_step(self, x_wave_1):
         """
@@ -97,9 +108,7 @@ class Split_Step_Operator():
         """
         k_wave_f = self.fourier.dft(x_wave_1)
         kin_k_wave = np.multiply(self.kinetic_operator_half, k_wave_f, dtype=np.complex64)
-        x_wave2 = self.fourier.idft(kin_k_wave)
-        pot_x_wave = np.multiply(self.potential_operator, x_wave2, dtype=np.complex64)
-        return self.fourier.dft(pot_x_wave)
+        return self.fourier.idft(kin_k_wave)
     
     def steps(self, wave):
         """
@@ -114,11 +123,11 @@ class Split_Step_Operator():
         v_k_wave_s2 : Array, len(wave)
             wavefunction after applying full kinetic-, full potential- and again full kineticoperator
         """
-        kin_k_wave_s = np.multiply(self.kinetic_operator, wave, dtype=np.complex64)
-        x_wave_s = self.fourier.idft(kin_k_wave_s)
-        pot_x_wave_s = np.multiply(self.potential_operator, x_wave_s, dtype=np.complex64)
-        k_wave_s2 = self.fourier.dft(pot_x_wave_s)
-        return np.multiply(self.kinetic_operator, k_wave_s2, dtype=np.complex64)
+        pot_wave_s = np.multiply(self.potential_operator, wave, dtype=np.complex64)
+        k_wave_s = self.fourier.dft(pot_wave_s)
+        kin_wave_s = np.multiply(self.kinetic_operator, k_wave_s, dtype=np.complex64)
+        return self.fourier.idft(kin_wave_s)
+
     
     def final_step(self, k_wave_fs):
         """
@@ -133,8 +142,7 @@ class Split_Step_Operator():
         ift_kin_k_wave_fs : Array, len(k_wave_fs)
             Wavefuntion in positionspace after the split-step-algorithm
         """
-        x_wave_fs = self.fourier.idft(k_wave_fs)
-        pot_x_wave_fs = np.multiply(self.potential_operator, x_wave_fs, dtype=np.complex64)
-        k_wave_fs2 = self.fourier.dft(pot_x_wave_fs)
-        kin_k_wave_fs = np.multiply(self.kinetic_operator_half, k_wave_fs2, dtype=np.complex64)
-        return self.fourier.idft(kin_k_wave_fs)
+        pot_wave_fs = np.multiply(self.potential_operator, k_wave_fs, dtype=np.complex64)
+        k_wave_fs = self.fourier.dft(pot_wave_fs)
+        kin_wave_fs = np.multiply(self.kinetic_operator_half, k_wave_fs, dtype=np.complex64)
+        return self.fourier.idft(kin_wave_fs)
