@@ -45,7 +45,7 @@ class TransmissionCalculator:
         if not (numpy.array(V).ndim == 1):
             raise ValueError("V must be one dimensional arrays")
 
-        potential_utils = PotentialUtils(V, dx)
+        potential_utils = Potential(V, dx)
 
         potential = potential_utils.potential
         symmetry_point = potential_utils.gauss_symmetry_point

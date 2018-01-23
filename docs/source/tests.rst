@@ -9,8 +9,6 @@ Here you find a details description of all test cases.
 .. automodule:: tests.OneBodyTest
     :members:    
 
-.. automodule:: tests.TwoBodyTest
-    :members:        
 
 .. automodule:: tests.TransmissionTest
     :members:            
