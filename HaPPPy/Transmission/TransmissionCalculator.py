@@ -38,7 +38,7 @@ class TransmissionCalculator:
         rate : float
             The rate of transmission for the particle within the Potential V (number between 0 and 1)
         """
-        if not (isinstance(V, list)):
+        if not (isinstance(V, Array)):
             raise ValueError("V and x must be arrays")
 
         if not (E <= 0 or V):

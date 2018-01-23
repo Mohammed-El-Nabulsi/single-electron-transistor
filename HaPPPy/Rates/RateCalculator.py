@@ -47,10 +47,10 @@ class RateCalculator:
                [Gamma_10,zeros,Gamma_12]
                [zeros, Gamma_21,zeros]] 
         """ 
-
         VG=np.diag(pot)
         E= int(0.5*np.size(VG))
         V = VG[0:E]
+        print(V)
         kB=0.08629 #Boltzmann constant in meV/K
         #The fermi-function is called by the Gamma_ij-equations (Gamma_12,Gamma_21,Gamma_01,Gamma_10) that calculate our rates.
 
@@ -64,6 +64,8 @@ class RateCalculator:
 
 
         def Gamma(Ea,Eb,V):
+             print(Ea)
+             print(V)
              return (np.absolute(TCalc.calculate_transmission(Ea,V))**2*Density.calculate_DensityofStates(np.absolute(Ea-Eb)))
 
  
