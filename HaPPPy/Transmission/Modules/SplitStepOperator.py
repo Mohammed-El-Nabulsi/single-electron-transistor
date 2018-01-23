@@ -9,7 +9,7 @@ me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert
 hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10 meV fm
 
 
-class SplitStepOperator():
+class Split_Step_Operator():
     """
     Parameters
     ----------
