@@ -95,7 +95,43 @@ class TwoBodyTestSuite(unittest.TestCase):
     def test_coulomb_epsilon_convergence(self):
         """ Checks whether the two-body energy states converge when decreasing epsilon (the coulomb interaction cutoff)
         """
-        #TODO write this test
+        # settings
+        _epsilon = 0.1 # start value for epsilon
+        _factor = 2.0 # factor by which epsilon gets divided each step
+        _steps = 20 # amount of steps to run
+        _obCount = 20 # number of one body state to use for calculation
+        _num = 20 # number of two body energies to plot and evaluate
+        
+        # generate / load test data
+        if (_useExistingData):
+            Ep = repository['varEpsilon/epsilon'][:]
+            En = repository['varEpsilon/energies'][:,:]
+        else:
+            obData = SpectrumData()
+            obData.open(_obDataFile)
+            obData.m = _obCount
+            Ep = np.zeros(_steps)
+            En = np.zeros((_steps, _obCount**2))
+            for i in range(_steps):
+                if _debug: print("running with epsilon of %s" % _epsilon)
+                MatrixElement._epsilon = _epsilon
+                ev = createTwoParticleData(obData)[0]
+                if _debug: print(ev)
+                Ep[i] = _epsilon
+                En[i,:] = ev
+                _epsilon /= _factor
+            repository.create_dataset('varEpsilon/epsilon', data=Ep, dtype='d')
+            repository.create_dataset('varEpsilon/energies', data=En, dtype='d')
+            repository.flush()
+        
+        #evaluate data
+        En = En[:, 0:_num]
+        if _debug: print("summary of two-body base energies:")
+        if _debug: print(En)
+        L_min, L_max = check_convergence(En[:,_num-1])
+        print("Converges with %.2f < factor < %.2f when epsilon decreased by factor %s" % (L_min, L_max, _factor))
+        self.assertLess(L_max, 1.0, msg='diverging!')
+        self.assertGreater(L_min, -1.0, msg='diverging!')
 
     def test_oneParticleLoader(self):
         """ Checks the OneParticleLoader for self consistency
