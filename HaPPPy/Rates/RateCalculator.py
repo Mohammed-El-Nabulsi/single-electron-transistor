@@ -151,6 +151,5 @@ class RateCalculator:
                 Gamma_L[i_+1][0]=Gamma_10(i,muL,T)
                 Gamma_R[i_+1][0]=Gamma_10(i,muR,T)
                 i_=1+i_
-        print(Gamma_L)
-        print(Gamma_R)
+
         return(Gamma_L,Gamma_R)

@@ -1,5 +1,6 @@
 from .TwoParticle import createTwoParticleData
 from .OneParticleLoader import SpectrumData
+from .TwoParticleLoader import TwoBodySpectrumData
 
 class TwoBodySolver:
     """ Solves the two body problem
@@ -31,8 +32,8 @@ class TwoBodySolver:
         Q = result[1]
         data = TwoBodySpectrumData()
         data.init(tbDataFile, len(ev), len(Q[0,0,:]))
-        data.energies[:] = ev
-        data.coeficients[:,:,:] = Q
+        data.energies = ev
+        data.coeficients = Q
         data.close()
         return result
 
