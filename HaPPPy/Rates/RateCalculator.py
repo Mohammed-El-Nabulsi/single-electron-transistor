@@ -36,7 +36,7 @@ class RateCalculator:
 
         print("Hello from the RateCalculator, what can I do for you?")
      
-    def doCalculation(self, E1, E2, muL, muR, T, pot, C, TCalc, Density, E0):
+    def doCalculation(self, E1, E2, muL, muR, T, pot, C, TCalc, Density, E0, L):
 
         """This function calculates the transition rates.
 
@@ -65,7 +65,18 @@ class RateCalculator:
         VG=np.diag(pot)
         E= int(0.5*np.size(VG))
         V = VG[0:E] #since the potential of both barriers is symmetric and we only tunnel through one barrier, we only use one half of the potential
-        print(V)
+        dx= L/(np.size(pot))
+
+        #Following prints are for debugging purposes:
+        #print("---------------------------------------------------------------------")
+        #print("---------------------------------------------------------------------")
+        #print("Hier beginnt die Ausgabe von Rates:")
+        #print("---------------------------------------------------------------------")
+        #print("V:", V)
+        #print("E1:", E1)
+        #print("E2:", E2)
+        #print("C:", C)
+
         kB=0.08629 #Boltzmann constant in meV/K
         
         
@@ -89,7 +100,7 @@ class RateCalculator:
              """
              print(Ea)
              print(V)
-             return (np.absolute(TCalc.calculate_transmission(Ea,V,0.1)*Density.calculate_DensityofStates(np.absolute(Ea-Eb))))
+             return (np.absolute(TCalc.calculate_transmission(Ea,V,dx)*Density.calculate_DensityofStates(np.absolute(Ea-Eb))))
                      
         #These next four functions are used to calculate the rates of transmissions.
         #Each function represents a specific kind of equation that deals with a certain kind of transmission;
@@ -168,6 +179,10 @@ class RateCalculator:
                 Gamma_L[i_+1][0]=Gamma_01(i,muL,T)
                 Gamma_R[i_+1][0]=Gamma_01(i,muR,T)
                 i_=1+i_
-        print(Gamma_L,Gamma_R)
+
+        #print("Gamma_L und Gamma_R:")
+        #print(Gamma_L,Gamma_R)
+        #print("-----------------------------------------------------------------------")
+        #print("---------------------------------------------------------------------")
         return(Gamma_L,Gamma_R)
         

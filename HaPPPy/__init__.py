@@ -159,7 +159,7 @@ def main(argv=None):
         RateCal = RateCalculator()
         Gamma_L, Gamma_R = RateCal.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
                                                 muL, muR, T, pot, \
-                                                TwoBodyEigenvectors, Transmission, dos, E0)
+                                                TwoBodyEigenvectors, Transmission, dos, E0, L)
 
 
         ## Group 5: MASTER MODULE
