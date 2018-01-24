@@ -11,8 +11,8 @@ e = constants.e
 l = 100
 n = 3000
 m = 10
-intersection = 0
-sigma = 10
+intersection = 1
+sigma = 1
 dx = l/n
 unit_gauss = 1
 
@@ -24,8 +24,8 @@ class OneBodyTestSuite(unittest.TestCase):
     def test_OneBody_exists(self):
         """ Checks wether the One Body module exists
         """
-        self.assertTrue(hasattr(HaPPPy, 'OneBody'))
-        print("\n""One Body module exists""\n" )
+        self.assertTrue(hasattr(HaPPPy, 'OneBody'),msg ="One Body Module doesn't exist")
+    
 
     def test_OneBody_Harmonic_kinetic(self):
         """
@@ -95,25 +95,27 @@ class OneBodyTestSuite(unittest.TestCase):
         OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
         _,_,_,_,pot_mat,_,_ = OBSolver.calculateBoxPotential(intersection)
         diagonalarray_main = np.diagonal(pot_mat, 0)
-        self.assertTrue(np.all(diagonalarray_main >= 0), msg = "\n""The elements of the potential matrix in the box potential doesn't make sense.""\n")
+        self.assertTrue(np.all(diagonalarray_main == intersection), msg = "\n""The elements of the potential matrix in the box potential doesn't make sense.""\n")
         diagonalarray_plusone = np.diagonal(pot_mat,1)
         self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "\n""The elements of the potential matrix in the box potential doesn't make sense.""\n")
         diagonalarray_minusone = np.diagonal(pot_mat,-1)
         self.assertTrue (np.all(diagonalarray_minusone == 0), msg = "\n""The elements of the potential matrix in the box potential doesn't make sense.""\n")
 
-#    def test_OneBody_Gauss_potential(self):
-#        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
-#        _,_,_,_,pot_mat,_,_ = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
-#        diagonalarray_main = np.diagonal(pot_mat, 0)
-#        if np.all (diagonalarray_main > 0):
-#            print("\n""The elements of the potential matrix in the gauss potential does make sense.""\n")
-#        else :
-#            print("\n""The elements of the potential matrix in the gauss potential doesn't make sense.""\n")
-#        diagonalarray_plusone = np.diagonal(pot_mat,1)
-#        self.assertTrue (np.all(diagonalarray_plusone == 0),msg = "\n""Your potential matrix is false.""\n")
-#
-#        diagonalarray_minusone = np.diagonal(pot_mat,-1)
-#        self.assertTrue (np.all(diagonalarray_minusone == 0), msg = "\n""Your potential matrix is false.""\n")
+    def test_OneBody_Gauss_potential(self):
+        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
+        _,_,_,_,pot_mat,_,_ = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
+        _,_,_,_,_,self.a_axis,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
+        i = 0
+        testvector = np.diagonal(pot_mat)
+        testvalue_pot = testvector [0]
+        testvalue_a = self.a_axis [0]
+        while i < n:
+            testvalue_pot = testvector [i]
+            testvalue_poti = testvalue_pot - intersection
+            testvalue_a = self.a_axis [i]
+            calc_testvalue_poti = ((-2*sigma)*sqrt(ln(-testvalue_poti/unit_gauss)))
+            self.assertTrue((round(sqrt_testvalue_pot,5) == round(abstestvalue_a,5)), msg = "Your calculation of the potential matrix in the gauss potential is incorrect.")
+            i = i+1
 
     def test_OneBody_calcualteBoxEigenvalues(self):
         """ Checks a dummy Calculation of an Harmonic Potential
@@ -128,16 +130,10 @@ class OneBodyTestSuite(unittest.TestCase):
         self.assertTrue ((lenght_eigenvector == n), msg ="The ammount of eigenvalues are incorrect!")
         while x < n:
             eigenvalue = la_l[x]
-#            self.assertTrue ((eigenvalue > 0), msg = "The eigenvalue aren't positive!")
-            if eigenvalue < 0:
-                print ("In your box potential are the eigenvalue no.",x,"is negative", "\n")
+            self.assertTrue ((eigenvalue > 0), msg = "The eigenvalue aren't positive!")
+#            if eigenvalue < 0:
+#                print ("In your box potential are the eigenvalue no.",x,"is negative", "\n")
             x = x+1
-
-#        for i in range(2000):
-#            bla = HaPPPy.OneBody.OneBodySolver(100, i, 10):
-#            bla.10
-#
-#            assertTrue(len(reuslt) == i)
 
     def test_OneBody_calcualteGaussEigenvalues(self):
         """ Checks a dummy Calculation of an Harmonic Potential
@@ -153,8 +149,8 @@ class OneBodyTestSuite(unittest.TestCase):
         while x < n:
             eigenvalue = la_l[x]
 #            self.assertTrue ((eigenvalue > 0), msg = "The eigenvalue aren't positive!")
-            if eigenvalue < 0:
-                print ("In your gauss potential are the eigenvalue no.",x,"is negative", "\n")
+#            if eigenvalue < 0:
+#                print ("In your gauss potential are the eigenvalue no.",x,"is negative", "\n")
             x = x+1
 
     def test_OneBody_calcualteHarmonicEigenvalues(self):
@@ -258,32 +254,92 @@ class OneBodyTestSuite(unittest.TestCase):
             self.assertTrue((cut_la_l == check_la), msg ="Your choosen eigenvalues do not correlate with the original")
             x = x+1
 
-#    def test_eigenvalues_gauss_compared(self):
-#        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
-
+    def test_eigenvalues_gauss_compared(self):
+        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
+        la_gauss,_,_,_,_,_,_ = OBSolver.calcualteGaussPotential(1,1)
+        la_harmonic,_,_,_,_,_,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
+        first_eigenvalue_harm = la_harmonic [1] - intersection
+        first_eigenvalue_gauss = la_gauss [1]
+        self.assertTrue((round(first_eigenvalue_harm,3) == round(first_eigenvalue_gauss,3)), msg ="Your eigenvalues from the gauss potential are wrong calculated")
 
     def test_output_eigenvalue_harmonic_potential(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
         la,_,_,_,_,_,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
         f = 1.876077526e13
         energie_first_eigenvalue = (((1/2)*hbar*f)/e)*1000
-        energie_first_eigenvalue_calc = la [0]
-        self.assertTrue((round(energie_first_eigenvalue,5) == round(energie_first_eigenvalue_calc,5)), msg ="The calculated eigenvalues aren't equal too the numeric calculated eigenvalues")
+        energie_first_eigenvalue_calc = la [0] - intersection
+        p = 0
+        while p < 5:
+            energie_eigenvalue = (((p+(1/2))*hbar*f)/e)*1000
+            energie_eigenvalue_calc = la [p] - intersection
+            self.assertTrue((round(energie_eigenvalue,2)==round(energie_eigenvalue_calc,2)), msg= "The eigenvalues form the harmonic potential are incorrect!")
+            p = p+1
+
+    def test_gridpoints_potential_matrix_box(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,_,pot_mat,_,_ = OBSolver.calculateBoxPotential(intersection)
+            diagonalarray = np.diagonal(pot_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The potenialmatrix in your box potential has a wrong ammount of values.")
+            n = n+1
+
+    def test_gridpoints_potential_matrix_harmonic(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,_,pot_mat,_,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
+            diagonalarray = np.diagonal(pot_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The potenialmatrix in your harmonic potential has a wrong ammount of values.")
+            n = n+1
+
+    def test_gridpoints_potential_matrix_gauss(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,_,pot_mat,_,_ = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
+            diagonalarray = np.diagonal(pot_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The potenialmatrix in your gauss potential has a wrong ammount of values.")
+            n = n+1
+
+    def test_gridpoints_kinetic_matrix_gauss(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,kin_mat,_,_,_ = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
+            diagonalarray = np.diagonal(kin_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The kineticmatrix in your gauss potential has a wrong ammount of values.")
+            n = n+1
+
+    def test_gridpoints_kinetic_matrix_harmonic(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,kin_mat,_,_,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
+            diagonalarray = np.diagonal(kin_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The kineticmatrix in your harmonic potential has a wrong ammount of values.")
+            n = n+1
+
+    def test_gridpoints_kinetic_matrix_box(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,kin_mat,_,_,_ = OBSolver.calculateBoxPotential(intersection)
+            diagonalarray = np.diagonal(kin_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The kineticmatrix in your box potential has a wrong ammount of values.")
+            n = n+1
+
+
+
+
 
 if __name__ == '__main__':
-    #OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
-    #la, vabcd, i = OBSolver.calcualteHarmonicPotential(0)
-    #OBSolver.exportData(la, vabcd, i)
-    #print(vabcd)
     
-    #OBSolver = HaPPPy.OneBody.OneBodySolver(100,2000)
-    #la ,v = OBSolver.calcualteGaussPotential(1 ,5)
-    #print(v)
-
-#    OBSolver = HaPPPy.OneBody.OneBodySolver(100,100)
-#    la, v , Info = OBSolver.calculateBoxPotential(1)
-#    OBSolver.exportData(la, v, Info)
     unittest.main()
 
-    #one_body_suite = unittest.TestLoader().loadTestsFromTestCase(OneBodyTestSuite)
-    #unittest.TextTestRunner(verbosity=2, buffer=True).run(one_body_suite)
