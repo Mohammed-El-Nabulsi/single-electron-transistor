@@ -1064,7 +1064,7 @@ class Simulation():
     \\dots, f(m \\cdot \\Delta t))`.
 
     where :math:`m = \\lfloor \\frac{t_{max}}{\\Delta t} \\rfloor`
-    ≣ :code:`len(sim)`.
+    ≣ :code:`len(sim) - 1`.
 
     Note: :math:`m` might be smaller for invalid simulations (see valid()).
     """
