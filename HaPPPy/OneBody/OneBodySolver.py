@@ -142,7 +142,7 @@ class OneBodySolver:
         return la, v_norm , Info, kin_mat, pot_mat
 			
     # possible input factor but we defined factor already as unit_pot
-    def calcualteHarmonicPotential(self, intersection):
+    def calcualteHarmonicPotential(self, intersection, omega=6*10**14):
         """ Gives energy eigenvalues and eigenvectors and Info
             needs intersection as input:
                 --> uses y = x^2 + intersection, as the potential
@@ -191,7 +191,7 @@ class OneBodySolver:
 
         # unit system and calculation of final Hamiltonian matrix ham_mat
         # factor 1000 for the unit system in order to reach meV
-        unit_pot = ((1/2)*self.me*(3.5174*(10**29))*((10**-9))**2)/self.e  # potential matrix in meV
+        unit_pot = ((1/2)*self.me*1000*omega**2*((10**-9))**2)/self.e  # potential matrix in meV
 
         unit_kin = ((self.hbar**2)*1000)/(2*self.me*(10**-18)*self.e)
         #print(unit_kin, "\n", unit_pot)  # control print for unit

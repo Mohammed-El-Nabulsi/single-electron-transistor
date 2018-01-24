@@ -124,7 +124,7 @@ def main(argv=None):
     # Do the one body calculation
     # TODO Group 1: Fix spelling mistakes
     OneBody = OneBodySolver(L,N)
-    OneBodyEigenvalues, OneBodyEigenVectors, Info, kin, pot = OneBody.calcualteHarmonicPotential(E0)
+    OneBodyEigenvalues, OneBodyEigenVectors, Info, kin, pot = OneBody.calcualteHarmonicPotential(E0, 5.93076*10**14)
 
     # Save file to hdf5 file
     OneBody.exportData(OneBodyEigenvalues, OneBodyEigenVectors, Info)
