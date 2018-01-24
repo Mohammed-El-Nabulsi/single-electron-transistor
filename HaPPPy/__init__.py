@@ -158,8 +158,8 @@ def main(argv=None):
         #                           There is no common way to transfer the rates
         RateCal = RateCalculator()
         Gamma_L, Gamma_R = RateCal.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
-                                                muL, muR, T, V, \
-                                                TwoBodyEigenvectors, Transmission, dos)
+                                                muL, muR, T, pot, \
+                                                TwoBodyEigenvectors, Transmission, dos, E0)
 
 
         ## Group 5: MASTER MODULE
