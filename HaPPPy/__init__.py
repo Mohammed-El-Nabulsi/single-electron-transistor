@@ -101,6 +101,10 @@ def main(argv=None):
                         action="store_true",
                         help="print detailed information about each step of the calulations",
                        )
+    parser.add_argument('-p', '--print_result',
+                       action="store_true",
+                       help="print the final result(s) of the calulations",
+                      )
     parser.add_argument('-c', '--config',
                         type=str,
                         default=default_path_config,
@@ -205,14 +209,20 @@ def main(argv=None):
                                                                   ns,
                                                                   verbose=args.verbose,
                                                                  )
-            print("(P_stat_ij) =\n", stat_ps)
-            print("(I^k_stat_i) = \n", stat_curs)
-            print("muL",muL,"muR",muR,sum(stat_curs[0]))
+            # Calculate conductivity.
+            stat_sigma = abs(stat_curs / (muR - muL))
+            # Print all results.
+            if args.print_result:
+                print("results:")
+                print("(P_stat_ij) =\n", stat_ps)
+                print("(I^k_stat_i) = \n", stat_curs)
+                print("(sigma^k_stat_i) = \n", stat_sigma)
             current.append(sum(stat_curs[0]))
             # Store output values.
             with h5py.File(datapath_master, "w") as f:
                 f.create_dataset("stat_ps", data=stat_ps)
                 f.create_dataset("stat_curs", data=stat_curs)
+                f.create_dataset("stat_sigma", data=stat_sigma)
         else:
             # A simulation is requested.
             if args.verbose: print("mode = DYNAMIC")

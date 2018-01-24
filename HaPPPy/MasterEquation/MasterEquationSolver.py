@@ -958,7 +958,7 @@ class MasterEquationSolver:
         else:
             stat_curs = []
 
-        return stat_curs
+        return np.array(stat_curs)
 
 
     def __simulateDynamicCurrent(self,
