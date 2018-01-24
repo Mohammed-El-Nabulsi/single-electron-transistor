@@ -3,6 +3,7 @@ import HaPPPy
 import unittest
 import numpy as np
 import scipy.integrate
+import math
 from math import sqrt
 from scipy import constants
 
@@ -15,6 +16,9 @@ intersection = 1
 sigma = 1
 dx = l/n
 unit_gauss = 1
+omega = 1.875537349*(10**13)
+lenght_gauss = int(round((n/4),0))
+lenght_gauss2 = int(round((3*lenght_gauss),0))
 
 class OneBodyTestSuite(unittest.TestCase):
     """A test class to the OneBody module.
@@ -105,16 +109,16 @@ class OneBodyTestSuite(unittest.TestCase):
         OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
         _,_,_,_,pot_mat,_,_ = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
         _,_,_,_,_,self.a_axis,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
-        i = 0
+        i = lenght_gauss
         testvector = np.diagonal(pot_mat)
         testvalue_pot = testvector [0]
         testvalue_a = self.a_axis [0]
-        while i < n:
+        while i < lenght_gauss2:
             testvalue_pot = testvector [i]
-            testvalue_poti = testvalue_pot - intersection
+            testvalue_poti = testvalue_pot
             testvalue_a = self.a_axis [i]
-            calc_testvalue_poti = ((-2*sigma)*sqrt(ln(-testvalue_poti/unit_gauss)))
-            self.assertTrue((round(sqrt_testvalue_pot,5) == round(abstestvalue_a,5)), msg = "Your calculation of the potential matrix in the gauss potential is incorrect.")
+            calc_testvalue_poti = (sigma)*sqrt(-2*np.log(-testvalue_poti/unit_gauss))
+            self.assertTrue((round(calc_testvalue_poti,5) == round(abs(testvalue_a),5)), msg = "Your calculation of the potential matrix in the gauss potential is incorrect.")
             i = i+1
 
     def test_OneBody_calcualteBoxEigenvalues(self):
@@ -265,14 +269,13 @@ class OneBodyTestSuite(unittest.TestCase):
     def test_output_eigenvalue_harmonic_potential(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
         la,_,_,_,_,_,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
-        f = 1.876077526e13
-        energie_first_eigenvalue = (((1/2)*hbar*f)/e)*1000
+        energie_first_eigenvalue = (((1/2)*hbar*omega)/e)*1000
         energie_first_eigenvalue_calc = la [0] - intersection
         p = 0
         while p < 5:
-            energie_eigenvalue = (((p+(1/2))*hbar*f)/e)*1000
+            energie_eigenvalue = (((p+(1/2))*hbar*omega)/e)*1000
             energie_eigenvalue_calc = la [p] - intersection
-            self.assertTrue((round(energie_eigenvalue,2)==round(energie_eigenvalue_calc,2)), msg= "The eigenvalues form the harmonic potential are incorrect!")
+            self.assertTrue((round(energie_eigenvalue,1)==round(energie_eigenvalue_calc,1)), msg= "The eigenvalues form the harmonic potential are incorrect!")
             p = p+1
 
     def test_gridpoints_potential_matrix_box(self):

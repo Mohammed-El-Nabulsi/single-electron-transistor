@@ -142,7 +142,7 @@ class OneBodySolver:
         return la, v_norm , Info, kin_mat, pot_mat, la_l, v_norm_l
 			
     # possible input factor but we defined factor already as unit_pot
-    def calcualteHarmonicPotential(self, intersection, omega=6*10**14):
+    def calcualteHarmonicPotential(self, intersection, omega=1.875537359*10**13):
         """ Gives energy eigenvalues and eigenvectors and Info
             needs intersection as input:
                 --> uses y = x^2 + intersection, as the potential
