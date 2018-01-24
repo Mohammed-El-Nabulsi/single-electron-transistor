@@ -144,7 +144,7 @@ def main(argv=None):
 
     current = []
     for i in range(len(configdata["muL"])):
-        
+
         muL = configdata["muL"][i]
         muR = configdata["muR"][i]
 
@@ -202,9 +202,9 @@ def main(argv=None):
             # Static solutions are requested.
             if args.verbose: print("mode = STATIC")
             stat_ps, stat_curs = mes.calculateStationarySloutions(Gamma_L, Gamma_R,
-                                                                ns,
-                                                                verbose=args.verbose,
-                                                                )
+                                                                  ns,
+                                                                  verbose=args.verbose,
+                                                                 )
             print("(P_stat_ij) =\n", stat_ps)
             print("(I^k_stat_i) = \n", stat_curs)
             print("muL",muL,"muR",muR,sum(stat_curs[0]))
@@ -238,10 +238,10 @@ def main(argv=None):
                 f.create_dataset("P_0", data=P_0)
             # Calculate the simulation.
             sim_p, sim_cur = mes.simulateDynamicSloution(DT, TMax,
-                                                        P_0,
-                                                        Gamma_L, Gamma_R,
-                                                        ns,
-                                                        verbose=args.verbose,
+                                                         P_0,
+                                                         Gamma_L, Gamma_R,
+                                                         ns,
+                                                         verbose=args.verbose,
                                                         )
             # Plot the simulations.
             # 1st plot: time development of propabilities
@@ -250,8 +250,10 @@ def main(argv=None):
                         )
             # 2nd plot: time development of netto current
             sim_cur.quickPlot(xlabel="t", ylabel="I",
-                            xunit_symbol="ps",
-                            )
+                              xunit_symbol="ps",
+                              yunit_symbol="\\frac{-e}{ps}",
+                              legend=["$I^L$","$I^R$"],
+                             )
             # Store output values.
             with h5py.File(datapath_master, "w") as f:
                 f.create_dataset("sim_p", data=sim_p)

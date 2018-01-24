@@ -1240,14 +1240,14 @@ class Simulation():
         # It is possible to add an optional unit to each axis.
         if xlabel != None:
             if xunit_symbol != None:
-                plt.xlabel(str(xlabel) + "/" + str(xunit_symbol))
+                plt.xlabel("$" + str(xlabel) + " / " + str(xunit_symbol) + "$")
             else:
-                plt.xlabel(str(xlabel))
+                plt.xlabel("$" + str(xlabel) + "$")
         if ylabel != None:
             if yunit_symbol != None:
-                plt.ylabel(str(ylabel) + "/" + str(yunit_symbol))
+                plt.ylabel("$" + str(ylabel) + " / " + str(yunit_symbol) + "$")
             else:
-                plt.ylabel(str(ylabel))
+                plt.ylabel("$" + str(ylabel) + "$")
         # Add a legend if requested.
         # If the function values are vetors ylabel is treated as a LATEX
         # expression representing a symbol and automatic indicies are added.
