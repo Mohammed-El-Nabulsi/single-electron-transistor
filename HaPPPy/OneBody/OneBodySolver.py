@@ -35,19 +35,20 @@ class OneBodySolver:
     me = constants.m_e
     e = constants.e
 
-    def __init__(self, l, n):
+    def __init__(self, l, n, m):
         """ The constructor receives l, n
         and creates an array from (-l/2) - (l/2) with n elements
         array is used as x-values for potential (Harmonic, Gauss, Box)
         """
         self.l = l
         self.n = n
+        self.m = m
 #        print("Hello from the OneBody Solver, what can I do for you?")
 
         # creating array in user input length l and user input elements n and not changeable array for plot x-axis
         self.a = np.linspace((-self.l / 2), (self.l / 2), self.n)
-
-        
+        self.a_axis = np.linspace((-self.l / 2), (self.l / 2), self.n)
+    
         
 
 
@@ -112,12 +113,8 @@ class OneBodySolver:
         ham_mat = unit_kin * kin_mat * (1/(dx*dx)) + unit_pot * pot_mat
 
         # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
-        la, v = np.linalg.eigh(ham_mat)
+        la_l, v = np.linalg.eigh(ham_mat)
 
-        # printing eigenvalues and eigenvectors
-        # as option for debugging
-        #for i in range(10):
-        #    print("Eigenvalue:\t\t ", la[i])
         
         # create norm of the eigenvectors
         norm = 0.0
@@ -125,9 +122,8 @@ class OneBodySolver:
             norm += (v[i,0]*v[i,0]) * dx
 
         sqrt_norm = sqrt(norm)
-        #print(sqrt_norm)
 
-        v_norm = v / sqrt_norm # v is now norm matrix of eigenvectors
+        v_norm_l = v / sqrt_norm # v is now norm matrix of eigenvectors
 
         # test if eigenvectors are normed here 25. 
         #norm = 0.0
@@ -136,10 +132,14 @@ class OneBodySolver:
         #print(norm)
         
         # list of tuples for calculation information
-        Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(True)], \
+        Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],
+                ["number of eigenvalues -vectors",str(self.m)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
         
-        return la, v_norm , Info, kin_mat, pot_mat
+        # return m eigenvalues/eigenvector
+        la = la_l[:self.m]
+        v_norm = v_norm_l[:,:self.m]
+        return la, v_norm , Info, kin_mat, pot_mat, la_l, v_norm_l
 			
     # possible input factor but we defined factor already as unit_pot
     def calcualteHarmonicPotential(self, intersection, omega=6*10**14):
@@ -173,6 +173,7 @@ class OneBodySolver:
         
         for x in np.nditer(self.a, op_flags=['readwrite']):
             x[...] =(x**2) + intersection
+        
         mat_build(self.a)  # build pot_mat
         #print(pot_mat)
         
@@ -201,7 +202,7 @@ class OneBodySolver:
         ham_mat = unit_kin * kin_mat * (1/(dx*dx)) + unit_pot * pot_mat
 
         # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
-        la, v = np.linalg.eigh(ham_mat)
+        la_l, v = np.linalg.eigh(ham_mat)
 
         # printing eigenvalues and eigenvectors
         # as option for debugging
@@ -215,7 +216,7 @@ class OneBodySolver:
 
         sqrt_norm = sqrt(norm)
 
-        v_norm = v / sqrt_norm # v is now norm matrix of eigenvectors
+        v_norm_l = v / sqrt_norm # v is now norm matrix of eigenvectors
 
         # test if eigenvectors are normed here 25. 
         #norm = 0.0
@@ -224,10 +225,14 @@ class OneBodySolver:
         #print(norm)
         
         # list of tuples for calculation information
-        Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(True)], \
+        Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],
+                ["number of eigenvalues -vectors",str(self.m)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
+        # return m eigenvalues/eigenvector
+        la = la_l[:self.m]
+        v_norm = v_norm_l[:,:self.m]
         
-        return la, v_norm , Info, kin_mat, pot_mat
+        return la, v_norm , Info, kin_mat, pot_mat, self.a_axis, la_l, v_norm_l
         
         
     def calcualteGaussPotential(self, A, sigma):
@@ -262,7 +267,7 @@ class OneBodySolver:
             return pot_mat
 
         for x in np.nditer(self.a, op_flags=['readwrite']):
-            x[...] = A*(-np.exp(-np.power((x) / sigma, 2.) / 2.))
+            x[...] = -A*(np.exp(-np.power((x) / sigma, 2.) / 2.))
         mat_build(self.a)  # build pot_mat
 
 
@@ -288,7 +293,7 @@ class OneBodySolver:
         ham_mat = unit_kin * kin_mat * (1/(dx*dx)) + unit_pot * pot_mat
         
         # calculate eigenvalues (stored in la) and eigenvectors (stored in v)
-        la, v = np.linalg.eigh(ham_mat)
+        la_l, v = np.linalg.eigh(ham_mat)
 
         # printing eigenvalues and eigenvectors
         # as option for debugging
@@ -303,7 +308,7 @@ class OneBodySolver:
         sqrt_norm = sqrt(norm)
 #        print(sqrt_norm)
 
-        v_norm = v / sqrt_norm # v is now norm matrix of eigenvectors
+        v_norm_l = v / sqrt_norm # v is now norm matrix of eigenvectors
 
         # test if eigenvectors are normed here 25. 
         #norm = 0.0
@@ -312,17 +317,21 @@ class OneBodySolver:
         #print(norm)
         
         # list of tuples for calculation information
-        Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],["HarmonicPotential",str(False)], \
+        Info = np.array([["n-grids point" ,str(self.n)],["l-length of potential",str(self.l)],
+                        ["number of eigenvalues -vectors",str(self.m)], ["HarmonicPotential",str(False)], \
         ["GaussPotential",str(True)],["BoxPotential",str(False)]]).astype('S9')
-        
-        return la, v_norm, Info, kin_mat, pot_mat
+        # return m eigenvalues/eigenvector
+        la = la_l[:self.m]
+        v_norm = v_norm_l[:,:self.m]
+        return la, v_norm, Info, kin_mat, pot_mat, la_l, v_norm_l
 
 
     def exportData(self, la, v_norm, info, path="data_group1"):
         Data = SpectrumData()
         Data.init(path, len(la), len(la), info=info)
-        Data.energies[:] = la
-        Data.waves[:,:] = v_norm
+        Data.energies = la
+        Data.waves = v_norm
+#       Data.potential[:] = self.a
         Data.close()
 
 

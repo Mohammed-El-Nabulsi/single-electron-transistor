@@ -120,11 +120,13 @@ def main(argv=None):
     L = configdata["L"]
     N = configdata["N"]
     E0 = configdata["E0"]
-
+    M = 3
     # Do the one body calculation
     # TODO Group 1: Fix spelling mistakes
-    OneBody = OneBodySolver(L,N)
-    OneBodyEigenvalues, OneBodyEigenVectors, Info, kin, pot = OneBody.calcualteHarmonicPotential(E0, 5.93076*10**14)
+    OneBody = OneBodySolver(L,N,M)
+    OneBodyEigenvalues, OneBodyEigenVectors, Info, _,pot,_,_,_ = OneBody.calcualteHarmonicPotential(E0)
+
+    print(OneBodyEigenVectors.shape)
 
     # Save file to hdf5 file
     OneBody.exportData(OneBodyEigenvalues, OneBodyEigenVectors, Info)
@@ -156,8 +158,8 @@ def main(argv=None):
         #                           There is no common way to transfer the rates
         RateCal = RateCalculator()
         Gamma_L, Gamma_R = RateCal.doCalculation(OneBodyEigenvalues, TwoBodyEigenvalues,\
-                                                muL, muR, T, V, \
-                                                TwoBodyEigenvectors, Transmission, dos)
+                                                muL, muR, T, pot, \
+                                                TwoBodyEigenvectors, Transmission, dos, E0)
 
 
         ## Group 5: MASTER MODULE

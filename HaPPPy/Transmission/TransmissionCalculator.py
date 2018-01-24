@@ -1,7 +1,7 @@
 from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
 from HaPPPy.Transmission.Modules.SplitStepOperator import SplitStepOperator
 from HaPPPy.Transmission.Modules.Transmission import Transmission
-from HaPPPy.Transmission.Modules.PotentialUtils import PotentialUtils
+from HaPPPy.Transmission.Modules.PotentialUtils import Potential
 
 import numpy
 import math
@@ -11,10 +11,8 @@ class TransmissionCalculator:
     Calculates the transmission for a particle with energy E
     moving in within a potential V.
     """
-    def doCalculation(self):
-        return 2
 
-    def calculate_transmission(self, E, V):
+    def calculate_transmission(self, E, V, dx):
         """
         Performs the calculation for a particle with energy E
         moving in within a potential V to return the trasmission rate.
@@ -38,19 +36,19 @@ class TransmissionCalculator:
         rate : float
             The rate of transmission for the particle within the Potential V (number between 0 and 1)
         """
-        if not (isinstance(V, list)):
+        if not (isinstance(V, numpy.ndarray)):
             raise ValueError("V and x must be arrays")
-
-        if not (E <= 0 or V):
+        
+        if not (E >= 0 or V):
             raise ValueError("The input parameters are not valid.")
    
         if not (numpy.array(V).ndim == 1):
             raise ValueError("V must be one dimensional arrays")
 
-        potential_utils = PotentialUtils(V, 1)
+        potential_utils = Potential(V, dx)
 
         potential = potential_utils.potential
-        symmetry_point = potential_utils.gauss_symmetry_point
+        symmetry_point = potential_utils.gauss_symmerey_point
         width = potential_utils.gauss_width
 
         x = potential_utils.position_grid
@@ -58,7 +56,7 @@ class TransmissionCalculator:
         psi_0 = None
 
         try:
-            psi_0 = GaussianWave(width, symmetry_point, E, x, []).create_gauss_x_package()
+            psi_0 = GaussianWave(x,symmetry_point,width,E).create_gauss_x_package()
         except Exception as error:
             raise Exception("An error occured while creating the gaussian package. Error: " + repr(error))
 
@@ -90,7 +88,7 @@ class TransmissionCalculator:
                 psi_n = psi_n1[:]
 
                 # BUG: Delta never changes!
-                print(delta)
+                #print(delta)
 
                 if (delta < margin):
                     psi_n = splitStepOperator.final_step(psi_n)
