@@ -1207,13 +1207,13 @@ class Simulation():
                        Vectorial graphs are ploted component-wise and labeled in
                        increasing order of their index. (optional)
         :type legend: list(string)
-        :param start: The :math:`i`th value to start the plot with. (optional)
+        :param start: The :math:`i` th value to start the plot with. (optional)
         :type start: int
-        :param stop: The :math:`i`th value to stop the plot with.
+        :param stop: The :math:`i` th value to stop the plot with.
                      :math:`i` is not included. (optional)
         :type stop: int
-        :param start: The distance between two ploted bins. E.g. :code:`step=1`
-                      plots all values and :code:`i=2` plots every odd indexed
+        :param step: The distance between two ploted bins. E.g. :code:`step=1`
+                      plots all values and :code:`step=2` plots every odd indexed
                       value. (optional)
         :type step: int
 
