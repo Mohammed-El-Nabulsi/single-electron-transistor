@@ -12,33 +12,34 @@ __docformat__ = 'reStructuredText'
 class RateCalculator:
     
     """
-    
-    This class calculates the transition rates between the possible one-body
-    and two-body states of an SET.
 
-    It gives out the transition rates of events where
-    electrons tunnel through a barrier (here through the Left barrier) onto the dot:
+    This class returns all transition rates, accompanying events in which one electron tunnels through a barrier.
+    We assume there are only up to 2 electrons on the dot. Therefore we only consider one-body states,
+    two-body states and the vacuum state.
+
+    The rate of events in which an electron tunnels through the left barrier onto the dot and changes the dot-state from :math:`| \\alpha_N \\rangle` to :math:`| \\beta_{N+1} \\rangle` looks like this:
     
     :math:`\\Gamma^L_{\\alpha_N \\rightarrow \\beta_{N+1}} =
     \Gamma | \langle \\beta_{N+1} | \sum_{\\nu}`
     :math:`c_{\\nu}^{\\dagger} | \\alpha_N \\rangle |^2 n_F ( E_{\\beta_{N+1}} - E_{\\alpha_N} -\\mu_L )`
 
     where
-    :math:`\\beta_{N+1}` is the final one-body or two-body state and :math:`\\alpha_N` is the initial vacuum state or one-body state of the dot.
+    :math:`\\beta_{N+1}` is the final one-body or two-body dot-state and :math:`\\alpha_N` is the initial vacuum state or one-body state of the dot.
     :math:`\\Gamma` includes the transmission coefficient of given tunneling event and the density of states function (DOS) on the dot
     (see the description below). :math:`n_F` is the fermifunction.
     
     :math:`c_{\\nu}^{\\dagger}` is the creation operator. Applied to the :math:`| \\alpha_N \\rangle` - state, it creates an
-    artificial :math:`N + 1`-body state that is being projected onto the :math:`| \\beta_N \\rangle` - state.
+    artificial :math:`N + 1`-body state, that is being projected onto the real final :math:`| \\beta_N \\rangle` - state. :math:`E_{\\alpha_N}` and :math:`E_{\\beta_{N+1}}`
+    are the energies of the initial and final states.
 
-    The rates of the transitions where the number of electrons on the dot decrease are similiarly calculated:
+    The rates of the transitions in which the number of electrons on the dot decrease are similiarly calculated:
 
     :math:`\\Gamma^L_{\\alpha_N \\rightarrow \\beta_{N-1}} =
     \Gamma | \langle \\beta_{N-1} | \sum_{\\nu}`
     :math:`c_{\\nu} | \\alpha_N \\rangle |^2 ( 1 - n_F ( E_{\\beta_{N-1}} - E_{\\alpha_N} -\\mu_L ))`.  
     :math:`\\beta_{N-1}` and :math:`\\alpha_{N}` are, again, the final and initial states. Here we use the annihilation operator :math:`c_{\\nu}`.
 
-    The Rates through the right barrier are calculated the same way (one simply exchanges :math:`\\mu_L` with :math:`\\mu_R`). 
+    The rates of events in which electrons tunnel through the right barrier are calculated the same way (one simply exchanges :math:`\\mu_L` with :math:`\\mu_R`). 
 
     """
     
@@ -51,6 +52,7 @@ class RateCalculator:
     def doCalculation(self, E1, E2, muL, muR, T, pot, C, TCalc, Density, E0, L):
 
         """This function calculates the transition rates.
+        It contains a number of "sub-function" to break down the :math:`\\Gamma^L_{\\alpha \\rightarrow \\beta}` - equation.
 
         :param E1: Array of eigenvalues of the single-particle-states on the dot
                    (calculated in the One Body Module).
@@ -82,14 +84,15 @@ class RateCalculator:
         :type Density: function
         :param E0: Offset Value/ Vacuum energy.
         :type E0: float
-        :param L: Length of tunnel barriers.
+        :param L: length of the potential
         :type L: float
         
         :return: Returns (:math:`\\Gamma_L` , :math:`\\Gamma_R`):
-                 :math:`\\Gamma_L` and :math:`\\Gamma_R` are two nxn-matrices
-                 (:math:`n`=size(E1)+size(E2)+1) that contain the rates through the left barrier on
-                 the "source-side"(Gamma_L) and through the right barrier on the "drain-side"(Gamma_R).
-                 The both output matrices have following format:
+        
+                 :math:`\\Gamma_L` and :math:`\\Gamma_R` are two :math:`n x n`-matrices
+                 (:math:`n` = size(E1) + size(E2)+1) that contain the rates through the left barrier on
+                 the source-side (:math:`\\Gamma_L`) and through the right barrier on the drain-side (:math:`\\Gamma_R`).
+                 Both output matrices have following format:
                  Gamma=[[0,Gamma_01,zeros],
                        [Gamma_10,zeros,Gamma_12]
                        [zeros, Gamma_21,zeros]] 
