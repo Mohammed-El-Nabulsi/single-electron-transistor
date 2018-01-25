@@ -120,6 +120,13 @@ https://pythonhosted.org/an_example_pypi_project/sphinx.html#headers
 Code realization
 ----------------
 
+The class OneBodySolver solves the one body problem as described in **Physics**.
+Following imports must be done to run the module:
+
+    .. figure::  _static/imports.jpg
+        :align:   center
+
+The Data is exported in a hdf5 format. For further information see **exportData**.
 
 
 .. automodule:: HaPPPy.OneBody
