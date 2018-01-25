@@ -5,11 +5,11 @@ import h5py
 from math import sqrt
 from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
 
+__docformat__ = 'reStructuredText'
+
 class OneBodySolver:
-    """ Solves the one body problem
-    class has to receive via user input: l, n
-        --> l, length of the potential in nm (best at 100 nm)
-        --> n, number of grid points for numerical calc.(best at 1000 - 3000)
+    """ The class OneBodySolver solves the one body problem as discribed in **Physics**.
+	Following libraries must be available to run the module.
 
         Solves the one body problem with 3 different potentials as 3 functions:
             call functions with: .calculate*(), 
@@ -21,14 +21,6 @@ class OneBodySolver:
                        A == unit_kin in meV (best at 1 meV)
                        sigma == width of gauss function (best at 5)
 
-        Data stored in Hdf5 format:
-		    call function with : .exportData()
-                --> exportData(la, v_norm, info)
-
-        validating constants as class variables
-            --> hbar, plancks constant
-            --> me, mass electron
-            --> e, charge of electron
     """
     # validating constants for unit calculation of Hamilton matrix
     hbar = constants.hbar

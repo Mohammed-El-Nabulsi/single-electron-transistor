@@ -18,13 +18,14 @@ This module is written to calculate the single bound electron states in a quantu
     .. figure::  _static/pic1.jpg
        :align:   center
 
-**Figure 1:**    Drain and source as well as the quantum dot with single electron states.
+**Figure 1:**    Drain and source with the chemical potential :math:`\mu` as well as the quantum dot with single electron states. :math:`\gamma` is the tunnel probability of the electrons.
+
 
 The energy states for the quantum dot can be calculated for a *harmonic potential*, *box potential* and a *gauss potential*.
 
 Choosing one of the potentials, the user yields the one particle energy levels as well
 as the corresponding wave functions. Plots shown in the documentation are either the chosen
-potential or the probability density of a wave function (most likely of the first 3 wave functions).
+potential or the probability density (absolute square) of a wave function.
 
 Enjoy the following documentation.
 
@@ -32,7 +33,7 @@ Enjoy the following documentation.
 Physics
 -------
 
-To calculate the energy states of a given potential, the Schrödinger quotation is needed.
+To calculate the energy states of a given potential, the time independent Schrödinger equation is needed.
 
 .. math::
     \widehat{H}\psi = E\psi
@@ -44,10 +45,10 @@ To calculate the energy states of a given potential, the Schrödinger quotation 
 .. math::
     \widehat{H} = -\frac{\hbar^2}{2m} \frac{d^2}{dx^2} + V(x)
 	
-A analytic solution to this problem is only in a few cases possible. Therefore the described problem should be calculated numerical.
+An analytic solution to this problem is only in borderline cases possible. Therefore the described problem should be calculated numerical.
 In order to do that the Hamilton operator must be translated to a matrix representation.  
 A potential with the length *l* describes the quantum dot. To calculate the potential numerical from -*l*/2 to *l*/2 
-the length is divided into n grid points. As more grid points are used, the approximation of the result becomes more and more accurate. 
+the length is divided into n grid points. As more grid points are used, the approximation of the result becomes more accurate, but the needed computing power increases. 
 The delta *x* between two grid points is the quotient of *l* and *n*.
 
 .. math::
@@ -90,11 +91,12 @@ The complete hamilton matrix is then:
 .. math::
     \widehat{H} = -\frac{\hbar^2}{2m} \begin{pmatrix} -2&1&0&0&0\\ 1&-2&1&0&0\\0&1&-2&1&0\\0&0&\ddots&\ddots&\ddots\\0&0&0&1&-2 \end{pmatrix} \frac{1}{\Delta x^2} + \begin{pmatrix} V(x_0)&0&0&0&0\\0&V(x_2)&0&0&0\\0&0&V(x_3)&0&0\\0&0&0&\ddots&0\\0&0&0&0&V(x_{n-1})\end{pmatrix}
 	
-With the matrix representation of the Hamilton operator the Schrödinger equation becomes a eigenvalue problem. The calculations 
+With the matrix representation of the Hamilton operator the Schrödinger equation becomes a eigenvalue problem of a . The calculation 
 yields the eigenvalues (energy of the states)and the corresponding eigenvectors (wave function of the energy state). A plot of 
 the squared wave function of a eigenvalue shows the probability density.
+
     - energy *E* --> eigenvalues
-	- wf psi     --> eigenvectors
+    - wf *psi* --> eigenvectors
 
 Unit convention
 ---------------
@@ -113,10 +115,12 @@ Joule is the unit of the calculated energy levels. In order to reach meV, the un
 of the potential matrix are devided by the electron charge *e* and multiplied by 1000. 
 	
 https://pythonhosted.org/an_example_pypi_project/sphinx.html#headers
-	
-	
+
+
 Code realization
 ----------------
+
+
 
 .. automodule:: HaPPPy.OneBody
 .. autoclass:: OneBodySolver
