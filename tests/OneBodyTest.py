@@ -12,7 +12,7 @@ e = constants.e
 l = 100
 n = 2000
 m = 3
-intersection = 0
+intersection = 1
 sigma = 1
 dx = l/n
 unit_gauss = 1
@@ -38,7 +38,7 @@ class OneBodyTestSuite(unittest.TestCase):
         """ This confirm that the user didn't want to get more cutted eigenvalues then eigenvalues exists."""
         self.assertTrue((m <= n),msg =" You want to get more cutted eigenvalues, then eigenvalues.")
     
-    """ Now the test start to check the kinetic Matrices from the chosen potential."""
+    """ Now the test start to check the kinetic matrices from the chosen potential."""
 
     def test_OneBody_Harmonic_kinetic(self):
         """ This test check the kinetic Matrix in the harmonic potential by building diagonalarrays."""
@@ -78,6 +78,39 @@ class OneBodyTestSuite(unittest.TestCase):
 
         diagonalarray_gauss_kin_minusone = np.diagonal(kin_mat,-1)
         self.assertTrue (np.all(diagonalarray_gauss_kin_minusone == -1), msg ="\n""Your kinetic matrix in your gauss potential is false.""\n")
+    
+    def test_gridpoints_kinetic_matrix_gauss(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,kin_mat,_,_,_ = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
+            diagonalarray = np.diagonal(kin_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The kineticmatrix in your gauss potential has a wrong ammount of values.")
+            n = n+1
+
+    def test_gridpoints_kinetic_matrix_harmonic(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,kin_mat,_,_,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
+            diagonalarray = np.diagonal(kin_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The kineticmatrix in your harmonic potential has a wrong ammount of values.")
+            n = n+1
+                
+    def test_gridpoints_kinetic_matrix_box(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,kin_mat,_,_,_ = OBSolver.calculateBoxPotential(intersection)
+            diagonalarray = np.diagonal(kin_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The kineticmatrix in your box potential has a wrong ammount of values.")
+            n = n+1
+
+    
+    """ Now the test start to check the potential matrices from the chosen potential."""
 
     def test_OneBody_Harmonic_potential(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
@@ -131,7 +164,40 @@ class OneBodyTestSuite(unittest.TestCase):
                 calc_testvalue_poti = (sigma)*sqrt(-2*np.log(-testvalue_poti/unit_gauss))
                 self.assertTrue((round(calc_testvalue_poti,5) == round(abs(testvalue_a),5)), msg = "Your calculation of the potential matrix in the gauss potential is incorrect.")
                 i = i+1
+    
 ####### HANDLUNGSBEDARF
+
+    def test_gridpoints_potential_matrix_box(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,_,pot_mat,_,_ = OBSolver.calculateBoxPotential(intersection)
+            diagonalarray = np.diagonal(pot_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The potenialmatrix in your box potential has a wrong ammount of values.")
+            n = n+1
+                    
+    def test_gridpoints_potential_matrix_harmonic(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,_,pot_mat,_,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
+            diagonalarray = np.diagonal(pot_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The potenialmatrix in your harmonic potential has a wrong ammount of values.")
+            n = n+1
+
+    def test_gridpoints_potential_matrix_gauss(self):
+        n = 1
+        while n < 200:
+            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
+            _,_,_,_,pot_mat,_,_ = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
+            diagonalarray = np.diagonal(pot_mat)
+            lenght_diagonalarray = len(diagonalarray)
+            self.assertTrue((lenght_diagonalarray == n), msg = "The potenialmatrix in your gauss potential has a wrong ammount of values.")
+            n = n+1
+
+    """ Now the test start to check the eigenvalues the chosen potential."""
 
     def test_OneBody_calcualteBoxEigenvalues(self):
         """ Checks a dummy Calculation of an Harmonic Potential
@@ -149,6 +215,23 @@ class OneBodyTestSuite(unittest.TestCase):
                 eigenvalue = la_l[x]
                 self.assertTrue ((eigenvalue > 0), msg = "The eigenvalue aren't positive!")
                 x = x+1
+        x = 0
+        while x < n-3:
+            first_eigenvalue_box = la_l[x]
+            second_eigenvalue_box = la_l[x+1]
+            third_eigenvalue_box = la_l[x+2]
+            forth_eigenvalue_box = la_l[x+3]
+            diffrence12 = second_eigenvalue_box - first_eigenvalue_box
+            diffrence23 = third_eigenvalue_box - second_eigenvalue_box
+            diffrence1234 = diffrence23-diffrence12
+            if diffrence1234 > 0.5 or diffrence1234 < -0.5:
+                if x > 0:
+                    print ("\n","The eigenvalues in your box potential are äquidistant until the ",(x-1),"th Gridpoint.")
+                    break
+                else:
+                    print ("\n","The eigenvalues in your box potential aren't äquidistant.")
+                    break
+            x = x+1
 
     def test_OneBody_calcualteGaussEigenvalues(self):
         """ Checks a dummy Calculation of an Harmonic Potential
@@ -203,42 +286,6 @@ class OneBodyTestSuite(unittest.TestCase):
                     break
             x = x+1
 
-    def test_Wafefunktion(self):
-        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
-        _,_,_,_,_,_,_,v_norm_l = OBSolver.calcualteHarmonicPotential(intersection)
-        squared_v = (v_norm_l * v_norm_l)
-        int_squared = np.trapz((squared_v),dx)
-        i = int_squared [0]
-        x = 0
-        while x < n:
-           i = int_squared[x]
-           self.assertTrue (i > 0.98 and i < 1.02, msg="not correctly normalized.")
-           x = x+1
-
-    def test_Wafefunktion(self):
-        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
-        _,_,_,_,_,_,v_norm_l = OBSolver.calculateBoxPotential(intersection)
-        squared_v = (v_norm_l * v_norm_l)
-        int_squared = np.trapz((squared_v),dx)
-        u = int_squared [0]
-        x = 0
-        while x < n:
-            u = int_squared[x]
-            self.assertTrue (u > 0.98 and u < 1.02, msg="not correctly normalized.")
-            x = x+1
-
-    def test_Wafefunktion(self):
-        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
-        _,_,_,_,_,_,v_norm_l = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
-        squared_v = (v_norm_l * v_norm_l)
-        int_squared = np.trapz((squared_v),dx= dx)
-        i = int_squared [0]
-        x = 0
-        while x < n:
-            i = int_squared[x]
-            self.assertTrue (i > 0.98 and i < 1.02, msg="not correctly normalized.")
-            x = x+1
-
     def test_output_eigenvalue(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
         la, v_norm,_,_,_,la_l, v_norm_l = OBSolver.calculateBoxPotential(intersection)
@@ -249,6 +296,7 @@ class OneBodyTestSuite(unittest.TestCase):
             check_la = la[x]
             self.assertTrue((cut_la_l == check_la), msg ="Your choosen eigenvalues do not correlate with the original")
             x = x+1
+
     def test_output_eigenvalue(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
         la, v_norm,_,_,_,_,la_l, v_norm_l = OBSolver.calcualteHarmonicPotential(intersection)
@@ -259,6 +307,7 @@ class OneBodyTestSuite(unittest.TestCase):
             check_la = la[x]
             self.assertTrue((cut_la_l == check_la), msg ="Your choosen eigenvalues do not correlate with the original")
             x = x+1
+
     def test_output_eigenvalue(self):
         OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
         la, v_norm,_,_,_,la_l, v_norm_l = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
@@ -300,67 +349,45 @@ class OneBodyTestSuite(unittest.TestCase):
                     p = p+1
 
 
-    def test_gridpoints_potential_matrix_box(self):
-        n = 1
-        while n < 200:
-            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
-            _,_,_,_,pot_mat,_,_ = OBSolver.calculateBoxPotential(intersection)
-            diagonalarray = np.diagonal(pot_mat)
-            lenght_diagonalarray = len(diagonalarray)
-            self.assertTrue((lenght_diagonalarray == n), msg = "The potenialmatrix in your box potential has a wrong ammount of values.")
-            n = n+1
+    """ Now the test start to check the output from the chosen potential."""
 
-    def test_gridpoints_potential_matrix_harmonic(self):
-        n = 1
-        while n < 200:
-            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
-            _,_,_,_,pot_mat,_,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
-            diagonalarray = np.diagonal(pot_mat)
-            lenght_diagonalarray = len(diagonalarray)
-            self.assertTrue((lenght_diagonalarray == n), msg = "The potenialmatrix in your harmonic potential has a wrong ammount of values.")
-            n = n+1
+    def test_Wafefunktion(self):
+        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
+        _,_,_,_,_,_,_,v_norm_l = OBSolver.calcualteHarmonicPotential(intersection)
+        squared_v = (v_norm_l * v_norm_l)
+        int_squared = np.trapz((squared_v),dx)
+        i = int_squared [0]
+        x = 0
+        while x < n:
+           i = int_squared[x]
+           self.assertTrue (i > 0.98 and i < 1.02, msg="not correctly normalized.")
+           x = x+1
 
-    def test_gridpoints_potential_matrix_gauss(self):
-        n = 1
-        while n < 200:
-            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
-            _,_,_,_,pot_mat,_,_ = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
-            diagonalarray = np.diagonal(pot_mat)
-            lenght_diagonalarray = len(diagonalarray)
-            self.assertTrue((lenght_diagonalarray == n), msg = "The potenialmatrix in your gauss potential has a wrong ammount of values.")
-            n = n+1
+    def test_Wafefunktion(self):
+        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
+        _,_,_,_,_,_,v_norm_l = OBSolver.calculateBoxPotential(intersection)
+        squared_v = (v_norm_l * v_norm_l)
+        int_squared = np.trapz((squared_v),dx)
+        u = int_squared [0]
+        x = 0
+        while x < n:
+            u = int_squared[x]
+            self.assertTrue (u > 0.98 and u < 1.02, msg="not correctly normalized.")
+            x = x+1
 
-    def test_gridpoints_kinetic_matrix_gauss(self):
-        n = 1
-        while n < 200:
-            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
-            _,_,_,kin_mat,_,_,_ = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
-            diagonalarray = np.diagonal(kin_mat)
-            lenght_diagonalarray = len(diagonalarray)
-            self.assertTrue((lenght_diagonalarray == n), msg = "The kineticmatrix in your gauss potential has a wrong ammount of values.")
-            n = n+1
+    def test_Wafefunktion(self):
+        OBSolver = HaPPPy.OneBody.OneBodySolver(l,n,m)
+        _,_,_,_,_,_,v_norm_l = OBSolver.calcualteGaussPotential(unit_gauss,sigma)
+        squared_v = (v_norm_l * v_norm_l)
+        int_squared = np.trapz((squared_v),dx= dx)
+        i = int_squared [0]
+        x = 0
+        while x < n:
+            i = int_squared[x]
+            self.assertTrue (i > 0.98 and i < 1.02, msg="not correctly normalized.")
+            x = x+1
 
-    def test_gridpoints_kinetic_matrix_harmonic(self):
-        n = 1
-        while n < 200:
-            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
-            _,_,_,kin_mat,_,_,_,_ = OBSolver.calcualteHarmonicPotential(intersection)
-            diagonalarray = np.diagonal(kin_mat)
-            lenght_diagonalarray = len(diagonalarray)
-            self.assertTrue((lenght_diagonalarray == n), msg = "The kineticmatrix in your harmonic potential has a wrong ammount of values.")
-            n = n+1
-
-    def test_gridpoints_kinetic_matrix_box(self):
-        n = 1
-        while n < 200:
-            OBSolver = HaPPPy.OneBody.OneBodySolver (l,n,m)
-            _,_,_,kin_mat,_,_,_ = OBSolver.calculateBoxPotential(intersection)
-            diagonalarray = np.diagonal(kin_mat)
-            lenght_diagonalarray = len(diagonalarray)
-            self.assertTrue((lenght_diagonalarray == n), msg = "The kineticmatrix in your box potential has a wrong ammount of values.")
-            n = n+1
 
 if __name__ == '__main__':
     
     unittest.main()
-
