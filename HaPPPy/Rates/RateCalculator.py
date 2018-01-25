@@ -138,9 +138,9 @@ class RateCalculator:
              Eb(float): energy of final state
              V(np.array): barrier potential
              """
-             print(Ea)
-             print(V)
-             return (np.absolute(TCalc.calculate_transmission(Ea,V,dx)*Density.calculate_DensityofStates(np.absolute(Ea-Eb))))
+             #print(Ea)
+             #print(V)
+             return (np.absolute(TCalc.calculate_transmission(Ea,V,dx))**2*Density.calculate_DensityofStates(np.absolute(Ea-Eb)))
                      
         #These next four functions are used to calculate the transition rates.Each function for a different ind of transition:
         #We distinguish between transitions, in which the number of electrons on the dot changes from one to two(Gamma_12) and reverse(Gamma_21).
