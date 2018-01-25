@@ -7,26 +7,33 @@ from HaPPPy.TwoBody import TwoBodySolver
 from HaPPPy.Transmission import TransmissionCalculator
 from HaPPPy.MasterEquation import MasterEquationSolver
 
-
+__docformat__ = 'reStructuredText'
 
 class RateCalculator:
-    """This class calculates the rates of transitions between the possible one-body and two-body states of an SET. 
+    
+    """
+    
+    This class calculates the rates of transitions between the possible one-body
+    and two-body states of an SET. It gives out the transition rates of events where
+    electrons tunnel through the left barrier onto the dot:
+    :math:`\\Gamma^L_{\\alpha_N \\rightarrow \\beta_{N+1}} =
+    \Gamma | \langle \\beta_{N+1} | \sum_{\\nu}`
+    :math:`c_{\\nu}^{\\dagger} | \\alpha_N \\rangle |^2 n_F ( E_{\\beta_{N+1}} - E_{\\alpha_N} -\\mu_L )`
 
-       It gives out the transition rates of events where electrons tunnel through the left barrier onto the dot:
-
-       .. math::' \Gamma^L_{\\beta_{N+1} \\rightarrow \\alpha_N} = \Gamma |\langle \beta_{N+1} | \sum_{\\nu} c^\dagger_\nu | \alpha_N \rangle |^2 n_F(E_{\beta_{N+1}} - E_{\alpha_{N}} -\mu_L)'
-       
-       where .. math::'\beta_{N+1}' is the final one -or two-body state and :math:'\alpha_N' is the initial zero -or one-body state of the dot.
-       .. math::' \Gamma^L' includes the transmission coefficient of given tunneling event and the density of states function (DOS) on the dot
-       (see the description of the function .. math::' \Gamma'). ..math::'n_F' is the fermifunction.
+    where
+    :math:`\\beta_{N+1}` is the final one body or two body state and :math:`\\alpha_N` is the initial vacuum state or one-body state of the dot.
+    :math:`\\Gamma` includes the transmission coefficient of given tunneling event and the density of states function (DOS) on the dot
+    (see the description of the function :math:`\\Gamma`). :math:`n_F` is the fermifunction.
 
 
-       Similiarly, the rates of events where an electron leaves the dot looks like this:
+    Similiarly, the rates of events where an electron leaves the dot looks like this:
 
-       .. math::' \Gamma^L_{\\beta_{N-1} \\rightarrow \\alpha_N} = \Gamma |\langle \beta_{N-1} | \sum_{\\nu} c^\dagger_\nu | \alpha_N \rangle |^2 [1-n_F(E_{\beta_{N+1}} - E_{\alpha_{N}} -\mu_L)]'.
-       .. math::'\beta_{N-1}' and .. math::'\alpha_{N}' are, again, the final and initial states.
+    :math:`\\Gamma^L_{\\alpha_N \\rightarrow \\beta_{N-1}} =
+    \Gamma | \langle \\beta_{N-1} | \sum_{\\nu}`
+    :math:`c_{\\nu}^{\\dagger} | \\alpha_N \\rangle |^2 ( 1 - n_F ( E_{\\beta_{N-1}} - E_{\\alpha_N} -\\mu_L ))`.  
+    :math:`\\beta_{N-1}` and :math:`\\alpha_{N}` are, again, the final and initial states.
 
-       The Rates through the right barrier are calculated the same way(exchange.. math::' \mu_L' with .. math::' mu_R'). 
+    The Rates through the right barrier are calculated the same way (exchange :math:`\\mu_L` with :math:`\\mu_R`). 
 
     """
     
@@ -92,7 +99,7 @@ class RateCalculator:
 
 	#This function is called by the Gamma_ij-equations and includes the transmission-coefficient for each tunnelling-event and the density of state function of the source and drain. 
         def Gamma(Ea,Eb,V):
-             """.. math::' \Gamma' includes the transmission coefficient and DOS: .. math::' \Gamma = |t|^2*DOS'
+             """:math::` \Gamma` includes the transmission coefficient and DOS: :math::` \Gamma = |t|^2*DOS`
 
              Ea(float): energy of initial state
              Eb(float): energy of final state
