@@ -71,7 +71,7 @@ class OneBodySolver:
                 
                 :math:`\\widehat{V} = \\frac{m_e\omega^2}{2}*\\underline{V}(x)`
         
-            Calculating the harmonic potential, the parameter unit is set ``True`` by default.
+            Calculating the harmonic potential, the parameter "unit" is set ``True`` by default.
             
                 ``unit`` kept at default:
             
@@ -80,7 +80,7 @@ class OneBodySolver:
                 ``unit`` set False:
                 
                     Since the unit of the potential is Joule, ``unit_pot`` has to be multiplied by :math:`\\frac{1000}{e}` in order to reach :math:`meV`.
-                    The program work best with a ``unit_pot`` close to 1.0. Therefore the default value of omega is initialized.
+                    The program work best with a ``unit_pot`` close to 1.0. Therefore the default value of omega is initialized as stated above.
         
                     ``unit_pot`` = :math:`\\frac{m_e\omega^2}{2}*\\frac{1000}{e}`
                 
@@ -333,7 +333,7 @@ class OneBodySolver:
         :type A: int or float
         
         :param sigma: Width of the gauss curve.
-        :type A: int or float
+        :type sigma: int or float
         
         :return: la, v_norm, Info, kin_mat, pot_mat, la_l, v_norm_l
         :rtype: np.array,matrix, np.array, matrix, matrix, np.array, matrix
