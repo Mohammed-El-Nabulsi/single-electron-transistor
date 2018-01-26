@@ -171,7 +171,7 @@ class RateCalculator:
             mu(float): chemical potential of either drain(muR) or source(muL).
             T(float): temperature.
             """
-            if (E-mu) > 6000:
+            if (E-mu)/T > 600:
                     f=0
 				
             else:
