@@ -7,7 +7,7 @@ The *OneBodyModule* is written by:
     - Sani Harouna-Mayer
     - Ludwig Hendl
 
-For any further information contact the developer team via: support.onebody@online.de
+For any further information contact the developer team via: support.OneBody@online.de
 
 Introduction
 ------------
@@ -91,12 +91,12 @@ The complete hamilton matrix is then:
 .. math::
     \widehat{H} = -\frac{\hbar^2}{2m} \begin{pmatrix} -2&1&0&0&0\\ 1&-2&1&0&0\\0&1&-2&1&0\\0&0&\ddots&\ddots&\ddots\\0&0&0&1&-2 \end{pmatrix} \frac{1}{\Delta x^2} + \begin{pmatrix} V(x_0)&0&0&0&0\\0&V(x_2)&0&0&0\\0&0&V(x_3)&0&0\\0&0&0&\ddots&0\\0&0&0&0&V(x_{n-1})\end{pmatrix}
 	
-With the matrix representation of the Hamilton operator the Schrödinger equation becomes a eigenvalue problem of a . The calculation 
+With the matrix representation of the Hamilton operator the Schrödinger equation becomes a eigenvalue problem. The calculation 
 yields the eigenvalues (energy of the states)and the corresponding eigenvectors (wave function of the energy state). A plot of 
 the squared wave function (wf) of a eigenvalue shows the probability density.
 
     - energy *E* --> eigenvalues
-    - wf *psi* --> eigenvectors
+    - wf :math:`\psi` --> eigenvectors
 
 Unit convention
 ---------------
