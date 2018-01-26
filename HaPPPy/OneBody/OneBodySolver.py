@@ -48,14 +48,17 @@ class OneBodySolver:
         self.a_axis = np.linspace((-self.l / 2), (self.l / 2), self.n)
     
     # possible input factor but we defined factor already as unit_pot
-    def calcualteHarmonicPotential(self, intersection, omega=1.875537359*10**13):
+    def calcualteHarmonicPotential(self, intersection, unit=True, omega=1.875537359*10**13):
         """ 
         Calculates the OneBody problem for harmonic potential.
         
         :param intersection: y position of the harmonic potential in :math:`meV`.
         :type intersection: int or float
         
-        :param omega: oscillation frequency in :math:`\\frac{1}{s}`. Default value is :math:`1,875537359*10^{13}`.
+        :param unit: Set True as default value. In case of False, ``unit_pot`` is calculated with the default omega.
+        :type unit: Boolean
+        
+        :param omega: Oscillation frequency in :math:`\\frac{1}{s}`. Default value is :math:`1,875537359*10^{13}`.
         :type omega: float
         
         :return: la, v_norm , Info, kin_mat, pot_mat, self.a_axis, la_l, v_norm_l
@@ -68,10 +71,18 @@ class OneBodySolver:
                 
                 :math:`\\widehat{V} = \\frac{m_e\omega^2}{2}*\\underline{V}(x)`
         
-            Since the unit of the potential is currently Joule, ``unit_pot`` has to be multiplied by :math:`\\frac{1000}{e}` in order to reach :math:`meV`. 
-            The program work best with a ``unit_pot`` close to 1.0. Therefore the default value of omega is initialized. 
+            Calculating the harmonic potential, the parameter unit is set ``True`` by default.
+            
+                ``unit`` kept at default:
+            
+                    ``unit_pot`` is set 1.0 in :math:`meV`.
+            
+                ``unit`` set False:
+                
+                    Since the unit of the potential is Joule, ``unit_pot`` has to be multiplied by :math:`\\frac{1000}{e}` in order to reach :math:`meV`.
+                    The program work best with a ``unit_pot`` close to 1.0. Therefore the default value of omega is initialized.
         
-                ``unit_pot`` = :math:`\\frac{m_e\omega^2}{2}*\\frac{1000}{e}`
+                    ``unit_pot`` = :math:`\\frac{m_e\omega^2}{2}*\\frac{1000}{e}`
                 
                 :math:`V(x) = x^2+intersection`
             
@@ -125,6 +136,8 @@ class OneBodySolver:
         not used potentials as ``False`` and the used potential as ``True``.
              
         """
+
+#        self.a_axis = np.linspace((-self.l / 2), (self.l / 2), self.n)
 #        print("\nYou've chosen HarmonicPotential.")
         # creating potential matrix with user input n elements
         pot_mat = np.zeros((self.n, self.n))
@@ -136,13 +149,17 @@ class OneBodySolver:
                 pot_mat[i, i] = a[i]
                 i += 1
             return pot_mat
-        
-        for x in np.nditer(self.a, op_flags=['readwrite']):
-            x[...] =(x**2) + intersection
-        
-        mat_build(self.a)  # build pot_mat
-        #print(pot_mat)
-        
+
+#        for x in np.nditer(self.a, op_flags=['readwrite']):
+#            x[...] =(x**2)
+#        mat_build(self.a)  # build pot_mat
+        x = np.zeros(self.n)
+        for i in range(self.n):
+            x[i] = self.a[i]**2 + intersection
+
+        mat_build(x)  # build pot_mat
+#        print(pot_mat)
+
         # creating body of kinetic matrix with second derivate of the location
         kin_mat = np.zeros((self.n, self.n))
 
@@ -158,7 +175,12 @@ class OneBodySolver:
 
         # unit system and calculation of final Hamiltonian matrix ham_mat
         # factor 1000 for the unit system in order to reach meV
-        unit_pot = ((1/2)*self.me*1000*omega**2*((10**-9))**2)/self.e  # potential matrix in meV
+        if unit:
+            unit_pot = 1.0
+        elif not unit:
+            unit_pot = ((1/2)*self.me*1000*omega**2*((10**-9))**2)/self.e  # potential matrix in meV
+        else:
+            sys.stderr.write("Unit has not been set True or False")
 
         unit_kin = ((self.hbar**2)*1000)/(2*self.me*(10**-18)*self.e)
         #print(unit_kin, "\n", unit_pot)  # control print for unit
@@ -200,7 +222,7 @@ class OneBodySolver:
                 ["number of eigenvalues -vectors",str(self.m)],["HarmonicPotential",str(True)], \
         ["GaussPotential",str(False)],["BoxPotential",str(False)]]).astype('S9')
 
-        pot_mat = unit_pot * pot_mat
+#        pot_mat_unit = unit_pot * pot_mat
 
         return la, v_norm , Info, kin_mat, pot_mat, self.a_axis, la_l, v_norm_l
 
