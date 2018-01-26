@@ -33,6 +33,8 @@ from HaPPPy.Transmission import TransmissionCalculator
 from HaPPPy.Rates import RateCalculator
 from HaPPPy.MasterEquation import MasterEquationSolver
 
+from HaPPPy.TwoBody.TwoParticleLoader import TwoBodySpectrumData
+
 __version__ = "0.0.1"
 
 """The main function of HaPPPy, which executed the code.
@@ -134,11 +136,12 @@ def main(argv=None):
     TwoBody = TwoBodySolver()
     TwoBody.doCalculation(obDataFile='data_group1', tbDataFile='data_group2')
 
-    # # TODO Group 2 or Group 4: Read two body data from hdf5
-    file = h5py.File('data_group2.hdf5', "a")
-    TwoBodyEigenvalues = file["eigenvalues"][:]
-    TwoBodyEigenvectors = file["coefMat"][:]
-    file.close()
+    # load TwoBody data
+    TbData = TwoBodySpectrumData()
+    TbData.open('data_group2')
+    TwoBodyEigenvalues = TbData.energies[:]
+    TwoBodyEigenvectors = TbData.coeficients[:,:,:]
+    TbData.close()
 
     Transmission = TransmissionCalculator()
 

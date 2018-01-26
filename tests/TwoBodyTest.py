@@ -5,6 +5,7 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 from HaPPPy.TwoBody.OneParticleLoader import SpectrumData
+from HaPPPy.TwoBody.TwoParticleLoader import TwoBodySpectrumData
 from HaPPPy.TwoBody.TwoParticle import createTwoParticleData
 import HaPPPy.TwoBody.MatrixElement as MatrixElement
 
@@ -105,7 +106,8 @@ class TwoBodyTestSuite(unittest.TestCase):
         _factor = 2.0 # factor by which epsilon gets divided each step
         _steps = 20 # amount of steps to run
         _obCount = 20 # number of one body state to use for calculation
-        _num = 20 # number of two body energies to plot and evaluate
+        _ofs = 5 # index of first two body energy to plot       
+        _num = 1 # number of two body energies to plot and evaluate
         
         # generate / load test data
         if (_useExistingData):
@@ -130,7 +132,7 @@ class TwoBodyTestSuite(unittest.TestCase):
             repository.flush()
         
         #evaluate data
-        En = En[:, 0:_num]
+        En = En[:, _ofs:_ofs+_num]
         if _debug: print("summary of two-body base energies:")
         if _debug: print(En)
         plt.plot(Ep, En)
@@ -179,6 +181,34 @@ class TwoBodyTestSuite(unittest.TestCase):
             self.assertEqual(len(wave), loader2.n, msg='result has wrong dimensions!')
             self.assertAlmostEqual(np.inner(wave, wave) * loader2.dx, 1.0, msg='incorrectly normalized!')
         loader2.close()
+
+    def test_twoParticleLoader(self):
+        """ Checks the TwoParticleLoader for self consistency
+        """
+        # create test data
+        path = "/tmp/twoParticleTest"
+        energies = np.array([1,2,2,1])
+        coefMat = [[[1,1],[1,1]] , [[2,2],[2,2]] , [[1,2],[1,2]] , [[2,1],[2,1]]]
+        # save to file
+        loader1 = TwoBodySpectrumData()
+        loader1.init(path, 4, 2)
+        loader1.energies[:] = energies
+        loader1.coeficients[:,:,:] = coefMat
+        loader1.close()
+        # load from file
+        loader2 = TwoBodySpectrumData()
+        loader2.open(path)
+        # compare data
+        self.assertEqual(loader1.m, loader2.m, msg='wrong amount of energies!')
+        self.assertEqual(loader1.n, loader2.n, msg='wrong matrix sizes!')
+        coefMat2 = loader2.coeficients[:,:,:]
+        self.assertEqual(coefMat2.shape[0], 4, msg='wrong coeficient dimensions!')
+        self.assertEqual(coefMat2.shape[1], 2, msg='wrong coeficient dimensions!')
+        self.assertEqual(coefMat2.shape[2], 2, msg='wrong coeficient dimensions!')
+        self.assertTrue(np.allclose(loader2.energies[:], energies), msg='corrupted eigenenergy values')
+        self.assertTrue(np.allclose(coefMat2, coefMat), msg='corrupted wavefunction data')
+        loader2.close()
+
 
 if __name__ == '__main__':
     two_body_suite = unittest.TestLoader().loadTestsFromTestCase(TwoBodyTestSuite)
