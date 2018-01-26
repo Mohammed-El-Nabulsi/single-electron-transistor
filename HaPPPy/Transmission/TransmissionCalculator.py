@@ -1,120 +1,155 @@
-from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
-from HaPPPy.Transmission.Modules.SplitStepOperator import SplitStepOperator
-from HaPPPy.Transmission.Modules.Transmission import Transmission
-from HaPPPy.Transmission.Modules.PotentialUtils import Potential
+from scipy.constants import codata
+import numpy as np
+from scipy.fftpack import fft, ifft
+import matplotlib.pyplot as plt
 
-import numpy
-import math
+me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to milli eV/c^2
+hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10*fs*millielectronvolts
 
-class TransmissionCalculator:
+class TransmissionCalculator():
     """
-    Calculates the transmission for a particle with energy E
-    moving in within a potential V.
+    Calculates the probability of an electron tunneling through an potential barrier.
+    
+    Parameters
+    ----------
+    E : float
+        Energy of the electron in meV
+    dx : float
+        Distance between two neigboured sample points in pm
+    barrier : Array
+        Potenital barrier to be tunneled with values in meV
     """
-
-    def calculate_transmission(self, E, V, dx):
-        """
-        Performs the calculation for a particle with energy E
-        moving in within a potential V to return the trasmission rate.
-
-        Internally it creates a gaussian wave package with energy E and uses
-        the split step method to iterate the gaussian package through the potential
-        using small time steps.
-
-        The transmission is calculated by letting enough time pass so that the wave package
-        completely traveles through the potential V and calculating the propabiliy behind the barrier. 
+    
+    def calculate_transmission(self, E, barrier, dx):
         
-        Parameters
-        ----------
-        E : float
-            The energy of the particle in milli eV
-        V : Array
-            An array of potential values for every point in space x (x is extracted using the indices of V)
+        #input parameters
+        self.E = E
+        self.dx = dx
+        self.barrier = barrier
+        
+        #build potential and helper objects
+        self.N = barrier.size
+        self.V = self.get_potential()
+        self.trans_index = self.get_first_index_behind_barrier()
+        
+        #build position grid and fix sizes with respect to V if needed. This could be nessesary if N is odd
+        self.x = self.get_position_grid()
+        while self.x.size<self.V.size:
+            self.x = np.append(self.x,[self.x[-1]+self.dx])
+        while self.x.size>self.V.size:
+            self.V = np.append(self.V,[0])
+        
+        #build wavenumbergrid depending on the now known length len(self.x)
+        self.M  = self.V.size
+        self.k_min = -np.pi/self.dx
+        self.dk = 2*np.pi/(self.x[-1]-self.x[0])
+        self.k = self.get_wavenumber_grid()
+        
+        #choose parameters for the initial state (gaussian package)
+        self.sigma = self.dx*self.N/10 #initial width of the package
+        self.k0 = np.sqrt(2*me*self.E)/hbar
+        self.x0 = self.x[self.trans_index-self.N-5*int(self.sigma/self.dx+1)] #symmetrypoint in positions space
+        
+        #build initial state (gaussian package)
+        self.psi0 = (self.sigma*np.sqrt(np.pi))**(-1/2)*np.exp(1j*self.x*self.k0-1/2*((self.x-self.x0)/self.sigma)**2)
+        
+        #chosse time between to two neigbourt time sample points (to be used in the split step algorithm)
+        self.dt = 0.1
+        
+        #build Operators for the split-step-algorithm
+        self.V_Op_half = np.exp(-(1j*self.dt/2)*(self.V/hbar))
+        self.T_Op = np.exp(-(1j*hbar*np.multiply(self.k,self.k)*self.dt/(2*me)))
+        
+        #performing z steps and calculate the probability of presence behind the barrier
+        self.psi_after_z_steps = self.perform_z_split_steps(1500)
+        
+        #calculate density of presence
+        self.density_after_z_steps = self.get_density_of_presens(self.psi_after_z_steps)
+        
+        #calculate transmission probability after 1500 steps
+        self.T_1500 = self.get_transmission(self.density_after_z_steps)
             
-        Returns
-        -------
-        rate : float
-            The rate of transmission for the particle within the Potential V (number between 0 and 1)
-        """
-        if not (isinstance(V, numpy.ndarray)):
-            raise ValueError("V and x must be arrays")
+        psi = self.psi_after_z_steps
         
-        if not (E >= 0 or V):
-            raise ValueError("The input parameters are not valid.")
-   
-        if not (numpy.array(V).ndim == 1):
-            raise ValueError("V must be one dimensional arrays")
-
-        potential_utils = Potential(V, dx)
-
-        potential = potential_utils.potential
-        symmetry_point = potential_utils.gauss_symmerey_point
-        width = potential_utils.gauss_width
-
-        x = potential_utils.position_grid
+        psi = self.dx*self.psi0*np.exp(-1j*self.k_min*self.x)/np.sqrt(2*np.pi) #fourier scaling
         
-        psi_0 = None
+        delta = 1
+        
+        T_stop_crit = self.T_1500
+        
+#        while delta > 10**(-1):
+#            psi = self.step(psi)
+#            
+#            #stop criterion
+#            psi_stop_crit = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx #undo the fourier scaling 
+#            psi_stop_crit_dens = self.get_density_of_presens(psi_stop_crit)
+#            T_stop_crit_n = self.get_transmission(psi_stop_crit_dens)
+#            
+#            delta = np.abs(T_stop_crit_n-T_stop_crit)
+#            
+#            T_stop_crit = T_stop_crit_n
+#            
+#        print(T_stop_crit)
+#            
+#        psi = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx #undo the fourier scaling   
+#
+#        
+#        psi_abs_squared = self.get_density_of_presens(psi)
+#        T = self.get_transmission(psi_abs_squared)
 
-        try:
-            psi_0 = GaussianWave(x,symmetry_point,width,E).create_gauss_x_package()
-        except Exception as error:
-            raise Exception("An error occured while creating the gaussian package. Error: " + repr(error))
-
-        margin = 10e-3      # Sample value, needs verification
- 
-        splitStepOperator = SplitStepOperator(x, potential)
-        transmission = Transmission()
-
-        psi_1 = splitStepOperator.first_step(psi_0)
-
-        # This step is redundant but serves a technical purpose and was added
-        # for clarity reasons.
-        psi_n = psi_1
- 
-        end_point = self.get_index_for_end_of_potential(V)
-
-        # Appliy the split step operator to advance in time until
-        # the differences in psi are small enough. It is not certain
-        # whether the selected exit method will work. It has to be verified.
-        while (True):
-            try:
-                psi_n1 = splitStepOperator.step(psi_n[:])
-
-                rate_n1 = transmission.calculate(psi_n1, end_point)
-                rate_n = transmission.calculate(psi_n, end_point)
-
-                delta = numpy.absolute(rate_n1 - rate_n) # self.calculate_max_diff_pointwise(psi_n, psi_n1)
-
-                psi_n = psi_n1[:]
-
-                # BUG: Delta never changes!
-                #print(delta)
-
-                if (delta < margin):
-                    psi_n = splitStepOperator.final_step(psi_n)
-                    break
-
-            except Exception as error:
-                raise Exception("An error occured while applying the split step operator. Error: " + repr(error))
+        T = self.T_1500
+        
+        return T
+        
+    def get_potential(self):
+            zeros = np.zeros(25*self.N)
+            V_ref = np.append(zeros,barrier) #part of the xgrid where the reflectet wave is living
+            return np.append(V_ref,zeros)
+    
+    def get_first_index_behind_barrier(self):
+        zeros = np.zeros(25*self.N)
+        V_ref = np.append(zeros,barrier) #part of the xgrid where the reflectet wave is living
+        return V_ref.size
+    
+    def get_position_grid(self):
+        x = np.arange(-int(self.V.size/2)*dx,int(self.V.size/2)*self.dx,self.dx)
+        return x
+    
+    def get_wavenumber_grid(self):
+        return self.k_min+self.dk*np.arange(0,self.M,1)
+    
+    def step(self,psi):
+        psi1 = np.array(np.multiply(psi,self.V_Op_half))
+        psi2 = np.array(fft(psi1))
+        psi3 = np.array(np.multiply(psi2,self.T_Op))
+        psi4 = np.array(ifft(psi3))
+        return np.array(np.multiply(psi4,self.V_Op_half))
+    
+    def perform_z_split_steps(self,z):
+        psi = self.dx*self.psi0*np.exp(-1j*self.k_min*self.x)/np.sqrt(2*np.pi) #fourier scaling
+        
+        for n in np.arange(0,z,1):
+            psi = self.step(psi)
             
-        try:
-            return Transmission().calculate(psi_n, end_point)
-        except Exception as error:
-            raise Exception("An error occured while calculating transmission rates. Error: " + repr(error))
+            #plot every 10th result
+#            if np.remainder(n,10)==0:
+#                psi_plot = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx
+#                psi_plot = np.multiply(psi_plot,psi_plot.conj()).real
+#                plt.xlabel('x in pm')
+#                plt.ylabel('$|\Psi(x)|^2$')
+#                plt.plot(self.x[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],psi_plot[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],self.x[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],0.002*self.V[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N])
+#                plt.show()
+            
+            n+=1
 
-    def calculate_max_diff_pointwise(self, f1, f2):
-        return numpy.absolute(max(numpy.absolute(f1, f2)))
-
-    def get_index_for_end_of_potential(self, V):
+        return psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx #undo the fourier scaling
+    
+    def get_density_of_presens(self,wave):
+        return np.multiply(wave,wave.conj()).real
+    
+    def get_transmission(self,psi2):
         """
-            Get the last point at which the potential is 0.
-            We define this as the end of the potential barrier.
+        input: psi squared after sucsessful split step iteration
         """
-
-        if (max(V) == 0):
-            return 0
-
-        # Filter V for all entries > 0 and return an array with
-        # the indices. The last index is the one we are looking for
-        # ([-1] is a sort hand notation for this)
-        return [idx for idx, v_i in enumerate(V) if v_i > 0][-1]    
+        p_tr = self.dx*np.sum(psi2[self.trans_index:])
+        return p_tr
