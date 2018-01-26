@@ -15,7 +15,7 @@ Introduction
 The One Body Module is the first part of the HaPPPy software project. For further information see **The HaPPPy program**. 
 This module is written to calculate the single bound electron states in a quantum dot described by a given potential.
 
-    .. figure::  _static/pic1.jpg
+    .. figure::  source/_static/pic1.jpg
        :align:   center
 
 **Figure 1:**    Drain and source with the chemical potential :math:`\mu` as well as the quantum dot with single electron states. :math:`\gamma` is the tunnel probability of the electrons.
