@@ -1,9 +1,8 @@
 Rates Module
 ============
 
-This Module calculates the rates of transitions between the possible one-body and two-body states of an SET. 
+This Module calculates the transition rates between the possible one-body and two-body states of a SET. 
 
-It 
 
 
 
