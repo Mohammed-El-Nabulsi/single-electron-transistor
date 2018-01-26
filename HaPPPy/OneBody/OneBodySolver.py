@@ -20,7 +20,7 @@ class OneBodySolver:
     :param m: number of eigenvalues and corresponding eigenvectors which are saved to a hdf5 file
     :type m: int
     
-    Two equal global numpy arrays (``a`` and ``a_axis``) are created from :math:`\\frac{l}{2}` to :math:`\\frac{l}{2}` with *n* grid points. 
+    Two equal global numpy arrays (``a`` and ``a_axis``) are created from :math:`-\\frac{l}{2}` to :math:`\\frac{l}{2}` with *n* grid points. 
             
         - ``a_axis`` serves as holder for the x values
         - ``a`` serves as holder for the (in each potential to calculate) y values
@@ -64,7 +64,7 @@ class OneBodySolver:
 
         **Potential term:**
   
-                :math:`\\widehat{V} =` ``unit_pot`` * :math:`\\begin{pmatrix} V(x_0)&0&0&0\\\ 0 &V(x_2)&0&0\\\ 0 &0&\\ddots&0\\\ 0 &0&0&V(x_{n-1})\\end{pmatrix}`
+                :math:`\\widehat{V} =` ``unit_pot`` :math:`*\\begin{pmatrix} V(x_0)&0&0&0\\\ 0 &V(x_2)&0&0\\\ 0 &0&\\ddots&0\\\ 0 &0&0&V(x_{n-1})\\end{pmatrix}`
                 
                 :math:`\\widehat{V} = \\frac{m_e\omega^2}{2}*\\underline{V}(x)`
         
@@ -119,7 +119,7 @@ class OneBodySolver:
             .. figure::  _static/harmonic_wavefkt.jpg
                 :align:   center
 
-        **Figure 3:** Probability density of the first 3 wave functions to corresponding energy eigenvalues.
+        **Figure 3:** Probability density of the first 3 wave functions to corresponding energy eigenvalues (``l`` = 100, ``n`` = 1000). The density is given arbitrary units.
         
         ``Info`` is an array with the used module parameter saved as strings. It saves the grid points ``n``, length of potential ``l``, number of eigenvalues -vectors ``m``,
         not used potentials as ``False`` and the used potential as ``True``.
@@ -207,7 +207,7 @@ class OneBodySolver:
 
     def calculateBoxPotential(self, intersection):
         """ 
-        Calculates the OneBody problem for box potential. The calculation is done according to the description for the **harmonic potential**.
+        Calculates the OneBody problem for box potential. The calculation is done according to the description for the **HarmonicPotential**.
         
         :param intersection: Ground level of potential.
         :type intersection: int or float
@@ -229,7 +229,7 @@ class OneBodySolver:
             .. figure::  _static/BoxPot_wavefkt.jpg
                 :align:   center
 
-        **Figure 5:** Probability density of the first 3 wave functions to corresponding energy eigenvalues.
+        **Figure 5:** Probability density of the first 3 wave functions to corresponding energy eigenvalues (``l`` = 100, ``n`` = 1000). The density is given arbitrary units.
         
         """
 #        print("\nYou've chosen BoxPotential.")
@@ -305,21 +305,33 @@ class OneBodySolver:
 
     def calcualteGaussPotential(self, A, sigma):
         """ 
-        Gives energy eigenvalues and eigenvectors and Info
-        needs intersection as input
-            --> uses x^2 + intersection as the potential
-        eigenvalues
-            --> stored in la
-        standardized eigenvectors 
-            --> stored in v_norm as ordered matrix, columns are eigenvector
-        Info
-            --> list of list with user input information in each sub-list
-                choosen potential stored as True 
-                not choosen potential stored as False
+        Calculates the OneBody problem for gauss potential. The calculation is done according to the description for the **HarmonicPotential**.
+        
+        :param A: Unit of the potential in :math:`meV`.
+        :type A: int or float
+        
+        :param sigma: Width of the gauss curve.
+        :type A: int or float
+        
+        :return: la, v_norm, Info, kin_mat, pot_mat, la_l, v_norm_l
+        :rtype: np.array,matrix, np.array, matrix, matrix, np.array, matrix
+        
+        The potential :math:`V(x)` has the unit ``unit_pot`` = ``A`` in :math:`meV`. The potential is plotted in figure 6.
+        
+            :math:`V(x) = -A*\\exp{({-\\frac{x}{2 \\sigma}})^2}`
+        
+            .. figure::  _static/gauss.jpg
+                :align:   center
 
-        Returns:
-            la, v_norm, Info
+        **Figure 6:** Plot of the gauss potential in arbitrary units (``A`` = 1, ``sigma`` = 5).
+        
+        The probability density of the first 3 wave functions are shown in figure 7. The absolute square of the first 3 eigenvectors vs. ``a_axis`` is plotted.
 
+            .. figure::  _static/gauss_wavefkt.jpg
+                :align:   center
+
+        **Figure 5:** Probability density of the first 3 wave functions to corresponding energy eigenvalues (``l`` = 100, ``n`` = 1000). The density is given arbitrary units.
+        
         """
         #        print("\nYou have chosen GaussPotential!")
 
@@ -396,11 +408,29 @@ class OneBodySolver:
 
         
     def exportData(self, la, v_norm, info, path="data_group1"):
+        """
+        Saves the calculated eigenvalues and -vectors as well as the information array Info to a hdf5 format file.
+        
+        :param la: Array holding the eigenvalues.
+        :type la: numpy.array
+        
+        :param v_norm: Matrix holding the normalized eigenvectors.
+        :type v_norm: matrix
+        
+        :param info: Array holding information about the chosen parameters.
+        :type info: numpy.array holding strings
+        
+        :param path: Name of the hdf5 file with default value "data_group1".
+        :type path: string
+        
+        To secure the correct save and load procedure, the hdf5 file save system of the group 2 is used. Each value holding parameter is saved in its own data set.
+        For any further information, please read the **Two Body Module** documentation.
+        """
+        
         Data = SpectrumData()
         Data.init(path, len(la), len(la), info=info)
         Data.energies = la
         Data.waves = v_norm
-#       Data.potential[:] = self.a
         Data.close()
 
 

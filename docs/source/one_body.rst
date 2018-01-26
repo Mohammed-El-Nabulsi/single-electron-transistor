@@ -93,7 +93,7 @@ The complete hamilton matrix is then:
 	
 With the matrix representation of the Hamilton operator the Schrödinger equation becomes a eigenvalue problem of a . The calculation 
 yields the eigenvalues (energy of the states)and the corresponding eigenvectors (wave function of the energy state). A plot of 
-the squared wave function of a eigenvalue shows the probability density.
+the squared wave function (wf) of a eigenvalue shows the probability density.
 
     - energy *E* --> eigenvalues
     - wf *psi* --> eigenvectors
@@ -113,9 +113,6 @@ The energy of the single bound electron states are needed in meV:
 
 Joule is the unit of the calculated energy levels. In order to reach meV, the unit of the kinetic matrix as well as the unit 
 of the potential matrix are devided by the electron charge *e* and multiplied by 1000. 
-	
-https://pythonhosted.org/an_example_pypi_project/sphinx.html#headers
-
 
 Code realization
 ----------------
@@ -126,8 +123,9 @@ Following imports must be done to run the module:
     .. figure::  _static/imports.jpg
         :align:   center
 
-The Data is exported in a hdf5 format. For further information see **exportData**.
-
+The Data is exported in a hdf5 format. For further information see **exportData**. In the following documentation the calculation
+of the harmonic potential is described in detail. The other potentials are calculated in the same way. Therefore only differing parts are stated
+for the box and the gauss potential.
 
 .. automodule:: HaPPPy.OneBody
 .. autoclass:: OneBodySolver
