@@ -168,7 +168,11 @@ class RateCalculator:
             mu(float): chemical potential of either drain(muR) or source(muL)
             T(float): temperature
             """
-            f=1/(math.exp((E-mu)/(kB*T) )+1)
+            if (E-mu) > 6000:
+                    f=0
+				
+            else:
+                    f=1/(math.exp((E-mu)/(kB*T) )+1)
             return(f)
           
 
@@ -213,7 +217,7 @@ class RateCalculator:
             mu(float): chemical potential of either drain(muR) or source(muL)
             T(float): temperature
             """
-            return(Gamma(0,Eb,V)*fermi((Eb-E0),mu,T))
+            return(Gamma(E0,Eb,V)*fermi((Eb-E0),mu,T))
 
         def Gamma_21(Ea,Eb,mu,T):
             """Calculates the rate of a transition from a two body state to a one body state
@@ -239,7 +243,7 @@ class RateCalculator:
             mu(float): chemical potential of either drain(muR) or source(muL)
             T(float): temperature
             """
-            return(Gamma(Ea,0,V)*(1-fermi(Ea-E0,mu,T)))
+            return(Gamma(Ea,E0,V)*(1-fermi((Ea-E0),mu,T)))
 
         #creating the output matrices that later contain all the transition rates through either
         #the left or the right barrier
@@ -251,7 +255,6 @@ class RateCalculator:
         for i in E1:
                 j_=0
                 for j in E2:
-                        #j_ =np.where(E2==j)[0][0]
                         Gamma_L[i_+1][j_+1+np.size(E1)]=Gamma_12(i,j,muL,T)
                         Gamma_L[j_+1+np.size(E1)][i_+1]=Gamma_21(j,i,muL,T)
                         Gamma_R[i_+1][j_+1+np.size(E1)]=Gamma_12(i,j,muR,T)
