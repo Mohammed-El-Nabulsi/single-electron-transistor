@@ -205,7 +205,7 @@ def main(argv=None):
         if BCond == "static":
             # Static solutions are requested.
             if args.verbose: print("mode = STATIC")
-            stat_ps, stat_curs = mes.calculateStationarySloutions(Gamma_L, Gamma_R,
+            stat_ps, stat_curs = mes.calculateStationarySolutions(Gamma_L, Gamma_R,
                                                                   ns,
                                                                   verbose=args.verbose,
                                                                  )

@@ -3,7 +3,6 @@ import numpy as np
 import numpy.linalg as lin
 import matplotlib.pyplot as plt
 import math
-import copy
 
 
 __docformat__ = 'reStructuredText'
@@ -18,7 +17,7 @@ class MasterEquationSolver:
     sationary netto current :math:`I_{stat}`.
 
 
-    calculateStationarySloutions() returns all possible **sationary** solutions
+    calculateStationarySolutions() returns all possible **sationary** solutions
     and simulateDynamicSloution() returns a numerical approximated and discrete
     **dynamic** simulation of both quantities.
 
@@ -212,7 +211,7 @@ class MasterEquationSolver:
             t_max = 100
             mes = HaPPPy.MasterEquation.MasterEquationSolver()
             sim_tdp, sim_cur = mes.simulateDynamicSloution(Δt, t_max, P_0, Γ_L, Γ_R, ns)
-            stat_ps, stat_curs = mes.calculateStationarySloutions(Γ_L, Γ_R, ns)
+            stat_ps, stat_curs = mes.calculateStationarySolutions(Γ_L, Γ_R, ns)
             ## plot/print results
             # 1st plot: time development of propabilities
             sim_tdp.quickPlot(x_symbol="t", y_symbol="P")
@@ -267,7 +266,7 @@ class MasterEquationSolver:
         """
         return 1E-10
 
-    def calculateStationarySloutions(self,
+    def calculateStationarySolutions(self,
                                      Γ_L, Γ_R,
                                      ns,
                                      Γ_0 = None,
@@ -324,7 +323,7 @@ class MasterEquationSolver:
         ## STEP 1: PARAMETER CHECKS
         # In this step some general checks are applied to the input parameters
         # to warn the user if the passed parameters are unreasonable and raise
-        # an RuntimeError exception if so.
+        # a RuntimeError exception if so.
 
         # The dimension n is extracted from an arbitrary matrix Γ_i.
         n = Γ_L.shape[0]
@@ -350,6 +349,19 @@ class MasterEquationSolver:
                                " matrix with coefficients >= 0."
                                + "\nΓ_R = \n" + str(Γ_R)
                               )
+        # Check and warn if Γ_0 is not a nxn matrix with positive coeffiecents.
+        # Γ_0 is optional!
+        if (Γ_0 != None and (Γ_0.ndim != 2
+                             or Γ_0.shape[0] != n
+                             or Γ_0.shape[1] != n
+                             or not (Γ_0 >= 0).all()
+                            )
+           ):
+            raise RuntimeError("Γ_0 must be a "
+                               + str(n) + "x" + str(n) +
+                               " matrix with coefficients >= 0."
+                               + "\nΓ_0 = \n" + str(Γ_0)
+                              )
 
         ## STEP 2: CALCULATION
         # In this step the actual calculation happens.
@@ -362,10 +374,11 @@ class MasterEquationSolver:
 
         # Calls the simulation method of the propabilities.
         stat_ps = self.__calculateStationaryPossibilitySolutions(Λ_evals,
-                                                                Λ_evecs,
-                                                                check_tolerance,
-                                                                verbose,
+                                                                 Λ_evecs,
+                                                                 check_tolerance,
+                                                                 verbose,
                                                                 )
+        # verbose only: Print stat_ps.
         if verbose: print("stat_ps =\n" + str(stat_ps))
 
         # Calls the simulation method of the netto current.
@@ -376,6 +389,7 @@ class MasterEquationSolver:
                                                        stat_ps,
                                                        verbose,
                                                       )
+        # verbose only: Print stat_curs.
         if verbose: print("stat_curs =\n" + str(stat_curs))
 
         # Return stationary solutions.
@@ -451,7 +465,7 @@ class MasterEquationSolver:
         ## STEP 1: TYPE CONVERSION OF PARAMETERS
         # In this step parameters are manipulated to match the desired type.
 
-        # P_0 can be passed as either a vector with n components or as a nx1
+        # P_0 can be passed either as a vector with n components or as a nx1
         # matrix - both are a numpy.ndarray but of different shapes. Since any
         # vector - one-dimensional numpy.ndarray - can not be transposed, the
         # matrix representation is used from now on. Hence a vector is
@@ -462,7 +476,7 @@ class MasterEquationSolver:
         ## STEP 2: PARAMETER CHECKS
         # In this step some general checks are applied to the input parameters
         # to warn the user if the passed parameters are unreasonable and raise
-        # an RuntimeError exception if so.
+        # a RuntimeError exception if so.
 
         # The dimension n is extracted from the P_0 vector.
         n = P_0.shape[0]
@@ -579,7 +593,7 @@ class MasterEquationSolver:
         sim_cur = self.__simulateDynamicCurrent(Γ_L, Γ_R, ns, sim_tdp, verbose)
         if verbose : print("sim_cur =\n" + str(sim_cur))
 
-        # Both simulations are returnd - mind the order!
+        # Both simulations are returned - mind the order!
         return sim_tdp, sim_cur
 
     def __calculateLambda(self, Γ_L, Γ_R, Γ_0, check_tolerance, verbose):

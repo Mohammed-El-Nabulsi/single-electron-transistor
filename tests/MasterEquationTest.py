@@ -57,7 +57,7 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
@@ -114,7 +114,7 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
@@ -163,7 +163,7 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
@@ -208,7 +208,7 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
@@ -255,7 +255,7 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
@@ -293,7 +293,7 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # check validity
