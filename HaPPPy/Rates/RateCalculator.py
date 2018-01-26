@@ -54,7 +54,7 @@ class RateCalculator:
         """This function calculates the transition rates.
         It contains a number of "sub-function" to break down the :math:`\\Gamma^L_{\\alpha \\rightarrow \\beta}` - equation.
 
-        :param E1: Array of eigenvalues of the single-particle-states on the dot
+        :param E1: Array of energy-eigenvalues of the single-particle states on the dot
                    (calculated in the One Body Module).
         :type E1: np.array
         :param E2: Array of eigenvalues of the two-particle-states on the dot
@@ -80,23 +80,66 @@ class RateCalculator:
                       :code:`calculate_transmission(E,V)` which calculates the transmission coefficient
                       for a given energy difference E and tunnel-barrier-potential V.
         :type TCalc: class
-        :param Density: function that gives us the density of states on source and drain (main input).
-        :type Density: function
-        :param E0: Offset Value/ Vacuum energy.
+        :param Density: Function that gives us the density of states on source and drain (main input).
+        :type Density: function (with one parameter: energy (float))
+        :param E0: Offset Value/ Vacuum energy (main input).
         :type E0: float
-        :param L: length of the potential
+        :param L: length of the potential (main input).
         :type L: float
         
         :return: Returns (:math:`\\Gamma_L` , :math:`\\Gamma_R`):
         
-                 :math:`\\Gamma_L` and :math:`\\Gamma_R` are two :math:`n x n`-matrices
-                 (:math:`n` = size(E1) + size(E2)+1) that contain the rates through the left barrier on
-                 the source-side (:math:`\\Gamma_L`) and through the right barrier on the drain-side (:math:`\\Gamma_R`).
+                 :math:`\\Gamma_L` and :math:`\\Gamma_R` are two :math:`(n*n)`-matrices
+                 :math:`(n = n1 + n2 + 1)`, (where :math:`n1` and :math:`n2` are the lengths of the E1 -and E2-arrays.
+                 They contain the rates through the left barrier on the source-side (:math:`\\Gamma_L`)
+                 and through the right barrier on the drain-side (:math:`\\Gamma_R`).
                  Both output matrices have following format:
-                 Gamma=[[0,Gamma_01,zeros],
-                       [Gamma_10,zeros,Gamma_12]
-                       [zeros, Gamma_21,zeros]] 
-        :rtype: list with two matrices
+                 
+
+                 .. math::
+                     \\Gamma_{L or R}
+                     =
+                     \\begin{pmatrix}
+                         0                       & \\Gamma_{10} (E1_1)          & \\dots  & \\Gamma_{10} (E1_{n1})
+                             & 0                           & \\dots  & 0                                  \\\\
+                         \\Gamma_{01} (E1_1)     & 0                            & \\dots  & 0
+                             & \\Gamma_{12} (E1_1,E2_1)    & \\dots  & \\Gamma_{12} (E1_1,E2_{n2})        \\\\
+                         \\vdots                 & \\vdots                      & \\ddots & \\vdots
+                             & \\vdots                     & \\ddots & \\vdots                            \\\\
+                         \\Gamma_{01} (E1_{n1})  & 0                            & \\dots  & 0
+                             & \\Gamma_{12} (E1_{n1},E2_1) & \\dots  & \\Gamma_{12} ( E1_{n1} , E2_{n2} ) \\\\
+                         0                       & \\Gamma_{21} (E2_1,E1_1)     & \\dots  & \\Gamma_{21} (E2_1,E1_{n1})
+                             & 0                           & \\dots  & 0                                  \\\\
+                         \\vdots                 & \\vdots                      & \\ddots & \\vdots
+                             & \\vdots                     & \\ddots & \\vdots                            \\\\
+                         0                       & \\Gamma_{21} (E2_{n2},E1_1) & \\dots  & \\Gamma_{21} (E2_{n2},E1_{n1})
+                             & 0                           & \\dots  & 0                                  \\\\
+                         
+                     \\end{pmatrix}
+                     ,
+
+
+                
+                 where :math:`\\Gamma_ab(E1_i)`  is the value for the transition rate from either an one-body state to the vacuum  :math:`(ab=10)`  or the other way around :math:`(ab=01)`.
+                 :math:`E1_i` is the energy of the one-body state (which is the :math:`i`-th value in the E1-array). 
+
+                 :math:`\\Gamma_ab(Ea_i,Eb_j)`,  analogously, is the value for a transition from either an one-body state to a two-body state :math:`(ab=12)`  or the other way around :math:`(ab=21)`.
+                 :math:`Ea_i` is the energy of the initial state and :math:`Eb_i` is the energy of the final state (again, read out of either the E1 -or E2-array).
+
+                 :math:`\\Gamma_L`  and :math:`\\Gamma_R` have the same format, that you see above.
+                 But, of course, the values for each transition differs, due to the different chemical potentials in source and drain.
+
+                 **Example** *(we refer to the state with the energy-eigenvalue* :code:`E1[n-1]`  *or*  :code:`E2[n-1]`  *as the n-th one-body or two-body state)*:
+                 
+                 if the dot is in the 5th one-body state and one wants to have the rate of the transition in which an electron tunnels through the left barrier and puts the dot into the 2nd two-body state,
+                 one must read out:
+                 
+                 :math:`(\\Gamma_L)_{1+5,1+n1+2}`
+
+                 
+
+            
+        :rtype: list with two matrices :math:`(\\Gamma_L` , :math:`\\Gamma_R)`
         
        
         """
@@ -164,7 +207,7 @@ class RateCalculator:
 
 
         def Gamma_01(Eb,mu,T):
-            """Calculates the rate of a transition from the vacuum state to a one body state
+            """Calculates the transition rate from the vacuum state to a one-body state
 
             Eb(float): energy of final state
             mu(float): chemical potential of either drain(muR) or source(muL)
@@ -208,7 +251,7 @@ class RateCalculator:
         for i in E1:
                 j_=0
                 for j in E2:
-                        j_ =np.where(E2==j)[0][0]
+                        #j_ =np.where(E2==j)[0][0]
                         Gamma_L[i_+1][j_+1+np.size(E1)]=Gamma_12(i,j,muL,T)
                         Gamma_L[j_+1+np.size(E1)][i_+1]=Gamma_21(j,i,muL,T)
                         Gamma_R[i_+1][j_+1+np.size(E1)]=Gamma_12(i,j,muR,T)
