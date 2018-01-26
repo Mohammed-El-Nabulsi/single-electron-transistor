@@ -42,7 +42,6 @@ class TwoBodySolver:
         """
         obData = SpectrumData()
         obData.open(obDataFile)
-        obData.m = min(obData.m, obLimit)
         result = createTwoParticleData(obData)
         tb_energ = result[0]
         tb_coeff = result[1]
