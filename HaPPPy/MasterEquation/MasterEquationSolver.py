@@ -13,8 +13,8 @@ class MasterEquationSolver:
 
     Simulates the time development of propabilities :math:`\\vec{P}(t)` or finds
     stationary solutions :math:`\\vec{P}_{stat}` for an :math:`n`-state quantum
-    dot transistor with two reservoirs with transition rates :math:`\\Gamma_{L}`
-    and :math:`\\Gamma_{R}` including the netto current :math:`I(t)` or the
+    dot transistor with two reservoirs with transition rates :math:`\\Gamma^{L}`
+    and :math:`\\Gamma^{R}` including the netto current :math:`I(t)` or the
     sationary netto current :math:`I_{stat}`.
 
 
@@ -28,25 +28,27 @@ class MasterEquationSolver:
     **1st Problem: Propabilities**
 
     Let :math:`n_i \in \mathbb{N}` be the number of states of :math:`i`
-    particles in the quantum dot where :math:`i` runns from :math:`0` to
-    :math:`m` and :math:`n = \\sum_{i=0}^m n_i`.
-    The propability of the system to be in state :math:`\\alpha \\in
-    \\{1, \\dots n\\}` is called :math:`P_{\\alpha}(t)` which can variy with the
-    time :math:`t`. They are summarized as a vector :math:`\\vec{P}(t)`.
-    The rates for any such state to transit to any other state is represented as
-    :math:`\Gamma = \Gamma^L + \Gamma^R + \Gamma^0 \in
+    particles in the quantum dot where :math:`i` runs from :math:`0` to
+    :math:`m` and :math:`n = \\sum_{i=0}^m n_i`. The states
+    :math:`| \\alpha \\rangle` - represented by their quantum number
+    :math:`\\alpha \\in \\{1, \\dots n\\}` - are sorted with **increasing**
+    :math:`i`. The propability of the system to be in state :math:`\\alpha` is
+    called :math:`P_{\\alpha}(t)` which can variy with the time :math:`t`.
+    (They are summarized as a vector :math:`\\vec{P}(t)`.)
+    The rates for any such state to transit to any other state is represented
+    collectively as :math:`\Gamma = \Gamma^L + \Gamma^R + \Gamma^0 \in
     Mat(n, n, \mathbb{R}^+_0)` where :math:`\Gamma_{\\alpha \\beta}
     \equiv \Gamma_{\\alpha \\rightarrow \\beta}` denotes the rate from state
-    :math:`\\alpha` to :math:`\\beta`. There are two different matricies
-    :math:`\\Gamma^L` and :math:`\\Gamma^R` to describe the transitions whitch
-    include exchanges of particles with the two reservoirs
-    (called *left* and *right*). The third matrix :math:`\Gamma^0` is
-    *optional* and describes the rates for relaxation and stimualtion which do
-    not require any interaction with the reservoirs. Since for this problem only
-    the total rates matter they are added up. (The idividual rates are only
-    relevant to the second problem.)
+    :math:`\\alpha` to :math:`\\beta`. There are two different matricies -
+    :math:`\\Gamma^L` and :math:`\\Gamma^R` - to describe the transition rates
+    including exchanges of particles with one of the two reservoirs
+    (called *left* and *right*). The third *optional* matrix :math:`\Gamma^0`
+    describes the rates for relaxation and stimualtion which do not require any
+    interaction with the reservoirs. Since for this problem only the total rates
+    matter they are added up. (The idividual rates are only relevant to the
+    second problem.)
 
-    The time development of propabilities are derived from the master equation
+    The time development of propabilities is derived from the master equation
     (a differential equation of first order with constant coefficients).
 
     .. math::
@@ -57,7 +59,7 @@ class MasterEquationSolver:
 
     It states that the propability of the quantum dot to be in state
     :math:`\\alpha` changes within an infinitesimal time interval depending on
-    the current state and the trasition rates to another state. All influences
+    the current state and the trasition rates to other states. All influences
     can be sorted into two categories. The left sum describes the total *gain*
     in propability whereas the right sum describes the total *loss*. If a state
     :math:`\\beta` has some propability and a transition rate
@@ -178,13 +180,16 @@ class MasterEquationSolver:
     During the calculation it is assumed that the charge per particle is
     :math:`q = 1` which is equal to divide the given formulae by :math:`q`.
 
-    **Stationary** solutions contains both total currents for each basis vector
-    of the stationary solution from the first problem (in the same order).
+    **Stationary** solutions contain both total currents for each basis vector
+    of the stationary solution from the first problem (in the same order).(They
+    should be equal and a difference might indicate bad input or numerical
+    issues during the calculation.)
 
     These solutions are returned as a list.
 
     **Dynamic** simulations are calculated in the same manner as in the
-    simulation of problem one. Both currents are returned.
+    simulation of the first problem. Both currents are returned. (A differnce
+    between both is to be ecpected.)
 
     The solution of the simulation is returned as a Simulation as well.
     (See HaPPPy.MasterEquation.Simulation for more details.)
@@ -210,11 +215,11 @@ class MasterEquationSolver:
             stat_ps, stat_curs = mes.calculateStationarySloutions(Γ_L, Γ_R, ns)
             ## plot/print results
             # 1st plot: time development of propabilities
-            sim_tdp.quickPlot(xlabel="t", ylabel="P")
+            sim_tdp.quickPlot(x_symbol="t", y_symbol="P")
             print("static solutions (P_ij) =\\n", stat_ps)
             # 2nd plot: time development of netto current
-            sim_cur.quickPlot(xlabel="t", ylabel="I",legend=["$I^L$","$I^R$"])
-            print("static solutions (I_i) = \\n", stat_curs)
+            sim_cur.quickPlot(x_symbol="t", y_symbol="I",legend=["$I^L$","$I^R$"])
+            print("static solutions (I^k_i) = \\n", stat_curs)
 
 
         The relevant lines of code for the simulation to work are highlighted.
@@ -270,10 +275,10 @@ class MasterEquationSolver:
                                      verbose=False,
                                     ):
         """
-        Calculates all possible stationary solutions :math:`\\vec{P}_{stat,i}`
-        (with :math:`\\Lambda \\cdot \\vec{P}_{stat,i} = 0`). The result is
-        returned as a :math:`n \\times k`-matrix :math:`\\Pi` formated
-        like:
+        Calculates a basis of all possible stationary solutions
+        :math:`\\vec{P}_{stat,i}` with
+        :math:`\\Lambda \\cdot \\vec{P}_{stat,i} = 0`). The result is returned
+        as a :math:`n \\times k`-matrix :math:`\\Pi` formated like:
 
         .. math::
             \\Pi = \\begin{pmatrix}
@@ -285,18 +290,18 @@ class MasterEquationSolver:
 
         For more details see class description of Happy.MasterEquationSolver.
 
-        :param Γ_L: Matrix containing the transition rates regarding electrons
+        :param Γ_L: Matrix containing the transition rates regarding particles
                     tunneling trough the *left* barrier where
                     :code:`Γ_L[i,j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_L: numpy.ndarray
-        :param Γ_R: Matrix containing the transition rates regarding electrons
+        :param Γ_R: Matrix containing the transition rates regarding particles
                     tunneling trough the *right* barrier where
                     :code:`Γ_R[i,j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_R: numpy.ndarray
         :param ns: List of numbers of states :math:`n_i` with the same number
-                   :math:`i` of electrons in inreasing order of :math:`i`:
+                   :math:`i` of particles in increasing order of :math:`i`:
 
                    :code:`ns = [n_0, n_1, …, n_k]`
                    ≣ :math:`(n_0, n_1, \\dots, n_k)`.
@@ -405,18 +410,18 @@ class MasterEquationSolver:
                     :code:`P_0` ≣ :math:`\\vec{P_0}`.
                     Must be either a list or a ``nx1`` matrix.
         :type P_0: numpy.array or numpy.ndarray
-        :param Γ_L: Matrix containing the transition rates regarding electrons
+        :param Γ_L: Matrix containing the transition rates regarding particles
                     tunneling trough the *left* barrier where
                     :code:`Γ_L[i,j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_L: numpy.ndarray
-        :param Γ_R: Matrix containing the transition rates regarding electrons
+        :param Γ_R: Matrix containing the transition rates regarding particles
                     tunneling trough the *right* barrier where
                     :code:`Γ_R[i,j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_R: numpy.ndarray
         :param ns: List of numbers of states :math:`n_i` with the same number
-                   :math:`i` of electrons in inreasing order of :math:`i`:
+                   :math:`i` of particles in increasing order of :math:`i`:
 
                    :code:`ns = [n_0, n_1, …, n_k]`
                    ≣ :math:`(n_0, n_1, \\dots, n_k)`.
@@ -679,7 +684,7 @@ class MasterEquationSolver:
         documentation).
 
         :param ns: List of numbers of states :math:`n_i` with the same number
-                   :math:`i` of electrons in inreasing order of :math:`i`:
+                   :math:`i` of particles in increasing order of :math:`i`:
 
                    :code:`ns = [n_0, n_1, …, n_k]`
                    ≣ :math:`(n_0, n_1, \\dots, n_k)`.
@@ -911,18 +916,18 @@ class MasterEquationSolver:
         MasterEquationSolver class! (Hence it does not perform further tests
         than MasterEquationSolver.)
 
-        :param Γ_L: Matrix containing the transition rates regarding electrons
+        :param Γ_L: Matrix containing the transition rates regarding particles
                     tunneling trough the *left* barrier where
                     :code:`Γ_L[i,j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_L: numpy.ndarray
-        :param Γ_R: Matrix containing the transition rates regarding electrons
+        :param Γ_R: Matrix containing the transition rates regarding particles
                     tunneling trough the *right* barrier where
                     :code:`Γ_R[i,j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_R: numpy.ndarray
         :param ns: List of numbers of states :math:`n_i` with the same number
-                   :math:`i` of electrons in inreasing order of :math:`i`:
+                   :math:`i` of particles in increasing order of :math:`i`:
 
                    :code:`ns = [n_0, n_1, …, n_k]`
                    ≣ :math:`(n_0, n_1, \\dots, n_k)`.
@@ -975,18 +980,18 @@ class MasterEquationSolver:
         MasterEquationSolver class! (Hence it does not perform further tests
         than MasterEquationSolver.)
 
-        :param Γ_L: Matrix containing the transition rates regarding electrons
+        :param Γ_L: Matrix containing the transition rates regarding particles
                     tunneling trough the *left* barrier where
                     :code:`Γ_L[i,j]` ≣ :math:`\Gamma^L_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_L: numpy.ndarray
-        :param Γ_R: Matrix containing the transition rates regarding electrons
+        :param Γ_R: Matrix containing the transition rates regarding particles
                     tunneling trough the *right* barrier where
                     :code:`Γ_R[i,j]` ≣ :math:`\Gamma^R_{i \\rightarrow j}`.
                     Must be a ``nxn`` matrix.
         :type Γ_R: numpy.ndarray
         :param ns: List of numbers of states :math:`n_i` with the same number
-                   :math:`i` of electrons in inreasing order of :math:`i`:
+                   :math:`i` of particles in increasing order of :math:`i`:
 
                    :code:`ns = [n_0, n_1, …, n_k]`
                    ≣ :math:`(n_0, n_1, \\dots, n_k)`.
@@ -1173,7 +1178,7 @@ class Simulation():
 
     def quickPlot(self,
                   title=None,
-                  xlabel=None, ylabel=None,
+                  x_symbol=None, y_symbol=None,
                   xunit=1, yunit=1,
                   xunit_symbol=None, yunit_symbol=None,
                   legend=None,
@@ -1182,17 +1187,19 @@ class Simulation():
                   step=1,
                  ):
         """
-        Simple plotting method to quickly get an overview on the simulation.
+        Simple plotting method to quickly get an overview of the simulation.
+        All parameters called **symbol** are treated as LATEX-expressions.
+        (The sourrounding :code:`$` 's are added automatically.)
 
         :param title: The title of the plot. (optional)
         :type title: string
-        :param xlabel: The symbol to retresent the parameter. (optional)
-        :type xlabel: string
-        :param ylabel: The symbol to retresent the function values. (optional)
-                       If the function values are vetors ylabel is treated as a
+        :param x_symbol: The symbol to represent the parameter. (optional)
+        :type x_symbol: string
+        :param y_symbol: The symbol to represent the function values. (optional)
+                       If the function values are vetors y_symbol is treated as a
                        LATEX expression representing a symbol and automatic
                        indicies are added.
-        :type ylabel: string
+        :type y_symbol: string
         :param xunit: The unit the paramter is meassured in. All x-values are
                       divided by this value before plotting. (optional)
         :type xunit: float
@@ -1201,7 +1208,8 @@ class Simulation():
         :type yunit: float
         :param xunit_symbol: The unit the paramter is meassured in. (optional)
         :type xunit_symbol: string
-        :param yunit_symbol: The unit the function valuesare meassured in. (optional)
+        :param yunit_symbol: The unit the function valuesare meassured in.
+                             (optional)
         :type yunit_symbol: string
         :param legend: A list of strings representing the symbols of each graph.
                        Vectorial graphs are ploted component-wise and labeled in
@@ -1213,8 +1221,8 @@ class Simulation():
                      :math:`i` is not included. (optional)
         :type stop: int
         :param step: The distance between two ploted bins. E.g. :code:`step=1`
-                      plots all values and :code:`step=2` plots every odd indexed
-                      value. (optional)
+                      plots all values and :code:`step=2` plots every odd
+                      indexed value. (optional)
         :type step: int
 
         :example: See the example given at the documentation of
@@ -1236,28 +1244,28 @@ class Simulation():
         # Add a title if requested.
         if title != None:
             plt.title(str(title))
-        # Add labels to one or both axes if requested.
+        # Adds labels to one or both axes if requested.
         # It is possible to add an optional unit to each axis.
-        if xlabel != None:
+        if x_symbol != None:
             if xunit_symbol != None:
-                plt.xlabel("$" + str(xlabel) + " / " + str(xunit_symbol) + "$")
+                plt.x_symbol("$" + str(x_symbol) + " / " + str(xunit_symbol) + "$")
             else:
-                plt.xlabel("$" + str(xlabel) + "$")
-        if ylabel != None:
+                plt.x_symbol("$" + str(x_symbol) + "$")
+        if y_symbol != None:
             if yunit_symbol != None:
-                plt.ylabel("$" + str(ylabel) + " / " + str(yunit_symbol) + "$")
+                plt.y_symbol("$" + str(y_symbol) + " / " + str(yunit_symbol) + "$")
             else:
-                plt.ylabel("$" + str(ylabel) + "$")
+                plt.y_symbol("$" + str(y_symbol) + "$")
         # Add a legend if requested.
-        # If the function values are vetors ylabel is treated as a LATEX
+        # If the function values are vetors y_symbol is treated as a LATEX
         # expression representing a symbol and automatic indicies are added.
         if (legend == None
-            and ylabel != None
+            and y_symbol != None
             and (type(vs[0]) == list or type(vs[0]) == np.ndarray)
             and len(vs[0]) > 1
            ):
             n = len(vs[0]) # dimension of v
-            legend = ["${" + str(ylabel) + "}_{" + str(i) + "}$"
+            legend = ["${" + str(y_symbol) + "}_{" + str(i) + "}$"
                       for i in range(n)
                      ]
         if legend != None:

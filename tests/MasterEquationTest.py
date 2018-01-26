@@ -62,12 +62,12 @@ class MasterEquationTestSuite(unittest.TestCase):
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P",
                                   start=plot_start,
                                   stop=plot_stop,
                                   step=plot_step,
                                  )
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   legend=["$I^L$","$I^R$"],
                                   start=plot_start,
                                   stop=plot_stop,
@@ -119,10 +119,10 @@ class MasterEquationTestSuite(unittest.TestCase):
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P",
                                   title=("P_stat = " + str(stat_ps)),
                                  )
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   title=("I_stat = " + str(stat_curs)),
                                   legend=["$I^L$","$I^R$"],
                                  )
@@ -168,8 +168,8 @@ class MasterEquationTestSuite(unittest.TestCase):
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P")
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   legend=["$I^L$","$I^R$"],
                                  )
             # check validity
@@ -213,8 +213,8 @@ class MasterEquationTestSuite(unittest.TestCase):
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P")
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   legend=["$I^L$","$I^R$"],
                                  )
             # check validity
@@ -260,8 +260,8 @@ class MasterEquationTestSuite(unittest.TestCase):
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P")
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   legend=["$I^L$","$I^R$"],
                                  )
             # check validity

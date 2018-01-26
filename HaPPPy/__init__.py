@@ -255,11 +255,11 @@ def main(argv=None):
                                                         )
             # Plot the simulations.
             # 1st plot: time development of propabilities
-            sim_p.quickPlot(xlabel="t", ylabel="P",
+            sim_p.quickPlot(x_symbol="t", y_symbol="P",
                             xunit_symbol="ps",
                         )
             # 2nd plot: time development of netto current
-            sim_cur.quickPlot(xlabel="t", ylabel="I",
+            sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                               xunit_symbol="ps",
                               yunit_symbol="\\frac{-e}{ps}",
                               legend=["$I^L$","$I^R$"],
