@@ -103,6 +103,10 @@ def main(argv=None):
                         action="store_true",
                         help="print detailed information about each step of the calulations",
                        )
+    parser.add_argument('-p', '--print_result',
+                       action="store_true",
+                       help="print the final result(s) of the calulations",
+                      )
     parser.add_argument('-c', '--config',
                         type=str,
                         default=default_path_config,
@@ -147,7 +151,7 @@ def main(argv=None):
 
     current = []
     for i in range(len(configdata["muL"])):
-        
+
         muL = configdata["muL"][i]
         muR = configdata["muR"][i]
 
@@ -204,18 +208,24 @@ def main(argv=None):
         if BCond == "static":
             # Static solutions are requested.
             if args.verbose: print("mode = STATIC")
-            stat_ps, stat_curs = mes.calculateStationarySloutions(Gamma_L, Gamma_R,
-                                                                ns,
-                                                                verbose=args.verbose,
-                                                                )
-            print("(P_stat_ij) =\n", stat_ps)
-            print("(I^k_stat_i) = \n", stat_curs)
-            print("muL",muL,"muR",muR,sum(stat_curs[0]))
+            stat_ps, stat_curs = mes.calculateStationarySolutions(Gamma_L, Gamma_R,
+                                                                  ns,
+                                                                  verbose=args.verbose,
+                                                                 )
+            # Calculate conductivity.
+            stat_sigma = abs(stat_curs / (muR - muL))
+            # Print all results.
+            if args.print_result:
+                print("results:")
+                print("(P_stat_ij) =\n", stat_ps)
+                print("(I^k_stat_i) = \n", stat_curs)
+                print("(sigma^k_stat_i) = \n", stat_sigma)
             current.append(sum(stat_curs[0]))
             # Store output values.
             with h5py.File(datapath_master, "w") as f:
                 f.create_dataset("stat_ps", data=stat_ps)
                 f.create_dataset("stat_curs", data=stat_curs)
+                f.create_dataset("stat_sigma", data=stat_sigma)
         else:
             # A simulation is requested.
             if args.verbose: print("mode = DYNAMIC")
@@ -241,20 +251,22 @@ def main(argv=None):
                 f.create_dataset("P_0", data=P_0)
             # Calculate the simulation.
             sim_p, sim_cur = mes.simulateDynamicSloution(DT, TMax,
-                                                        P_0,
-                                                        Gamma_L, Gamma_R,
-                                                        ns,
-                                                        verbose=args.verbose,
+                                                         P_0,
+                                                         Gamma_L, Gamma_R,
+                                                         ns,
+                                                         verbose=args.verbose,
                                                         )
             # Plot the simulations.
             # 1st plot: time development of propabilities
-            sim_p.quickPlot(xlabel="t", ylabel="P",
+            sim_p.quickPlot(x_symbol="t", y_symbol="P",
                             xunit_symbol="ps",
                         )
             # 2nd plot: time development of netto current
-            sim_cur.quickPlot(xlabel="t", ylabel="I",
-                            xunit_symbol="ps",
-                            )
+            sim_cur.quickPlot(x_symbol="t", y_symbol="I",
+                              xunit_symbol="ps",
+                              yunit_symbol="\\frac{-e}{ps}",
+                              legend=["$I^L$","$I^R$"],
+                             )
             # Store output values.
             with h5py.File(datapath_master, "w") as f:
                 f.create_dataset("sim_p", data=sim_p)

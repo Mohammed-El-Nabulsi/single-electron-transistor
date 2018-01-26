@@ -43,7 +43,10 @@ class MasterEquationTestSuite(unittest.TestCase):
             p1 = 0.7 # > 0
             p2 = 0.2 # > 0, p0 + p1 + p2 = 1
             Δt = 1
-            t_max = 100
+            t_max = 100 # >= plot_stop, plot_start
+            plot_start = 0
+            plot_stop = 20
+            plot_step = 1
             # set-up a reasonable Γ-matrix
             Γ_L = np.array([[0, a, 0], [0, 0, 0], [0, 0, 0]])
             Γ_R = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
@@ -54,14 +57,21 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P",
+                                  start=plot_start,
+                                  stop=plot_stop,
+                                  step=plot_step,
+                                 )
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   legend=["$I^L$","$I^R$"],
+                                  start=plot_start,
+                                  stop=plot_stop,
+                                  step=plot_step,
                                  )
             # check validity
             self.assertTrue(sim_tdp.valid())
@@ -104,15 +114,15 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P",
                                   title=("P_stat = " + str(stat_ps)),
                                  )
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   title=("I_stat = " + str(stat_curs)),
                                   legend=["$I^L$","$I^R$"],
                                  )
@@ -153,13 +163,13 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P")
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   legend=["$I^L$","$I^R$"],
                                  )
             # check validity
@@ -198,13 +208,13 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P")
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   legend=["$I^L$","$I^R$"],
                                  )
             # check validity
@@ -245,13 +255,13 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # plot result
             if plot_figures:
-                sim_tdp.quickPlot(xlabel="t", ylabel="P")
-                sim_cur.quickPlot(xlabel="t", ylabel="I",
+                sim_tdp.quickPlot(x_symbol="t", y_symbol="P")
+                sim_cur.quickPlot(x_symbol="t", y_symbol="I",
                                   legend=["$I^L$","$I^R$"],
                                  )
             # check validity
@@ -283,7 +293,7 @@ class MasterEquationTestSuite(unittest.TestCase):
             sim_tdp, sim_cur = mes.simulateDynamicSloution(
                                    Δt, t_max, P_0, Γ_L, Γ_R, ns, verbose=verbose
                                   )
-            stat_ps, stat_curs = mes.calculateStationarySloutions(
+            stat_ps, stat_curs = mes.calculateStationarySolutions(
                                     Γ_L, Γ_R, ns, verbose=verbose
                                    )
             # check validity
