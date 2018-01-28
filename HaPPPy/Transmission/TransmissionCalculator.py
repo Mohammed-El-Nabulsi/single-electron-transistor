@@ -41,7 +41,16 @@ class TransmissionCalculator():
             hbar = _hbar
 
     def validate_input(self, E, barrier, dx):
+        
+        """
+        This function tests the input parameters for validity. 
+        It tests both the data types aswell the vaulue range and shows an error message for all upcoming issues.
+        """
         error_msg_tmpl = string.Template("Validation Error: $message Details: $details")
+         """
+        This function tests the input parameters for validity. 
+        It tests both the data types aswell the vaulue range and shows an error message for all upcoming issues.
+        """
 
         if (not hasattr(barrier, "__iter__") or np.array(barrier).ndim != 1):
             message = "The potential must be an array of one dimension"
@@ -73,7 +82,50 @@ class TransmissionCalculator():
 
     
     def calculate_transmission(self, E, barrier, dx):
+         """
+        Here the actual calculation happens.
+        
+        First it builds up the potential and the position grid. If needed it also fits sizes. Then it creates the wavenumber grind based on the length of the position grid.
+        As soon as we built up all of that we can use the Split-Step-Method to simulate the transmission of our electron, representet by a gaussian wave. The algorith works like that:
+            Transforming the wavepackage into pulse space with the Fouriertransformation.
+            Multiplying the package with the diagonal elements of the pulse operator for half a time step:
+                .. math::
+                    \\exp(-i* \\delta t * hbar * (k_i)^2 / (4*m))
+            Reverse Fourier Transformation
+            Multiplying with diganoal elements of pulse operator:
+                .. math::
+                    \\exp(-i*V_i * \\delta t / hbar)
+            Fourier Transformation again
+            Multiplying with the diagonal elements of the pulse operator for a full time step:
+                .. math::
+                    \\exp(-i* \\delta t * hbar * (k_i)^2 / (2*m))
+            Repeat that until you reach the last time step and finish it with a multiplication of the package with the diagonal elements of the pulse operator for half a time step instead.
+        For every step it calculates the transmission propability by dividing the current square of the absolute value by the original one.
+        It compares every vaule with the one before and as soon as the diffrence drops below a very low value the chain breaks.
+        """
         self.validate_input(E, barrier, dx)
+        
+        """
+        Here the actual calculation happens.
+        
+        First it builds up the potential and the position grid. If needed it also fits sizes. Then it creates the wavenumber grind based on the length of the position grid.
+        As soon as we built up all of that we can use the Split-Step-Method to simulate the transmission of our electron, representet by a gaussian wave. The algorith works like that:
+            Transforming the wavepackage into pulse space with the Fouriertransformation.
+            Multiplying the package with the diagonal elements of the pulse operator for half a time step:
+                .. math::
+                    \\exp(-i* \\delta t * hbar * (k_i)^2 / (4*m))
+            Reverse Fourier Transformation
+            Multiplying with diganoal elements of pulse operator:
+                .. math::
+                    \\exp(-i*V_i * \\delta t / hbar)
+            Fourier Transformation again
+            Multiplying with the diagonal elements of the pulse operator for a full time step:
+                .. math::
+                    \\exp(-i* \\delta t * hbar * (k_i)^2 / (2*m))
+            Repeat that until you reach the last time step and finish it with a multiplication of the package with the diagonal elements of the pulse operator for half a time step instead.
+        For every step it calculates the transmission propability by dividing the current square of the absolute value by the original one.
+        It compares every vaule with the one before and as soon as the diffrence drops below a very low value the chain breaks.
+        """
         
         E = E * eV * 1e40 # 1e-3 * 1e12 * 1e31
         barrier = barrier * eV * 1e40  # * 1e-3 * 1e12 * 1e31
