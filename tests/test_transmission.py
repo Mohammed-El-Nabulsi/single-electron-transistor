@@ -1,158 +1,182 @@
-from HaPPPy.Transmission.Modules.GaussianWave import GaussianWave
-from HaPPPy.Transmission.Modules.SplitStepOperator import SplitStepOperator
-from HaPPPy.Transmission.Modules.Transmission import Transmission
-from HaPPPy.Transmission.Modules.Fourier import Fourier
-from HaPPPy.Transmission.Modules.PotentialUtils import PotentialUtils
 from HaPPPy.Transmission.TransmissionCalculator import TransmissionCalculator
 from scipy.constants import codata
 
 import unittest
-import numpy
-
-me   = codata.value("electron mass energy equivalent in MeV") * 1e9 ;  # Convert to milli eV
-hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e15;  # Convert to ps
-
+import pytest
+import numpy as np
+import matplotlib.pyplot as plt
 
 class TransmissionTestSuite(unittest.TestCase):
-    def test_GaussianWave_isMathematicallyCorrect(self):
-
+    def test_validation_does_not_allow_negative_electron_energies(self):
         # Assemble
-        # testPsi for a=1/2, energy=(hbar/3)**2/(2*me) x in [-1,0,1], x0=1/5 from wolfram alpha:
-        #x = -1
-        expectedPsiRe1  = 0.00366637770707954939318041612000244530051853481045139516
-        expectedPsiIm1 = -0.00155011963188600389828072397974977655743189489415947434
+        E = -1
+        dx = 0.1
+        barrier = np.array(20+np.zeros(3000))
 
-        #x = 0
-        expectedPsiRe2 = 1.074068789330235009621373594853013756095220098586369327
-        expectedPsiIm2 = -0.07171085575151225040654591725275008467732293163741000634
-
-        #x = 1
-        expectedPsiRe3 = 0.09420262718699546582979705382375965292637280618901849569
-        expectedPsiIm3 = 0.02573359354865373116603681901836827575687821882738438584
+        transmission_calculator = TransmissionCalculator()
         
-        expectedPsiRe = numpy.array([expectedPsiRe1,expectedPsiRe2,expectedPsiRe3])
-        expectedPsiIm = numpy.array([expectedPsiIm1,expectedPsiIm2,expectedPsiIm3])        
-        
-        width = 1/2
-        energy = (hbar/3)**2/(2*me)
-        symmetrypoint = 1/5
-        pos = [-1, 0, 1]
-
-        gaussianWave = GaussianWave(width, symmetrypoint,energy,pos,pos)
-
         # Act
-        psi0 = gaussianWave.x_package
-        psi = numpy.array(psi0)
-
-        maxAbsReal = max(numpy.absolute(psi.real - expectedPsiRe))
-        maxAbsImag = max(numpy.absolute(psi.imag - expectedPsiIm))
-
-        errorTolerance = 10**(-10)
-
-        print("Max errors: ")
-        print([maxAbsReal, maxAbsImag])
+        with pytest.raises(ValueError) as exception_results:
+            transmission_calculator.calculate_transmission(E, barrier, dx)
 
         # Assert
-        self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The gaussian wave returns an error greater than %e" % errorTolerance)
+        self.assertTrue("Electron energy must be greater than 0." in str(exception_results.value))
+
+    def test_validation_does_not_allow_electron_energies_bigger_than_potential(self):
+        # Assemble
+        E = 25 
+        dx = 0.1
+        barrier = np.array(20+np.zeros(3000))
+
+        transmission_calculator = TransmissionCalculator()
         
+        # Act
+        with pytest.raises(ValueError) as exception_results:
+            transmission_calculator.calculate_transmission(E, barrier, dx)
+
+        # Assert
+        self.assertTrue("Electron energy cannot be bigger than max potential value." in str(exception_results.value))
         
-    # BUG: This runs forever because the delta never changes...
-    def test_SplitStepOperator_isMathematicallyCorrect(self):
-        V = numpy.arange(1,11,1/2)
-        dx = 1/4
-
-        potential_instanz = PotentialUtils(V, dx)
-
-        grid = potential_instanz.position_grid
-
-        psi = numpy.arange(grid.size)
-
-        splitStep = SplitStepOperator(grid, potential_instanz.potential)
-
-        psi1 = splitStep.first_step(psi)
-        psi2 = splitStep.step(psi)
-        psi3 = splitStep.final_step(psi)
-   
-        print(psi3)
-
-        # We need to define criteria for asserting the split step operator!
-        self.assertTrue(True)
+    def test_validation_does_not_allow_invalid_potential(self):
+        # Assemble
+        E = 25 
+        dx = 0.1
+        barrier = [np.array(20+np.zeros(3000)), np.array(20+np.zeros(3000))]
+  
+        transmission_calculator = TransmissionCalculator()
         
-    def test_Transmission_isMathematicallyCorrect(self):
-        psi = [ -2, 1, 2, 1j ]
-        start = 2
-        expectedx = 0.5
+        # Act
+        with pytest.raises(ValueError) as exception_results1:
+            transmission_calculator.calculate_transmission(E, barrier, dx)
 
-        transmission = Transmission()
+        with pytest.raises(ValueError) as exception_results2:
+            transmission_calculator.calculate_transmission(E, "some string", dx)
 
-        x = transmission.calculate(psi,start)
+        # Assert
+        self.assertTrue("The potential must be an array of one dimension" in str(exception_results1.value))
+        self.assertTrue("The potential must be an array of one dimension" in str(exception_results2.value))
 
-        self.assertTrue(x == expectedx)
+        
+    def test_validation_does_not_allow_invalid_dx(self):
+        # Assemble
+        E = 10 
+        barrier = np.array(20+np.zeros(3000))
+  
+        transmission_calculator = TransmissionCalculator()
+        
+        # Act
+        with pytest.raises(ValueError) as exception_results1:
+            transmission_calculator.calculate_transmission(E, barrier, 0)
 
+        with pytest.raises(ValueError) as exception_results2:
+            transmission_calculator.calculate_transmission(E, barrier, -1)
 
-    def test_TransmissionCalculator_runs(self):
-        V = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        # Assert
+        self.assertTrue("dx must be greater than 0" in str(exception_results1.value))
+        self.assertTrue("dx must be greater than 0" in str(exception_results2.value))
+
+    def test_width_of_free_gaussian_package_grows_correctly(self):
+        hbar = 1
+        me = 1
+
         E = 0.5
+        dx = 0.1
+        barrier = np.zeros(300)
 
-        transmissionCalculator = TransmissionCalculator()
+        initial_package_width = 1
+        error_tolerance = 1 
+  
+        package_widths = []
+        package_expected_widths = []
+ 
+        # ref: https://stackoverflow.com/a/16489955
+        def find_width_at_half_max_height(X,Y):
+            half_max = max(Y) / 2.
+            #find when function crosses line half_max (when sign of diff flips)
+            #take the 'derivative' of signum(half_max - Y[])
+            d = np.sign(half_max - np.array(Y[0:-1])) - np.sign(half_max - np.array(Y[1:]))
+            #plot(X,d) #if you are interested
+            #find the left and right most indexes
+            left_idx = np.argwhere(d > 0)[0]
+            right_idx = np.argwhere(d < 0)[-1]
 
-        # rate = transmissionCalculator.calculate_transmission(E, V)
+            return (X[right_idx] - X[left_idx])[0] #return the difference (full width)
 
-        # print(rate)
+        def _step_callback(self, psi, psi_squared, x, t, b, z):
+            package_widths.append(find_width_at_half_max_height(x, psi_squared))
+            width = (1 / initial_package_width * np.sqrt(initial_package_width ** 4 + (hbar / me * t) ** 2)) * 1.7
+            package_expected_widths.append(width)
 
-        self.assertTrue(True)
-    
-    def test_Fourier_isMathematicallyCorrect(self):
-        # Assemble
-        # test x = np.arange(-1,-1+5/2,1/2), function = np.array([np.sin(0.123*x)+np.sin(0.234*x) for x in positions])
-            
-        positions = numpy.arange(-1,-1+5/2,1/2)
-
-        function = numpy.array([numpy.sin(0.123*x)+numpy.sin(0.234*x) for x in positions])
-            
-        #x[0]
-        expected_idft_real1 = 0
-        expected_idft_imag1 = 0
-        #x[1]
-        expected_idft_real2 = 0
-        expected_idft_imag2 = -0.44666733802575149239
-        #x[2]
-        expected_idft_real3 = 0
-        expected_idft_imag3 = 0
-        #x[3]
-        expected_idft_real4 = 0
-        expected_idft_imag4 = 0.44666733802575149239
-        #x[4]
-        expected_idft_real5 = 0
-        expected_idft_imag5 = 0
-        
-        #create expected array
-        expected_idft = numpy.array(
-                [expected_idft_real1+1*1j*expected_idft_imag1,
-                 expected_idft_real2+1*1j*expected_idft_imag2,
-                 expected_idft_real3+1*1j*expected_idft_imag3,
-                 expected_idft_real4+1*1j*expected_idft_imag4,
-                 expected_idft_real5+1*1j*expected_idft_imag5
-                 ]
-                )
-        
-        expected_idft_real = expected_idft.real
-        expected_idft_imag = expected_idft.imag
-        
+        transmission_calculator = TransmissionCalculator(
+            disable_electron_potential_validation = True,
+            _hbar = hbar,
+            _me = me,
+            package_wdh = initial_package_width,
+            step_callback = _step_callback
+        )
         
         # Act
-        fourier = Fourier(positions)
+        transmission_calculator.calculate_transmission(E, barrier, dx)
+       
+        error = max(np.absolute(np.array(package_widths) - np.array(package_expected_widths)))
+     
+        # Assert
+        self.assertTrue(error < error_tolerance)
+
+    def test_propability_density_is_1(self):
+        E = 500 * codata.value("electron volt")
+        V0 = 600 * codata.value("electron volt")
+
+        dx = 0.1
+        barrier = np.array(V0 + np.zeros(250))
+
+        prob_dens = [] 
+        error_tolerance = 0.1
+  
+        def _step_callback(self, psi, psi_squared, x, t, b, z):
+            prob =  np.multiply(psi, psi.conj()).real
+            prob_dens.append(dx*np.sum(psi_squared))
+
+        transmission_calculator = TransmissionCalculator(
+            step_callback = _step_callback
+        )
         
-        maxAbsReal = max(numpy.absolute(fourier.idft(function).real - expected_idft_real))
-        maxAbsImag = max(numpy.absolute(fourier.idft(function).imag - expected_idft_imag))
-        
-        errorTolerance = 10**(-15)
-        
-        print("Max errors: ")
-        print([maxAbsReal, maxAbsImag])
+        # Act
+        transmission_calculator.calculate_transmission(E, barrier, dx)
+
+        error = max(np.absolute(np.array(prob_dens) - 1))
         
         # Assert
-        self.assertTrue(maxAbsReal < errorTolerance and maxAbsImag < errorTolerance, "The Fourier-Method returns an error greater than %e" % errorTolerance)
+        self.assertTrue(error < error_tolerance)
+
+    def test_potential_to_energy_ratio(self):
+        # Assemble
+        V_0 = 20
+        dx = 0.1
+        barrier = np.array(V_0 + np.zeros(500))
+
+        transmission_calculator = TransmissionCalculator(_me = 1, _hbar = 1, disable_electron_potential_validation = True)
+
+        V_over_E = []
+        transmissions = []
+
+        for E in np.arange(0, 1.5 * V_0, 1):
+            # Act
+            transmission = transmission_calculator.calculate_transmission(E, barrier, dx)
+
+            transmissions.append(transmission**2)
+
+            V_over_E.append(V_0 / E)
+ 
+        # print(transmissions)
+
+        # plt.xlabel('V/E')
+        # plt.ylabel('T^2')
+        # plt.plot(V_over_E, transmissions)
+        # plt.show()
+
+        self.assertTrue(False)
+
         
 if __name__ == '__main__':
     transmission_suite = unittest.TestLoader().loadTestsFromTestCase(TransmissionTestSuite)
