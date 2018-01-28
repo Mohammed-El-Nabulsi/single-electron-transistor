@@ -160,18 +160,21 @@ class TransmissionTestSuite(unittest.TestCase):
 
     def test_potential_to_energy_ratio(self):
         # Assemble
+        # E = 100 * codata.value("electron volt") * 1e-3
+        # V_0 = 400 * codata.value("electron volt") * 1e-3
+
         E = 10 * codata.value("electron volt") * 1e-3
-        V_0 = 50 * codata.value("electron volt") * 1e-3
+        V_0 = 40 * codata.value("electron volt") * 1e-3
 
         dx = 0.1
 
-        barrier = np.array(V_0 + np.zeros(2000))
+        barrier = np.array(V_0 + np.zeros(3000))
 
         V_over_E = []
         transmissions = []
 
         def _step_callback(self, psi, psi_plot, x, n, finished):
-            if (False): # (finished == True):
+            if (finished == True):
                print("MAX: " + str(psi_plot[self.psi_peak_after_barrier]))
                print("MIN: " + str(psi_plot[self.psi_peak_before_barrier]))
                print("BEFORE: " + str(self.psi_peak_before_barrier)) 
@@ -192,7 +195,7 @@ class TransmissionTestSuite(unittest.TestCase):
             step_callback = _step_callback
         )
 
-        for E in np.arange(0, 2 * V_0, V_0 / 10):
+        for E in np.arange(V_0, 2 * V_0, V_0 / 10):
             # Act
             if (E == 0):
                 E = 1 * codata.value("electron volt") * 1e-3
@@ -236,8 +239,8 @@ class TransmissionTestSuite(unittest.TestCase):
         E = 500 * codata.value("electron volt") * 1e-3
         V0 = 600 * codata.value("electron volt") * 1e-3
 
-        dx = 0.05
-        barrier = np.array(V0 + np.zeros(250))
+        dx = 0.005
+        barrier = np.array(V0 + np.zeros(25))
 
         prob_dens = [] 
         error_tolerance = 0.1
@@ -256,15 +259,8 @@ class TransmissionTestSuite(unittest.TestCase):
 
                plt.show()
 
-        def _step_exit(self, n):
-            if (n == 3000):
-                return True
-
-            return False
-
         transmission_calculator = TransmissionCalculator(
-            step_callback = _step_callback,
-            # step_exit = _step_exit,
+            # step_callback = _step_callback,
         )
         
         # Act

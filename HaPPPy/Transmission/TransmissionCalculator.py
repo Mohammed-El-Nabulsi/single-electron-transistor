@@ -281,10 +281,10 @@ class TransmissionCalculator():
                 else:
                     continue
 
-            if (self.psi_peak_after_barrier[0][0] > self.x.size * 0.75): #  and max_after > 1e-18):
+            if (self.psi_peak_after_barrier[0][0] > self.x.size * 0.75 and max_after > 1e-30):
                 break
 
-            if (self.psi_peak_before_barrier[0][0] < self.x.size * 0.25): # and max_before > 1e-18):
+            if (self.psi_peak_before_barrier[0][0] < self.x.size * 0.25 and max_before > 1e-30):
                 break
 
         if (self.step_callback != None):
