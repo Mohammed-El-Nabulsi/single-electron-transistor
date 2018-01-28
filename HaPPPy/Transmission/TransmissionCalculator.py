@@ -9,7 +9,6 @@ eV = codata.value("electron volt")
 me   = codata.value("electron mass") * 1e15 # convert to pico grams            
 hbar = codata.value("Planck constant over 2 pi") * 1e27  # convert to pico-compatible values
 
-
 class TransmissionCalculator():
     """
     Calculates the probability of an electron tunneling through an potential barrier.
@@ -47,10 +46,6 @@ class TransmissionCalculator():
         It tests both the data types aswell the vaulue range and shows an error message for all upcoming issues.
         """
         error_msg_tmpl = string.Template("Validation Error: $message Details: $details")
-         """
-        This function tests the input parameters for validity. 
-        It tests both the data types aswell the vaulue range and shows an error message for all upcoming issues.
-        """
 
         if (not hasattr(barrier, "__iter__") or np.array(barrier).ndim != 1):
             message = "The potential must be an array of one dimension"
@@ -82,7 +77,7 @@ class TransmissionCalculator():
 
     
     def calculate_transmission(self, E, barrier, dx):
-         """
+        """
         Here the actual calculation happens.
         
         First it builds up the potential and the position grid. If needed it also fits sizes. Then it creates the wavenumber grind based on the length of the position grid.
@@ -104,28 +99,6 @@ class TransmissionCalculator():
         It compares every vaule with the one before and as soon as the diffrence drops below a very low value the chain breaks.
         """
         self.validate_input(E, barrier, dx)
-        
-        """
-        Here the actual calculation happens.
-        
-        First it builds up the potential and the position grid. If needed it also fits sizes. Then it creates the wavenumber grind based on the length of the position grid.
-        As soon as we built up all of that we can use the Split-Step-Method to simulate the transmission of our electron, representet by a gaussian wave. The algorith works like that:
-            Transforming the wavepackage into pulse space with the Fouriertransformation.
-            Multiplying the package with the diagonal elements of the pulse operator for half a time step:
-                .. math::
-                    \\exp(-i* \\delta t * hbar * (k_i)^2 / (4*m))
-            Reverse Fourier Transformation
-            Multiplying with diganoal elements of pulse operator:
-                .. math::
-                    \\exp(-i*V_i * \\delta t / hbar)
-            Fourier Transformation again
-            Multiplying with the diagonal elements of the pulse operator for a full time step:
-                .. math::
-                    \\exp(-i* \\delta t * hbar * (k_i)^2 / (2*m))
-            Repeat that until you reach the last time step and finish it with a multiplication of the package with the diagonal elements of the pulse operator for half a time step instead.
-        For every step it calculates the transmission propability by dividing the current square of the absolute value by the original one.
-        It compares every vaule with the one before and as soon as the diffrence drops below a very low value the chain breaks.
-        """
         
         E = E * eV * 1e40 # 1e-3 * 1e12 * 1e31
         barrier = barrier * eV * 1e40  # * 1e-3 * 1e12 * 1e31
@@ -158,12 +131,12 @@ class TransmissionCalculator():
         self.k0 = np.sqrt(2*me*self.E)/hbar
         max_E =   max_k**2 * hbar**2 / (2 * me)
 
-        if (self.k0 >= max_k):
+        if (self.k0 >= max_k and self.disable_electron_potential_validation != True):
             error_msg_tmpl = string.Template("Validation Error: $message Details: $details")
 
             message = "The energy provided results in too much intertia. The algorithm cannot provide results for such energies."
             details = f"Energy: {E}. Allowed energy range: (0, {max_E / eV} eV]."
-            # raise ValueError(error_msg_tmpl.substitute(message = message, details = details))
+            raise ValueError(error_msg_tmpl.substitute(message = message, details = details))
 
         #choose parameters for the initial state (gaussian package)
         self.sigma = self.dx*self.N / 10  if self.mock_package_width is None else self.mock_package_width #initial width of the package
