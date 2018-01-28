@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 
 class TransmissionTestSuite(unittest.TestCase):
     def test_validation_does_not_allow_negative_electron_energies(self):
+        """
+        Runs the calculator with a negative electron energy to lead to an error.
+        """
         # Assemble
         E = -1
         dx = 0.1
@@ -23,6 +26,9 @@ class TransmissionTestSuite(unittest.TestCase):
         self.assertTrue("Electron energy must be greater than 0." in str(exception_results.value))
 
     def test_validation_does_not_allow_electron_energies_bigger_than_potential(self):
+         """ 
+        Runs the calculator with an electron energy higher than the barrier to lead to an error
+        """
         # Assemble
         E = 25 
         dx = 0.1
@@ -38,6 +44,9 @@ class TransmissionTestSuite(unittest.TestCase):
         self.assertTrue("Electron energy cannot be bigger than max potential value." in str(exception_results.value))
         
     def test_validation_does_not_allow_invalid_potential(self):
+         """
+        Runs the calculator with an invalid potential to lead to an error
+        """
         # Assemble
         E = 25 
         dx = 0.1
@@ -58,6 +67,9 @@ class TransmissionTestSuite(unittest.TestCase):
 
         
     def test_validation_does_not_allow_invalid_dx(self):
+          """
+        Runs the calculator with invalid steps dx to lead to an error
+        """
         # Assemble
         E = 10 
         barrier = np.array(20+np.zeros(3000))
@@ -76,6 +88,9 @@ class TransmissionTestSuite(unittest.TestCase):
         self.assertTrue("dx must be greater than 0" in str(exception_results2.value))
 
     def xtest_width_of_free_gaussian_package_grows_correctly(self):
+         """ 
+        Compares the growing of the simulated gaussian wave width to refrences from https://stackoverflow.com/a/16489955
+        """
         hbar = 1
         me = 1
 
@@ -124,6 +139,9 @@ class TransmissionTestSuite(unittest.TestCase):
         self.assertTrue(error < error_tolerance)
 
     def xtest_propability_density_is_1(self):
+        """
+        Tests if the propability density is 1
+        """
         E = 500 * codata.value("electron volt") * 1e-3
         V0 = 600 * codata.value("electron volt") * 1e-3
 
