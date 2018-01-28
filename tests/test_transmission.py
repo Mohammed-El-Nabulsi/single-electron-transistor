@@ -75,7 +75,7 @@ class TransmissionTestSuite(unittest.TestCase):
         self.assertTrue("dx must be greater than 0" in str(exception_results1.value))
         self.assertTrue("dx must be greater than 0" in str(exception_results2.value))
 
-    def xtest_width_of_free_gaussian_package_grows_correctly(self):
+    def test_width_of_free_gaussian_package_grows_correctly(self):
         hbar = 1
         me = 1
 
@@ -102,19 +102,28 @@ class TransmissionTestSuite(unittest.TestCase):
 
             return (X[right_idx] - X[left_idx])[0] / (2 * np.sqrt(2 * np.log(2))) #return the difference (full width)
 
-        def _step_callback(self, psi, psi_plot, x, t, n, z):
+        def _step_callback(self, psi, psi_plot, x, n, finished):
+            t = self.dt * n
             package_widths.append(find_width_at_half_max_height(x, psi_plot))
             width = initial_package_width/2 * np.sqrt(1 + (4*(hbar**2)*(t**2))/((me**2)*(initial_package_width**4)))
             package_expected_widths.append(width)
+
+        def _step_exit(self, n):
+            if (n == 1000):
+                return True
+
+            return False
 
         transmission_calculator = TransmissionCalculator(
             disable_electron_potential_validation = True,
             _hbar = hbar,
             _me = me,
             package_wdh = initial_package_width,
-            step_callback = _step_callback
+            step_callback = _step_callback,
+            step_exit = _step_exit
         )
-        
+
+
         # Act
         transmission_calculator.calculate_transmission(E, barrier, dx)
        
@@ -133,7 +142,7 @@ class TransmissionTestSuite(unittest.TestCase):
         prob_dens = [] 
         error_tolerance = 0.1
   
-        def _step_callback(self, psi, psi_squared, x, t, b, z):
+        def _step_callback(self, psi, psi_squared, x, n, finished):
             prob =  np.multiply(psi, psi.conj()).real
             prob_dens.append(dx*np.sum(psi_squared))
 
@@ -149,18 +158,27 @@ class TransmissionTestSuite(unittest.TestCase):
         # Assert
         self.assertTrue(error < error_tolerance)
 
-    def xtest_potential_to_energy_ratio(self):
+    def test_potential_to_energy_ratio(self):
         # Assemble
-        V_0 = 20
-        dx = 0.1
-        barrier = np.array(V_0 + np.zeros(200))
+        E = 10 * codata.value("electron volt") * 1e-3
+        V_0 = 50 * codata.value("electron volt") * 1e-3
 
+        dx = 0.1
+
+        barrier = np.array(V_0 + np.zeros(2000))
 
         V_over_E = []
         transmissions = []
 
-        def _step_callback(self, psi, psi_plot, x, t, n, z):
-            if (n +  10  == z):
+        def _step_callback(self, psi, psi_plot, x, n, finished):
+            if (False): # (finished == True):
+               print("MAX: " + str(psi_plot[self.psi_peak_after_barrier]))
+               print("MIN: " + str(psi_plot[self.psi_peak_before_barrier]))
+               print("BEFORE: " + str(self.psi_peak_before_barrier)) 
+               print("AFTER: " + str(self.psi_peak_after_barrier)) 
+               print("0.2: " + str(self.x.size * 0.2))
+               print("0.8: " + str(self.x.size * 0.8))
+
                plt.xlabel('x in pm')
                plt.ylabel('$|\Psi(x)|^2$')
                plt.plot(
@@ -170,13 +188,17 @@ class TransmissionTestSuite(unittest.TestCase):
                        max(psi_plot)*(self.V)/max(self.V))
                plt.show()
 
-        transmission_calculator = TransmissionCalculator(_me = 1, _hbar = 1, disable_electron_potential_validation = True,
+        transmission_calculator = TransmissionCalculator(disable_electron_potential_validation = True,
             step_callback = _step_callback
         )
 
-        for E in np.arange(0, 4 * V_0, 2):
+        for E in np.arange(0, 2 * V_0, V_0 / 10):
             # Act
+            if (E == 0):
+                E = 1 * codata.value("electron volt") * 1e-3
+
             transmission = transmission_calculator.calculate_transmission(E, barrier, dx)
+
 
             transmissions.append(transmission**2)
 
@@ -199,10 +221,7 @@ class TransmissionTestSuite(unittest.TestCase):
         barrier = np.array(V_0 + np.zeros(200))
 
         def _value_callback(self):
-            print("dt: " + str(self.dt))
-            print("t: " + str(self.t))
             print("N: " + str(self.N * 0.8))
-            print("Steps: " + str(self.N * 0.8 * self.dt))
 
         transmission_calculator = TransmissionCalculator(_me = 1,
                 _hbar = 1,
@@ -213,63 +232,50 @@ class TransmissionTestSuite(unittest.TestCase):
 
         self.assertTrue(False)
 
-    def test_realistic_values(self):
-        E = 1 # * codata.value("electron volt") * 1e-3
-        V0 = 20 # *  codata.value("electron volt") * 1e-3
+    def test_transmission_returns_realistic_values(self):
+        E = 500 * codata.value("electron volt") * 1e-3
+        V0 = 600 * codata.value("electron volt") * 1e-3
 
-        dx = 0.1
-        barrier = np.array(V0 + np.zeros(100))
+        dx = 0.05
+        barrier = np.array(V0 + np.zeros(250))
 
         prob_dens = [] 
         error_tolerance = 0.1
 
-        def _value_callback(self):
-            print("dt: " + str(self.dt))
-            print("t: " + str(self.t))
-            print("N: " + str(self.N * 0.8))
-            print("Steps: " + str(self.steps))
-            print("V: " + str(max(self.V)))
-            print("E: " + str(self.E))
-            print("Sigma: " + str(self.sigma))
-            print("k: " + str(self.k0))
-            print("k_max: " + str(self.k[-1]))
-  
-        # def _step_callback(self, psi, psi_plot, x, t, n, z):
-            # print(self.k0)
-            # print(self.k[-1])
-            # print(self.t)
-            # print(self.dt)
-            # print(self.x - self.x0)
-            # if (np.remainder(n, int(z / 4)) == 0):
-               # plt.xlabel('x in pm')
-               # plt.ylabel('$|\Psi(x)|^2$')
-               # plt.plot(
-                       # # self.x[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],
-                       # self.x,
-                       # psi_plot,
-                       # self.x,
-                       # max(psi_plot)*(self.V)/max(self.V)
-                       # # psi_plot[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],
-                       # # self.x[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],
-                       # # max(psi_plot)*(self.V[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N])/max(self.V))
-               # )
+        def _step_callback(self, psi, psi_plot, x, n, finished):
+            if (finished == True):
+               print("N : " + str(n))
+               plt.xlabel('x in pm')
+               plt.ylabel('$|\Psi(x)|^2$')
+               plt.plot(
+                       self.x,
+                       psi_plot,
+                       self.x,
+                       max(psi_plot)*(self.V)/max(self.V)
+               )
 
-               # plt.show()
+               plt.show()
+
+        def _step_exit(self, n):
+            if (n == 3000):
+                return True
+
+            return False
 
         transmission_calculator = TransmissionCalculator(
-            # step_callback = _step_callback,
-            value_callback = _value_callback,
-            # _hbar = 1,
-            # _me = 1
+            step_callback = _step_callback,
+            # step_exit = _step_exit,
         )
         
         # Act
-        transmission_calculator.calculate_transmission(E, barrier, dx)
+        transmission = transmission_calculator.calculate_transmission(E, barrier, dx)
+
+        print("transmission: " + str(transmission))
 
         # error = max(np.absolute(np.array(prob_dens) - 1))
         
         # Assert
-        self.assertTrue(False) #error < error_tolerance)
+        self.assertTrue(np.abs(1 - transmission / 0.175) < error_tolerance) #error < error_tolerance)
         
 if __name__ == '__main__':
     transmission_suite = unittest.TestLoader().loadTestsFromTestCase(TransmissionTestSuite)
