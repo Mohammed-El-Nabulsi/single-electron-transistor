@@ -4,8 +4,11 @@ from scipy.fftpack import fft, ifft
 import matplotlib.pyplot as plt
 import string
 
-me   = codata.value("electron mass energy equivalent in MeV") * 1e8 ;  # Convert to milli eV/c^2
-hbar = codata.value("Planck constant over 2 pi in eV s")      * 1e19;  # Convert to 10*fs*millielectronvolts
+eV = codata.value("electron volt")
+
+me   = codata.value("electron mass") * 1e15 # convert to pico grams            
+hbar = codata.value("Planck constant over 2 pi") * 1e27  # convert to pico-compatible values
+
 
 class TransmissionCalculator():
     """
@@ -20,11 +23,12 @@ class TransmissionCalculator():
     barrier : Array
         Potenital barrier to be tunneled with values in meV
     """
-    def __init__(self, step_callback = None, _me = None, _hbar = None, package_wdh = None, disable_electron_potential_validation = None):
+    def __init__(self, step_callback = None, value_callback = None,  _me = None, _hbar = None, package_wdh = None, disable_electron_potential_validation = None):
         global me
         global hbar
 
         self.step_callback = step_callback
+        self.value_callback = value_callback
         self.mock_package_width = package_wdh
         self.disable_electron_potential_validation = disable_electron_potential_validation
         
@@ -65,11 +69,14 @@ class TransmissionCalculator():
             details = f"dx: {dx}."
             raise ValueError(error_msg_tmpl.substitute(message = message, details = details))
 
-
     
     def calculate_transmission(self, E, barrier, dx):
         self.validate_input(E, barrier, dx)
         
+        E = E * eV * 1e-3 * 1e12
+        barrier = barrier * eV * 1e-3 * 1e12
+        # dx = dx * 1e-12 
+
         #input parameters
         self.E = E
         self.dx = dx
@@ -93,23 +100,45 @@ class TransmissionCalculator():
         self.dk = 2*np.pi/(self.x[-1]-self.x[0])
         self.k = self.get_wavenumber_grid()
         
-        #choose parameters for the initial state (gaussian package)
-        self.sigma = self.dx*self.N/10 if self.mock_package_width is None else self.mock_package_width #initial width of the package
+        max_k = self.get_wavenumber_grid()[-1]
         self.k0 = np.sqrt(2*me*self.E)/hbar
+        max_E =   max_k**2 * hbar**2 / (2 * me)
+
+        if (self.k0 >= max_k):
+            error_msg_tmpl = string.Template("Validation Error: $message Details: $details")
+
+            message = "The energy provided results in too much intertia. The algorithm cannot provide results for such energies."
+            details = f"Energy: {E}. Allowed energy range: (0, {max_E / eV} eV]."
+            raise ValueError(error_msg_tmpl.substitute(message = message, details = details))
+
+        #choose parameters for the initial state (gaussian package)
+        self.sigma = self.dx*self.N / 10 if self.mock_package_width is None else self.mock_package_width #initial width of the package
+        # self.sigma = hbar / np.sqrt(2*E*me) if self.mock_package_width is None else self.mock_package_width #initial width of the package
         self.x0 = self.x[self.trans_index-self.N-5*int(self.sigma/self.dx+1)] #symmetrypoint in positions space
         
+        self.v = hbar / (me * self.sigma)
+        
+        self.t = (self.dx * self.x.size) / self.v
+
         #build initial state (gaussian package)
-        self.psi0 = (self.sigma*np.sqrt(np.pi))**(-1/2)*np.exp(1j*self.x*self.k0-1/2*((self.x-self.x0)/self.sigma)**2)
+        self.psi0 = (2/(np.pi*self.sigma**2))**(1/4) * np.exp(1j*self.k0*(self.x-self.x0)) * np.exp(-((self.x-self.x0)/self.sigma)**2)
+        # self.psi0 = (self.sigma*np.sqrt(np.pi))**(-1/2)*np.exp(1j*self.x*self.k0-1/2*((self.x-self.x0)/self.sigma)**2)
 
         #chosse time between to two neigbourt time sample points (to be used in the split step algorithm)
-        self.dt = 0.1
+        # steps = 1000  #  150 #  20**3 #  0.25 * 1 / self.k0 # 10**10
+        self.dt = self.t / 10000  #  0.05 # self.t / (400 * steps)  #  150 #  20**3 #  0.25 * 1 / self.k0 # 10**10
+
+        self.steps = self.N * 0.8
         
         #build Operators for the split-step-algorithm
         self.V_Op_half = np.exp(-(1j*self.dt/2)*(self.V/hbar))
         self.T_Op = np.exp(-(1j*hbar*np.multiply(self.k,self.k)*self.dt/(2*me)))
         
+        if (self.value_callback != None):
+            self.value_callback(self)
+
         #performing z steps and calculate the probability of presence behind the barrier
-        self.psi_after_z_steps = self.perform_z_split_steps(z = self.N * 0.7)
+        self.psi_after_z_steps = self.perform_z_split_steps(z = self.steps)
         
         #calculate density of presence
         self.density_after_z_steps = self.get_density_of_probability(self.psi_after_z_steps)
@@ -184,15 +213,6 @@ class TransmissionCalculator():
                 psi_plot = np.multiply(psi_plot,psi_plot.conj()).real
                 
                 self.step_callback(self, psi, psi_plot, self.x, self.dt * n,  n, z)
-            
-            #plot every quaterly result
-            # if (np.remainder(n, int(z / 10)) == 0):
-               # psi_plot = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx
-               # psi_plot = np.multiply(psi_plot,psi_plot.conj()).real
-               # plt.xlabel('x in pm')
-               # plt.ylabel('$|\Psi(x)|^2$')
-               # plt.plot(self.x[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],psi_plot[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],self.x[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],0.002*self.V[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N])
-               # plt.show()
             
             n+=1
 
