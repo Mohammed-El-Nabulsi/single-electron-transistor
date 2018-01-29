@@ -1,12 +1,13 @@
 from HaPPPy.Transmission.TransmissionCalculator import TransmissionCalculator
+
+from threading import Thread
 from scipy.constants import codata
 
 import threading
-from threading import Thread
-
 import unittest
 import pytest
 import numpy as np
+
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -140,7 +141,7 @@ class TransmissionTestSuite(unittest.TestCase):
         # Assert
         self.assertTrue(error < error_tolerance)
 
-    def xtest_propability_density_is_1(self):
+    def test_propability_density_is_1(self):
         E = 500 * codata.value("electron volt") * 1e-3
         V0 = 600 * codata.value("electron volt") * 1e-3
 
@@ -151,8 +152,9 @@ class TransmissionTestSuite(unittest.TestCase):
         error_tolerance = 0.1
   
         def _step_callback(self, psi, psi_squared, x, n, finished):
-            prob =  np.multiply(psi, psi.conj()).real
-            prob_dens.append(dx*np.sum(psi_squared))
+            if (finished == True):
+                prob =  np.multiply(psi, psi.conj()).real
+                prob_dens.append(dx*np.sum(psi_squared))
 
         transmission_calculator = TransmissionCalculator(
             step_callback = _step_callback
@@ -166,7 +168,7 @@ class TransmissionTestSuite(unittest.TestCase):
         # Assert
         self.assertTrue(error < error_tolerance)
 
-    def xtest_potential_to_energy_ratio(self):
+    def xtest_transmission_to_energy_ratio(self):
         # Assemble
         E = 100 * codata.value("electron volt") * 1e-3
         V_0 = 400 * codata.value("electron volt") * 1e-3
@@ -183,13 +185,6 @@ class TransmissionTestSuite(unittest.TestCase):
 
         def _step_callback(self, psi, psi_plot, x, n, finished):
             if (finished == True):
-               print("MAX: " + str(psi_plot[self.psi_peak_after_barrier]))
-               print("MIN: " + str(psi_plot[self.psi_peak_before_barrier]))
-               print("BEFORE: " + str(self.psi_peak_before_barrier)) 
-               print("AFTER: " + str(self.psi_peak_after_barrier)) 
-               print("0.2: " + str(self.x.size * 0.2))
-               print("0.8: " + str(self.x.size * 0.8))
-
                plt.xlabel('x in pm')
                plt.ylabel('$|\Psi(x)|^2$')
                plt.plot(
@@ -224,25 +219,24 @@ class TransmissionTestSuite(unittest.TestCase):
 
         self.assertTrue(True)
 
-    def test_transmission_returns_realistic_values(self):
-        # E = 500 * codata.value("electron volt") * 1e-3
-        # V0 = 600 * codata.value("electron volt") * 1e-3
-
-        # dx = 0.05
-        # barrier = np.array(V0 + np.zeros(250))
-
+    def xtest_transmission_returns_realistic_values(self):
         E = 500 * codata.value("electron volt") * 1e-3
         V0 = 600 * codata.value("electron volt") * 1e-3
 
         dx = 0.05
         barrier = np.array(V0 + np.zeros(250))
 
+        # E = 10 * codata.value("electron volt") * 1e-3
+        # V0 = 40 * codata.value("electron volt") * 1e-3
+
+        # dx = 0.1
+        # barrier = np.array(V0 + np.zeros(3000))
+
         prob_dens = [] 
         error_tolerance = 0.1
 
         def _step_callback(self, psi, psi_plot, x, n, finished):
             if (finished == True):
-               print("N : " + str(n))
                plt.xlabel('x in pm')
                plt.ylabel('$|\Psi(x)|^2$')
                plt.plot(
@@ -260,8 +254,6 @@ class TransmissionTestSuite(unittest.TestCase):
         
         # Act
         transmission = transmission_calculator.calculate_transmission(E, barrier, dx)
-
-        print(transmission)
         
         # Assert
         self.assertTrue(np.abs(1 - transmission / 0.175) < error_tolerance) 

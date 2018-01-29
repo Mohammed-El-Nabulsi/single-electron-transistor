@@ -1,8 +1,8 @@
-from scipy.constants import codata
-import numpy as np
-from scipy.fftpack import fft, ifft
-import matplotlib.pyplot as plt
 import string
+import numpy as np
+
+from scipy.constants import codata
+from scipy.fftpack import fft, ifft
 
 eV = codata.value("electron volt")
 
@@ -142,7 +142,6 @@ class TransmissionCalculator():
         self.sigma = self.dx*self.N / 10  if self.mock_package_width is None else self.mock_package_width #initial width of the package
         # self.sigma = hbar / np.sqrt(2*E*me) if self.mock_package_width is None else self.mock_package_width #initial width of the package
         self.x0 = self.x[self.trans_index-self.N-5*int(self.sigma/self.dx+1)] if self.mock_x0 is None else self.mock_x0 #initial width of the package
-#symmetrypoint in positions space
        
         #build initial state (gaussian package)
         self.psi0 = (2/(np.pi*self.sigma**2))**(1/4) * np.exp(1j*self.k0*(self.x-self.x0)) * np.exp(-((self.x-self.x0)/self.sigma)**2)
@@ -170,8 +169,7 @@ class TransmissionCalculator():
         # self.psi0 = (self.sigma*np.sqrt(np.pi))**(-1/2)*np.exp(1j*self.x*self.k0-1/2*((self.x-self.x0)/self.sigma)**2)
 
         #chosse time between to two neigbourt time sample points (to be used in the split step algorithm)
-        self.steps = 1000  #  150 #  20**3 #  0.25 * 1 / self.k0 # 10**10
-        self.dt = self.t / 1e11 # self.steps # 1e11  # self.steps #  0.05 # self.t / (400 * steps)  #  150 #  20**3 #  0.25 * 1 / self.k0 # 10**10
+        self.dt = self.t *  1e-11 # self.steps # 1e11  # self.steps #  0.05 # self.t / (400 * steps)  #  150 #  20**3 #  0.25 * 1 / self.k0 # 10**10
 
         #build Operators for the split-step-algorithm
         self.V_Op_half = np.exp(-(1j*self.dt/2)*(self.V/hbar))
@@ -196,26 +194,6 @@ class TransmissionCalculator():
         delta = 1
         
         T_stop_crit = self.T_1500
-        
-#        while delta > 10**(-1):
-#            psi = self.step(psi)
-#            
-#            #stop criterion
-#            psi_stop_crit = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx #undo the fourier scaling 
-#            psi_stop_crit_dens = self.get_density_of_presens(psi_stop_crit)
-#            T_stop_crit_n = self.get_transmission(psi_stop_crit_dens)
-#            
-#            delta = np.abs(T_stop_crit_n-T_stop_crit)
-#            
-#            T_stop_crit = T_stop_crit_n
-#            
-#        print(T_stop_crit)
-#            
-#        psi = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx #undo the fourier scaling   
-#
-#        
-#        psi_abs_squared = self.get_density_of_presens(psi)
-#        T = self.get_transmission(psi_abs_squared)
 
         T = self.T_1500
         
@@ -264,37 +242,11 @@ class TransmissionCalculator():
             self.psi_peak_after_barrier = np.argwhere(max_after == psi_plot)
             self.psi_peak_before_barrier = np.argwhere(max_before == psi_plot)
             
-            # if (self.psi_peak_after_barrier.size == 0):
-                # continue
-
-            # if (self.psi_peak_before_barrier.size == 0):
-                # continue
-
-        
-
             if (self.step_callback != None):
                 psi_plot = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx
                 psi_plot = np.multiply(psi_plot,psi_plot.conj()).real
                 
                 self.step_callback(self, psi, psi_plot, self.x, n, False)
-
-             # if (np.remainder(n, int(z / 4)) == 0):
-            # psi_plot = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx
-            # psi_plot = np.multiply(psi_plot,psi_plot.conj()).real
-
-            # plt.xlabel('x in pm')
-            # plt.ylabel('$|\Psi(x)|^2$')
-            # plt.plot(
-                   # # self.x[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],
-                   # self.x,
-                   # psi_plot,
-                   # self.x,
-                   # max(psi_plot)*(self.V)/max(self.V)
-                   # # psi_plot[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],
-                   # # self.x[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N],
-                   # # max(psi_plot)*(self.V[self.trans_index-self.N-10*int(self.sigma/self.dx+1):self.trans_index+1*self.N])/max(self.V))
-            # )
-
             
             psi = self.step(psi)
 
@@ -306,10 +258,10 @@ class TransmissionCalculator():
                 else:
                     continue
 
-            if (self.psi_peak_after_barrier[0][0] > self.x.size * 0.75 and max_after > 1e-30):
+            if (self.psi_peak_after_barrier[0][0] > self.x.size * 0.75 and max_after > 1e-25):
                 break
 
-            if (self.psi_peak_before_barrier[0][0] < self.x.size * 0.25 and max_before > 1e-30):
+            if (self.psi_peak_before_barrier[0][0] < self.x.size * 0.25 and max_before > 1e-25):
                 break
 
         if (self.step_callback != None):
@@ -329,18 +281,3 @@ class TransmissionCalculator():
         """
         p_tr = self.dx*np.sum(psi2[self.trans_index:])
         return p_tr
-
-##constants
-# hbar = 1
-# me = 1
-#
-##input
-# E0 = 20
-# E = E0
-# dx = 0.1
-# barrier = np.array(20+np.zeros(3000))
-
-# testinstance = TransmissionCalculator(_me = 1, _hbar = 1)
-# #
-# ##print(testinstance.T_600)
-# print(testinstance.calculate_transmission(E, barrier, dx))
