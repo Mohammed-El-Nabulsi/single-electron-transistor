@@ -16,6 +16,10 @@ _psi_plot = []
 _V = []
 
 class TransmissionTestSuite(unittest.TestCase):
+    """
+        Set of validation test that ensure the modules does not accept
+        invalid or corrupt inputs.
+    """
     def test_validation_does_not_allow_negative_electron_energies(self):
         # Assemble
         E = -1
@@ -84,7 +88,50 @@ class TransmissionTestSuite(unittest.TestCase):
         self.assertTrue("dx must be greater than 0" in str(exception_results1.value))
         self.assertTrue("dx must be greater than 0" in str(exception_results2.value))
 
-    def xtest_width_of_free_gaussian_package_grows_correctly(self):
+    def test_validation_does_not_allow_too_large_energies(self):
+        # Assemble
+        E = 10000
+        V0 = 60000
+
+        dx = 0.1
+
+        barrier = np.array(V0+np.zeros(100))
+  
+        transmission_calculator = TransmissionCalculator()
+        
+        # Act
+        with pytest.raises(ValueError) as exception_results:
+            transmission_calculator.calculate_transmission(E, barrier, dx)
+
+        # Assert
+        self.assertTrue("The energy provided results in too much intertia. The algorithm cannot provide results for such energies." in str(exception_results.value))
+
+    def test_validation_does_not_allow_invalid_dx(self):
+        # Assemble
+        E = 10 
+        barrier = np.array(20+np.zeros(3000))
+  
+        transmission_calculator = TransmissionCalculator()
+        
+        # Act
+        with pytest.raises(ValueError) as exception_results1:
+            transmission_calculator.calculate_transmission(E, barrier, 0)
+
+        with pytest.raises(ValueError) as exception_results2:
+            transmission_calculator.calculate_transmission(E, barrier, -1)
+
+        # Assert
+        self.assertTrue("dx must be greater than 0" in str(exception_results1.value))
+        self.assertTrue("dx must be greater than 0" in str(exception_results2.value))
+
+
+    """
+       Checks for the spread of a free particle (gaussian package) in space.
+       The truth comparison is done via comparing the wifth at half hight over
+       time with its theoretical prediction. 
+    """
+    def test_width_of_free_gaussian_package_grows_correctly(self):
+        # Assemble
         hbar = 1
         me = 1
 
@@ -101,11 +148,10 @@ class TransmissionTestSuite(unittest.TestCase):
         # ref: https://stackoverflow.com/a/16489955
         def find_width_at_half_max_height(X,Y):
             half_max = max(Y) / 2
-            #find when function crosses line half_max (when sign of diff flips)
-            #take the 'derivative' of signum(half_max - Y[])
+            # find when function crosses line half_max (when sign of diff flips)
             d = np.sign(half_max - np.array(Y[0:-1])) - np.sign(half_max - np.array(Y[1:]))
-            #plot(X,d) #if you are interested
-            #find the left and right most indexes
+
+            # find the left and right most indexes
             left_idx = np.argwhere(d > 0)[0]
             right_idx = np.argwhere(d < 0)[-1]
 
@@ -117,6 +163,8 @@ class TransmissionTestSuite(unittest.TestCase):
             width = initial_package_width/2 * np.sqrt(1 + (4*(hbar**2)*(t**2))/((me**2)*(initial_package_width**4)))
             package_expected_widths.append(width)
 
+        # As there is no barrier we want to intercept the exit condition and
+        # return after 1000 split steps
         def _step_exit(self, n):
             if (n == 1000):
                 return True
@@ -141,7 +189,11 @@ class TransmissionTestSuite(unittest.TestCase):
         # Assert
         self.assertTrue(error < error_tolerance)
 
+    """
+        Makes sure the integral over all propability densities is 1.
+    """
     def test_propability_density_is_1(self):
+        # Assemble
         E = 500 * codata.value("electron volt") * 1e-3
         V0 = 600 * codata.value("electron volt") * 1e-3
 
@@ -168,7 +220,12 @@ class TransmissionTestSuite(unittest.TestCase):
         # Assert
         self.assertTrue(error < error_tolerance)
 
-    def xtest_transmission_to_energy_ratio(self):
+    """
+        Plots |T|^2 over E/V and should show a characteristic curvature.
+        The test is not automatically checked for truthness. The tester
+        must review the plot manually.
+    """
+    def test_transmission_to_energy_ratio(self):
         # Assemble
         E = 100 * codata.value("electron volt") * 1e-3
         V_0 = 400 * codata.value("electron volt") * 1e-3
@@ -178,7 +235,7 @@ class TransmissionTestSuite(unittest.TestCase):
 
         dx = 0.1
 
-        barrier = np.array(V_0 + np.zeros(50))
+        barrier = np.array(V_0 + np.zeros(300))
 
         V_over_E = []
         transmissions = []
@@ -219,7 +276,14 @@ class TransmissionTestSuite(unittest.TestCase):
 
         self.assertTrue(True)
 
-    def xtest_transmission_returns_realistic_values(self):
+    """
+        Tests the entire transmission calculation process and - if configured -
+        displays the plot of the final propagation state.
+        Compares the result with a reference result found here:
+        https://www.youtube.com/watch?v=_3wFXHwRP4s
+    """
+    def test_transmission_returns_realistic_values(self):
+        # Assemble
         E = 500 * codata.value("electron volt") * 1e-3
         V0 = 600 * codata.value("electron volt") * 1e-3
 
@@ -258,7 +322,13 @@ class TransmissionTestSuite(unittest.TestCase):
         # Assert
         self.assertTrue(np.abs(1 - transmission / 0.175) < error_tolerance) 
         
+    """
+        Animates the entire propagation of the gaussian wave through a potential.
+        Only for visual purposes. Does not validate against anything and thus
+        asserts against True
+    """
     def xtest_animate_progress(self):
+        # Assemble
         E = 550 * codata.value("electron volt") * 1e-3
         V0 = 600 * codata.value("electron volt") * 1e-3
 

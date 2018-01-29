@@ -18,11 +18,30 @@ class TransmissionCalculator():
     E : float
         Energy of the electron in meV
     dx : float
-        Distance between two neigboured sample points in pm
+        Distance between two neighboring sample points in pm
     barrier : Array
-        Potenital barrier to be tunneled with values in meV
+        Potenital barrier to be tunneled through with values in meV
     """
-    def __init__(self, step_callback = None, step_exit = None, value_callback = None, _me = None, x0 = None, _hbar = None, package_wdh = None, disable_electron_potential_validation = None):
+    def __init__(
+            self,
+            step_callback = None,
+            step_exit = None,
+            value_callback = None,
+            _me = None,
+            x0 = None,
+            _hbar = None,
+            package_wdh = None,
+            disable_electron_potential_validation = None
+        ):
+        """
+            Dependency-Injection constructor for injecting functionality and/or configuration 
+            via external components. This enables full testability of this module without having
+            to modify or rely on production-components. 
+
+            This constructor is not relevant for production purposes. Use the default (empty)
+            constructor instead.
+        """
+
         global me
         global hbar
 
@@ -40,10 +59,11 @@ class TransmissionCalculator():
             hbar = _hbar
 
     def validate_input(self, E, barrier, dx):
-        
         """
-        This function tests the input parameters for validity. 
-        It tests both the data types aswell the vaulue range and shows an error message for all upcoming issues.
+            This function tests the input parameters for validity. 
+            It tests both the data types aswell the vaulue range and shows an error message for all upcoming issues.
+
+            The error message is alwats of the form: Validation Error: $message Details: $details
         """
         error_msg_tmpl = string.Template("Validation Error: $message Details: $details")
 
@@ -78,25 +98,30 @@ class TransmissionCalculator():
     
     def calculate_transmission(self, E, barrier, dx):
         """
-        Here the actual calculation happens.
-        
-        First it builds up the potential and the position grid. If needed it also fits sizes. Then it creates the wavenumber grind based on the length of the position grid.
-        As soon as we built up all of that we can use the Split-Step-Method to simulate the transmission of our electron, representet by a gaussian wave. The algorith works like that:
-            Transforming the wavepackage into pulse space with the Fouriertransformation.
-            Multiplying the package with the diagonal elements of the pulse operator for half a time step:
-                .. math::
-                    \\exp(-i* \\delta t * hbar * (k_i)^2 / (4*m))
-            Reverse Fourier Transformation
-            Multiplying with diganoal elements of pulse operator:
-                .. math::
-                    \\exp(-i*V_i * \\delta t / hbar)
-            Fourier Transformation again
-            Multiplying with the diagonal elements of the pulse operator for a full time step:
-                .. math::
-                    \\exp(-i* \\delta t * hbar * (k_i)^2 / (2*m))
-            Repeat that until you reach the last time step and finish it with a multiplication of the package with the diagonal elements of the pulse operator for half a time step instead.
-        For every step it calculates the transmission propability by dividing the current square of the absolute value by the original one.
-        It compares every vaule with the one before and as soon as the diffrence drops below a very low value the chain breaks.
+            Here the actual calculation happens.
+            
+            First it builds up the potential and the position grid. If needed it also fits sizes.
+            Then it creates the wavenumber grind based on the length of the position grid.
+            As soon as we built up all of that we can use the Split-Step-Method to simulate
+            the transmission of our electron, representet by a gaussian wave. The algorith works like that:
+                Transforming the wavepackage into pulse space with the Fouriertransformation.
+                Multiplying the package with the diagonal elements of the pulse operator for half a time step:
+                    .. math::
+                        \\exp(-i* \\delta t * hbar * (k_i)^2 / (4*m))
+                Reverse Fourier Transformation
+                Multiplying with diganoal elements of pulse operator:
+                    .. math::
+                        \\exp(-i*V_i * \\delta t / hbar)
+                Fourier Transformation again
+                Multiplying with the diagonal elements of the pulse operator for a full time step:
+                    .. math::
+                        \\exp(-i* \\delta t * hbar * (k_i)^2 / (2*m))
+                Repeat that until you reach the last time step and finish it with a multiplication of the
+                package with the diagonal elements of the pulse operator for half a time step instead.
+            For every step it calculates the transmission propability by dividing the current square
+            of the absolute value by the original one.
+            It compares every vaule with the one before and as soon as the diffrence
+            drops below a very low value the chain breaks.
         """
         self.validate_input(E, barrier, dx)
         
@@ -140,12 +165,10 @@ class TransmissionCalculator():
 
         #choose parameters for the initial state (gaussian package)
         self.sigma = self.dx*self.N / 10  if self.mock_package_width is None else self.mock_package_width #initial width of the package
-        # self.sigma = hbar / np.sqrt(2*E*me) if self.mock_package_width is None else self.mock_package_width #initial width of the package
         self.x0 = self.x[self.trans_index-self.N-5*int(self.sigma/self.dx+1)] if self.mock_x0 is None else self.mock_x0 #initial width of the package
        
         #build initial state (gaussian package)
         self.psi0 = (2/(np.pi*self.sigma**2))**(1/4) * np.exp(1j*self.k0*(self.x-self.x0)) * np.exp(-((self.x-self.x0)/self.sigma)**2)
-        # self.psi0 = (self.sigma*np.sqrt(np.pi))**(-1/2)*np.exp(1j*self.x*self.k0-1/2*((self.x-self.x0)/self.sigma)**2)
 
         before_barrier = 25 * self.N * self.dx
         in_barrier = self.barrier.size * self.dx
@@ -166,43 +189,31 @@ class TransmissionCalculator():
 
         #build initial state (gaussian package)
         self.psi0 = (2/(np.pi*self.sigma**2))**(1/4) * np.exp(1j*self.k0*(self.x-self.x0)) * np.exp(-((self.x-self.x0)/self.sigma)**2)
-        # self.psi0 = (self.sigma*np.sqrt(np.pi))**(-1/2)*np.exp(1j*self.x*self.k0-1/2*((self.x-self.x0)/self.sigma)**2)
 
         #chosse time between to two neigbourt time sample points (to be used in the split step algorithm)
-        self.dt = self.t *  1e-11 # self.steps # 1e11  # self.steps #  0.05 # self.t / (400 * steps)  #  150 #  20**3 #  0.25 * 1 / self.k0 # 10**10
+        self.dt = self.t * 1e-11 
 
-        #build Operators for the split-step-algorithm
-        self.V_Op_half = np.exp(-(1j*self.dt/2)*(self.V/hbar))
-        self.T_Op = np.exp(-(1j*hbar*np.multiply(self.k,self.k)*self.dt/(2*me)))
+        #build operators for the accelorated algorithm
+        self.V_op = np.exp(-(1j*self.V*self.dt/hbar))
+        self.T_op_first_final = np.exp(-(1j*self.dt*np.multiply(self.k,self.k)*hbar/(4*me)))
+        self.T_op_step = np.exp(-(1j*self.dt*hbar*np.multiply(self.k,self.k)/(2*me)))
         
         if (self.value_callback != None):
             self.value_callback(self)
 
         #performing z steps and calculate the probability of presence behind the barrier
-        self.psi_after_z_steps = self.perform_z_split_steps()
+        self.psi_after_steps = self.perform_split_steps()
         
         #calculate density of presence
-        self.density_after_z_steps = self.get_density_of_probability(self.psi_after_z_steps)
+        self.density_after_steps = self.get_density_of_probability(self.psi_after_steps)
         
         #calculate transmission probability after 1500 steps
-        self.T_1500 = self.get_transmission(self.density_after_z_steps)
-            
-        psi = self.psi_after_z_steps
-        
-        psi = self.dx*self.psi0*np.exp(-1j*self.k_min*self.x)/np.sqrt(2*np.pi) #fourier scaling
-        
-        delta = 1
-        
-        T_stop_crit = self.T_1500
-
-        T = self.T_1500
-        
-        return T
+        return  self.get_transmission(self.density_after_steps)
         
     def get_potential(self):
-            zeros = np.zeros(25*self.N)
-            V_ref = np.append(zeros,self.barrier) #part of the xgrid where the reflectet wave is living
-            return np.append(V_ref,zeros)
+        zeros = np.zeros(25*self.N)
+        V_ref = np.append(zeros,self.barrier) #part of the xgrid where the reflectet wave is living
+        return np.append(V_ref,zeros)
     
     def get_first_index_behind_barrier(self):
         zeros = np.zeros(25*self.N)
@@ -219,17 +230,28 @@ class TransmissionCalculator():
     def get_wavenumber_grid(self):
         return self.k_min+self.dk*np.arange(0,self.M,1)
     
-    def step(self,psi):
-        psi1 = np.array(np.multiply(psi,self.V_Op_half))
-        psi2 = np.array(fft(psi1))
-        psi3 = np.array(np.multiply(psi2,self.T_Op))
-        psi4 = np.array(ifft(psi3))
-        return np.array(np.multiply(psi4,self.V_Op_half))
+    def first_step(self,wave):
+        wave1 = np.array(fft(wave))
+        wave2 = np.multiply(self.T_op_first_final,wave1)
+        return np.array(ifft(wave2))
     
-    def perform_z_split_steps(self):
+    def step(self,wave):
+        wave3 = np.multiply(self.V_op,wave)
+        wave4 = np.array(fft(wave3))
+        wave5 = np.multiply(self.T_op_step,wave4)
+        return np.array(ifft(wave5))
+    
+    def final_step(self,wave):
+        wave6 = np.multiply(self.V_op,wave)
+        wave7 = np.array(fft(wave6))
+        wave8 = np.multiply(self.T_op_first_final,wave7)
+        return np.array(ifft(wave8))
+
+    def perform_split_steps(self):
         psi = self.dx*self.psi0*np.exp(-1j*self.k_min*self.x)/np.sqrt(2*np.pi) #fourier scaling
+
+        psi = self.first_step(psi)
         
-        # for n in np.arange(0,z,1):
         n = 0
 
         while (True):
@@ -243,9 +265,6 @@ class TransmissionCalculator():
             self.psi_peak_before_barrier = np.argwhere(max_before == psi_plot)
             
             if (self.step_callback != None):
-                psi_plot = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx
-                psi_plot = np.multiply(psi_plot,psi_plot.conj()).real
-                
                 self.step_callback(self, psi, psi_plot, self.x, n, False)
             
             psi = self.step(psi)
@@ -264,6 +283,8 @@ class TransmissionCalculator():
             if (self.psi_peak_before_barrier[0][0] < self.x.size * 0.25 and max_before > 1e-25):
                 break
 
+        psi = self.final_step(psi)
+  
         if (self.step_callback != None):
             psi_plot = psi*np.sqrt(2*np.pi)*np.exp(1j*self.k_min*self.x)/self.dx
             psi_plot = np.multiply(psi_plot,psi_plot.conj()).real
@@ -277,7 +298,7 @@ class TransmissionCalculator():
     
     def get_transmission(self,psi2):
         """
-        input: psi squared after sucsessful split step iteration
+        input: psi squared after successful split step iteration
         """
         p_tr = self.dx*np.sum(psi2[self.trans_index:])
         return p_tr
